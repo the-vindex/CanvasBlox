@@ -1,8 +1,9 @@
 import { Tile, InteractableObject, SpawnPoint, Position, LevelData, EditorState } from '@/types/level';
+import { TILE_SIZE } from '@/constants/editor';
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D;
-  private gridSize = 20;
+  private gridSize = TILE_SIZE;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -41,10 +42,11 @@ export class CanvasRenderer {
   }
 
   drawTile(tile: Tile, pan: Position, zoom: number, isSelected = false) {
-    const x = tile.position.x * zoom + pan.x;
-    const y = tile.position.y * zoom + pan.y;
-    const width = tile.dimensions.width * zoom;
-    const height = tile.dimensions.height * zoom;
+    // Convert tile position to pixel position
+    const x = tile.position.x * TILE_SIZE * zoom + pan.x;
+    const y = tile.position.y * TILE_SIZE * zoom + pan.y;
+    const width = tile.dimensions.width * TILE_SIZE * zoom;
+    const height = tile.dimensions.height * TILE_SIZE * zoom;
 
     this.ctx.save();
     
@@ -94,10 +96,11 @@ export class CanvasRenderer {
   }
 
   drawObject(obj: InteractableObject, pan: Position, zoom: number, isSelected = false) {
-    const x = obj.position.x * zoom + pan.x;
-    const y = obj.position.y * zoom + pan.y;
-    const width = obj.dimensions.width * zoom;
-    const height = obj.dimensions.height * zoom;
+    // Convert tile position to pixel position
+    const x = obj.position.x * TILE_SIZE * zoom + pan.x;
+    const y = obj.position.y * TILE_SIZE * zoom + pan.y;
+    const width = obj.dimensions.width * TILE_SIZE * zoom;
+    const height = obj.dimensions.height * TILE_SIZE * zoom;
 
     this.ctx.save();
     this.ctx.translate(x + width / 2, y + height / 2);
@@ -166,9 +169,10 @@ export class CanvasRenderer {
   }
 
   drawSpawnPoint(spawn: SpawnPoint, pan: Position, zoom: number, isSelected = false) {
-    const x = spawn.position.x * zoom + pan.x;
-    const y = spawn.position.y * zoom + pan.y;
-    const size = 32 * zoom;
+    // Convert tile position to pixel position
+    const x = spawn.position.x * TILE_SIZE * zoom + pan.x;
+    const y = spawn.position.y * TILE_SIZE * zoom + pan.y;
+    const size = TILE_SIZE * zoom;
 
     this.ctx.save();
     this.ctx.translate(x, y);
@@ -222,14 +226,14 @@ export class CanvasRenderer {
 
     objects.forEach(obj => {
       if (obj.properties.linkedObjects) {
-        const fromX = obj.position.x * zoom + pan.x + (obj.dimensions.width * zoom) / 2;
-        const fromY = obj.position.y * zoom + pan.y + (obj.dimensions.height * zoom) / 2;
+        const fromX = obj.position.x * TILE_SIZE * zoom + pan.x + (obj.dimensions.width * TILE_SIZE * zoom) / 2;
+        const fromY = obj.position.y * TILE_SIZE * zoom + pan.y + (obj.dimensions.height * TILE_SIZE * zoom) / 2;
 
         obj.properties.linkedObjects.forEach(linkedId => {
           const linkedObj = objects.find(o => o.id === linkedId);
           if (linkedObj) {
-            const toX = linkedObj.position.x * zoom + pan.x + (linkedObj.dimensions.width * zoom) / 2;
-            const toY = linkedObj.position.y * zoom + pan.y + (linkedObj.dimensions.height * zoom) / 2;
+            const toX = linkedObj.position.x * TILE_SIZE * zoom + pan.x + (linkedObj.dimensions.width * TILE_SIZE * zoom) / 2;
+            const toY = linkedObj.position.y * TILE_SIZE * zoom + pan.y + (linkedObj.dimensions.height * TILE_SIZE * zoom) / 2;
 
             this.ctx.beginPath();
             this.ctx.moveTo(fromX, fromY);

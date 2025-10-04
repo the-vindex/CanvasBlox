@@ -27,7 +27,7 @@ export class LevelSerializer {
 
   static createDefaultLevel(name: string = 'New Level'): LevelData {
     const now = new Date().toISOString();
-    
+
     return {
       levelName: name,
       metadata: {
@@ -35,7 +35,7 @@ export class LevelSerializer {
         createdAt: now,
         author: 'Level Editor',
         description: '',
-        dimensions: { width: 1920, height: 1080 },
+        dimensions: { width: 60, height: 30 }, // Level size in tiles
         backgroundColor: '#1a1a1a'
       },
       tiles: [],

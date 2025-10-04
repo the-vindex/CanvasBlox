@@ -1,6 +1,7 @@
 import { useCanvas } from '@/hooks/useCanvas';
 import { LevelData, EditorState, Position } from '@/types/level';
 import { cn } from '@/lib/utils';
+import { TILE_SIZE } from '@/constants/editor';
 
 interface CanvasProps {
   levelData: LevelData;
@@ -27,13 +28,17 @@ export function Canvas({
     onTilePlaced
   });
 
+  // Calculate canvas pixel size from tile dimensions
+  const canvasWidth = levelData.metadata.dimensions.width * TILE_SIZE;
+  const canvasHeight = levelData.metadata.dimensions.height * TILE_SIZE;
+
   return (
-    <div className={cn("flex-1 relative overflow-hidden", className)}>
+    <div className={cn("flex-1 relative overflow-auto", className)} style={{ minHeight: canvasHeight }}>
       <canvas
         id="levelCanvas"
         ref={canvasRef}
-        width={1920}
-        height={1080}
+        width={canvasWidth}
+        height={canvasHeight}
         className="absolute top-0 left-0 cursor-crosshair"
         style={{ imageRendering: 'pixelated' }}
         data-testid="level-canvas"

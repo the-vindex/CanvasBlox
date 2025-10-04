@@ -145,7 +145,7 @@ export function useLevelEditor() {
       id: `tile_${Date.now()}_${Math.random()}`,
       type: tileType,
       position,
-      dimensions: { width: 128, height: 32 },
+      dimensions: { width: 1, height: 1 }, // Dimensions in tiles
       rotation: 0,
       layer: 0,
       properties: { collidable: true }
@@ -165,7 +165,7 @@ export function useLevelEditor() {
         id: `spawn_${Date.now()}_${Math.random()}`,
         type: objectType === 'spawn-player' ? 'player' : 'enemy',
         position,
-        dimensions: { width: 32, height: 32 },
+        dimensions: { width: 1, height: 1 }, // Dimensions in tiles
         rotation: 0,
         layer: 1,
         facingDirection: 'right',
@@ -182,7 +182,7 @@ export function useLevelEditor() {
         id: `obj_${Date.now()}_${Math.random()}`,
         type: objectType,
         position,
-        dimensions: { width: 32, height: 32 },
+        dimensions: { width: 1, height: 1 }, // Dimensions in tiles
         rotation: 0,
         layer: 1,
         properties: { interactable: true }

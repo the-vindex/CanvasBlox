@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { CanvasRenderer } from '@/utils/canvasRenderer';
 import { LevelData, EditorState, Position } from '@/types/level';
+import { TILE_SIZE } from '@/constants/editor';
 
 interface UseCanvasProps {
   levelData: LevelData;
@@ -47,9 +48,13 @@ export function useCanvas({
       y: e.clientY - rect.top
     };
 
+    // Convert pixel position to world pixel coordinates, then to tile indices
+    const worldPixelX = (canvasPos.x - editorState.pan.x) / editorState.zoom;
+    const worldPixelY = (canvasPos.y - editorState.pan.y) / editorState.zoom;
+
     return {
-      x: Math.floor((canvasPos.x - editorState.pan.x) / editorState.zoom),
-      y: Math.floor((canvasPos.y - editorState.pan.y) / editorState.zoom)
+      x: Math.floor(worldPixelX / TILE_SIZE),
+      y: Math.floor(worldPixelY / TILE_SIZE)
     };
   }, [editorState.pan, editorState.zoom]);
 
