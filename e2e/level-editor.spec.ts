@@ -283,4 +283,74 @@ test.describe('Level Editor', () => {
     const backToTop = await scrollableArea.evaluate(el => el.scrollTop);
     expect(backToTop).toBe(0);
   });
+
+  test('Step 5: should display properties panel', async ({ page }) => {
+    const propertiesPanel = page.getByTestId('properties-panel');
+    await expect(propertiesPanel).toBeVisible();
+
+    // Check for level settings section
+    await expect(page.getByText('Level Settings')).toBeVisible();
+
+    // Check for level name input
+    const levelNameInput = page.getByTestId('input-level-name');
+    await expect(levelNameInput).toBeVisible();
+
+    // Level name should have some value (could be "Level 1" or "New Level" depending on localStorage state)
+    const levelName = await levelNameInput.inputValue();
+    expect(levelName).toBeTruthy();
+  });
+
+  test('Step 5: should update level name via properties panel', async ({ page }) => {
+    const levelNameInput = page.getByTestId('input-level-name');
+    await expect(levelNameInput).toBeVisible();
+
+    // Clear and type new level name
+    await levelNameInput.fill('My Custom Level');
+
+    // Verify the value updated
+    await expect(levelNameInput).toHaveValue('My Custom Level');
+  });
+
+  test('Step 5: should collapse and expand properties panel', async ({ page }) => {
+    const propertiesPanel = page.getByTestId('properties-panel');
+    await expect(propertiesPanel).toBeVisible();
+
+    // Find and click the close button
+    const closeButton = page.getByTestId('button-close-properties');
+    await expect(closeButton).toBeVisible();
+    await closeButton.click();
+
+    // Properties panel should be hidden
+    await expect(propertiesPanel).not.toBeVisible();
+
+    // Find and click the expand button (the arrow button on the right edge)
+    const expandButton = page.getByRole('button', { name: '◀' });
+    await expect(expandButton).toBeVisible();
+    await expandButton.click();
+
+    // Properties panel should be visible again
+    await expect(propertiesPanel).toBeVisible();
+  });
+
+  test('Step 5: should show duplicate level button', async ({ page }) => {
+    const duplicateButton = page.getByTestId('button-duplicate-level');
+    await expect(duplicateButton).toBeVisible();
+    await expect(duplicateButton).toHaveText(/Duplicate Level/);
+  });
+
+  test('Step 5: should update background color', async ({ page }) => {
+    // Use the text input for background color, not the color picker
+    const colorTextInput = page.getByTestId('input-background-color-text');
+    await expect(colorTextInput).toBeVisible();
+
+    // The initial color should be set
+    const initialColor = await colorTextInput.inputValue();
+    expect(initialColor).toBeTruthy();
+
+    // Change the color using the text input
+    await colorTextInput.fill('#FF5733');
+
+    // Verify the value updated
+    await expect(colorTextInput).toHaveValue('#FF5733');
+  });
 });

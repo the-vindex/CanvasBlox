@@ -2,10 +2,11 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
 import { Canvas } from '@/components/level-editor/Canvas';
 import { TilePalette } from '@/components/level-editor/TilePalette';
+import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
 import { Position } from '@/types/level';
 
 export default function LevelEditor() {
-  const [propertiesPanelCollapsed, setPropertiesPanelCollapsed] = useState(false);
+  const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
 
   // Integrate useLevelEditor hook
   const {
@@ -181,7 +182,7 @@ export default function LevelEditor() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: propertiesPanelCollapsed ? '250px 1fr 0px' : '250px 1fr 300px',
+          gridTemplateColumns: showPropertiesPanel ? '250px 1fr 300px' : '250px 1fr 0px',
           overflow: 'hidden',
           background: '#1a1a1a',
         }}
@@ -237,135 +238,21 @@ export default function LevelEditor() {
         </main>
 
         {/* RIGHT SIDEBAR: Properties Panel (Collapsible) */}
-        {!propertiesPanelCollapsed && (
-          <aside style={{ background: '#222', borderLeft: '1px solid #333', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'all 0.3s ease' }}>
-            <div style={{ padding: '12px 16px', background: '#2a2a2a', borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 600, fontSize: '14px' }}>
-              <span>Properties</span>
-              <button
-                onClick={() => setPropertiesPanelCollapsed(true)}
-                style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer', border: 'none', background: 'none', color: '#e0e0e0' }}
-              >
-                ▶
-              </button>
-            </div>
-
-            <div
-              style={{
-                overflowY: 'auto',
-                padding: '16px',
-                flex: 1,
-              }}
-            >
-              {/* Level Properties */}
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>Level Settings</div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Level Name</label>
-                  <input type="text" defaultValue="Level 1" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Background Color</label>
-                  <input type="color" defaultValue="#5C94FC" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Grid Size</label>
-                  <input type="number" defaultValue="32" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
-                  <input type="checkbox" id="show-grid" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                  <label htmlFor="show-grid" style={{ color: '#aaa', fontSize: '13px' }}>Show Grid</label>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
-                  <input type="checkbox" id="snap-to-grid" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                  <label htmlFor="snap-to-grid" style={{ color: '#aaa', fontSize: '13px' }}>Snap to Grid</label>
-                </div>
-              </div>
-
-              {/* Object Properties */}
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>Selected Object</div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Type</label>
-                  <input type="text" defaultValue="Platform" readOnly style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Position X</label>
-                  <input type="number" defaultValue="320" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Position Y</label>
-                  <input type="number" defaultValue="480" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Width</label>
-                  <input type="number" defaultValue="256" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Height</label>
-                  <input type="number" defaultValue="32" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
-                  <input type="checkbox" id="has-collision" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                  <label htmlFor="has-collision" style={{ color: '#aaa', fontSize: '13px' }}>Has Collision</label>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
-                  <input type="checkbox" id="is-visible" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                  <label htmlFor="is-visible" style={{ color: '#aaa', fontSize: '13px' }}>Visible</label>
-                </div>
-              </div>
-
-              {/* Platform-Specific Properties */}
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>Platform Properties</div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Material</label>
-                  <select style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }}>
-                    <option>Basic</option>
-                    <option>Stone</option>
-                    <option>Grass</option>
-                    <option>Ice</option>
-                    <option>Lava</option>
-                    <option>Metal</option>
-                  </select>
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Friction</label>
-                  <input type="range" min="0" max="100" defaultValue="50" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
-                  <input type="checkbox" id="is-one-way" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                  <label htmlFor="is-one-way" style={{ color: '#aaa', fontSize: '13px' }}>One-Way Platform</label>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
-                  <input type="checkbox" id="is-breakable" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                  <label htmlFor="is-breakable" style={{ color: '#aaa', fontSize: '13px' }}>Breakable</label>
-                </div>
-              </div>
-            </div>
-          </aside>
+        {showPropertiesPanel && (
+          <PropertiesPanel
+            levelData={currentLevel}
+            editorState={editorState}
+            onLevelUpdate={updateCurrentLevel}
+            onDuplicateLevel={() => duplicateLevel()}
+            onClose={() => setShowPropertiesPanel(false)}
+          />
         )}
       </div>
 
       {/* Collapse toggle button (when properties panel is collapsed) */}
-      {propertiesPanelCollapsed && (
+      {!showPropertiesPanel && (
         <button
-          onClick={() => setPropertiesPanelCollapsed(false)}
+          onClick={() => setShowPropertiesPanel(true)}
           style={{
             position: 'fixed',
             right: 0,
