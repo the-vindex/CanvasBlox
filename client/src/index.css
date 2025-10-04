@@ -262,3 +262,44 @@
 .active-glow-red {
   box-shadow: 0 0 20px rgba(228, 38, 31, 0.4);
 }
+
+/* Delete action fade-out animation */
+@keyframes deleteObject {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.deleting {
+  animation: deleteObject 250ms ease-out forwards;
+}
+
+/* Undo/Redo flash effect */
+@keyframes undoRedoFlash {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.undo-redo-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(59, 130, 246, 0.2);
+  pointer-events: none;
+  animation: undoRedoFlash 400ms ease-out forwards;
+  z-index: 10;
+}

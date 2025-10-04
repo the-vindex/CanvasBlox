@@ -1,7 +1,7 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Chapter 4 - Completed, Reviewed ✓
+**Current Chapter:** Chapter 7 - Completed & Approved
 **Last Updated:** 2025-10-04
 
 ---
@@ -173,7 +173,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 5: Polished Properties Panel
 
-**Status:** ⏸️ Not Started
+**Status:** ❌ Skipped - Not Implementing
 **Files:** `client/src/components/level-editor/PropertiesPanel.tsx`, `client/src/index.css`
 **Priority:** Low
 
@@ -189,13 +189,13 @@ Work through chapters sequentially. After implementing each chapter:
 - **Design:** Centered preview with dark background, subtle border
 
 **Dependencies:** Will need to import and use CanvasRenderer
-**Notes:** Quick visual confirmation of what's selected
+**Notes:** Quick visual confirmation of what's selected - **SKIPPED by user decision**
 
 ---
 
 ## Chapter 6: Level Tabs Enhancement
 
-**Status:** ⏸️ Not Started
+**Status:** ❌ Skipped - Not Implementing
 **Files:** `client/src/components/level-editor/LevelTabs.tsx`, `client/src/index.css`
 **Priority:** Medium
 
@@ -218,19 +218,20 @@ Work through chapters sequentially. After implementing each chapter:
 - **CSS:** `hover:rotate-90 transition-transform duration-300`
 
 **Dependencies:** None
-**Notes:** Make tabs feel like browser tabs - familiar and polished
+**Notes:** Make tabs feel like browser tabs - familiar and polished - **SKIPPED by user decision**
 
 ---
 
 ## Chapter 7: Animations & Micro-interactions
 
-**Status:** ⏸️ Not Started
-**Files:** `client/src/index.css`, various component files
+**Status:** ✅ Completed - Approved ✓
+**Files:** `client/src/index.css`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`, `client/src/types/level.ts`, `client/src/utils/canvasRenderer.ts`
 **Priority:** Medium
 
 ### Tasks:
 
 #### 7.1 Page transitions: Smooth fade-in on load
+- **Status:** ❌ Skipped - Not implementing
 - **Location:** Main LevelEditor component
 - **CSS:** Add fade-in animation to root div
 - **Keyframe:** `@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`
@@ -250,26 +251,29 @@ Work through chapters sequentially. After implementing each chapter:
 - **CSS:** Brief white/blue flash that fades out
 
 #### 7.5 Save indicator: Checkmark animation in header
+- **Status:** ❌ Skipped - Merged into 7.6 (checkmark animation too intrusive)
 - **Location:** Header status bar (from Chapter 1)
 - **Trigger:** After updateCurrentLevel calls
 - **Animation:** Checkmark slides in, holds, fades out
 
-#### 7.6 Remove auto-save toast notifications and use color-coded save icon
+#### 7.6 Subtle color-coded save indicator (replaces 7.5)
 - **Location:** `client/src/pages/LevelEditor.tsx` - Header status bar and auto-save logic
-- **Current:** Toast notifications appear on auto-save
+- **Current:** Toast notifications appear on auto-save + static "Auto-saved" badge
 - **Change:**
-  - Remove toast notifications for auto-save events
-  - Save icon in status bar shows orange when there are unsaved changes
-  - Save icon turns green after successful save
-  - Use smooth color transitions for visual feedback
+  - Replace "Auto-saved" badge with single save icon
+  - Orange icon when unsaved changes exist
+  - Green icon when saved
+  - Smooth color transitions only (no animations, no glow, no scale)
+  - Remove all toast notifications
 - **Implementation:**
   - Track "hasUnsavedChanges" state (set to true on edits, false after save)
   - Remove toast trigger from auto-save logic
   - Apply conditional color classes to save icon: `text-orange-500` (unsaved) / `text-green-500` (saved)
 - **CSS:** `transition-colors duration-300` for smooth color changes
-- **Note:** More subtle, less intrusive feedback than toast notifications
+- **Note:** Purely informative, minimal intrusion, glanceable only - does not try to catch attention
 
 #### 7.7 Loading states: Skeleton screens
+- **Status:** ❌ Skipped - App loads very quickly, not needed
 - **Location:** Initial render of LevelEditor
 - **Current:** "Loading..." text
 - **Change:** Animated skeleton layout matching UI structure
@@ -355,6 +359,78 @@ Work through chapters sequentially. After implementing each chapter:
   - Keyboard shortcuts
 - **Remove:** All code and UI related to grid snapping
 
+#### 9.4 Fix redo functionality - changes not properly restored
+- **Location:** `client/src/hooks/useLevelEditor.ts` - redo function (line ~102-112)
+- **Current:** Redo button/shortcut doesn't properly restore the state - changes are not applied
+- **Bug:** When redo is triggered, the level state is not visually updated on canvas
+- **Investigation needed:**
+  - Check if history state is being correctly retrieved
+  - Verify levelData is being properly updated in state
+  - Ensure canvas re-renders after redo
+  - Compare with undo implementation which works correctly
+- **Files to check:**
+  - `client/src/hooks/useLevelEditor.ts` (redo function)
+  - `client/src/pages/LevelEditor.tsx` (redo button handlers)
+- **Note:** Bug reported by user - redo doesn't restore changes as expected
+
+#### 9.5 Group consecutive tile placements as single undo/redo action
+- **Location:** `client/src/hooks/useLevelEditor.ts` - addTile function and history management
+- **Current:** Each tile placed adds a separate history entry, making undo/redo tedious when drawing multiple tiles
+- **Change:** When user drags to place multiple tiles in one continuous action, group them as a single history entry
+- **Implementation:**
+  - Track "drawing session" - starts on mousedown, ends on mouseup
+  - Buffer tile additions during drawing session
+  - Add single history entry when session ends with all tiles added
+  - Apply same logic to addObject function for consistency
+- **Files to check:**
+  - `client/src/hooks/useLevelEditor.ts` (addTile, addObject, addToHistory)
+  - `client/src/hooks/useCanvas.ts` (mouse event handlers)
+  - `client/src/pages/LevelEditor.tsx` (handleTilePlaced)
+- **Note:** User improvement request - better UX for drawing multiple tiles
+
+#### 9.6 Auto-increment level names to avoid duplicates
+- **Location:** `client/src/hooks/useLevelEditor.ts` - addNewLevel function
+- **Current:** Adding new level always creates "New Level" - duplicates cause confusion
+- **Change:** Check if "New Level" exists, if so create "New Level 2", "New Level 3", etc.
+- **Implementation:**
+  - In addNewLevel function, check existing level names
+  - Search for pattern "New Level", "New Level 2", "New Level 3", etc.
+  - Find highest number and increment by 1
+  - If no "New Level" exists, use "New Level" (no number)
+- **Logic:**
+  ```typescript
+  const existingNames = levels.map(l => l.levelName);
+  let counter = 0;
+  let newName = "New Level";
+  while (existingNames.includes(newName)) {
+    counter++;
+    newName = `New Level ${counter}`;
+  }
+  ```
+- **Files to modify:**
+  - `client/src/hooks/useLevelEditor.ts` (addNewLevel function)
+- **Note:** User improvement request - prevents duplicate level names
+
+#### 9.7 Add close/collapse functionality to Properties Panel
+- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`
+- **Current:** Properties panel is always visible and takes up right sidebar space
+- **Change:** Add close/collapse button to properties panel header, allow users to hide it for more canvas space
+- **Implementation options:**
+  1. **Full close:** Hide panel completely, show small ">" button to reopen
+  2. **Collapse:** Minimize to thin vertical bar with icon, click to expand
+  3. **Toggle button in header:** X button in panel header to close, reopen from toolbar or keyboard shortcut
+- **Recommended approach:** Option 3 (toggle button)
+- **Implementation:**
+  - Add state to track panel visibility: `const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);`
+  - Add X/close button to PropertiesPanel header
+  - Conditionally render panel based on state
+  - Add reopen button in main toolbar or use keyboard shortcut (e.g., 'P' key)
+  - Persist preference in localStorage (optional)
+- **Files to modify:**
+  - `client/src/components/level-editor/PropertiesPanel.tsx` (add close button)
+  - `client/src/pages/LevelEditor.tsx` (manage panel visibility state)
+- **Note:** User improvement request - more canvas space when properties not needed
+
 **Dependencies:** 9.3 should be done first
 **Notes:** Make editor more discoverable for new users
 
@@ -395,6 +471,183 @@ Work through chapters sequentially. After implementing each chapter:
 
 **Dependencies:** None
 **Notes:** These are polish effects - keep subtle and performant
+
+---
+
+## Chapter 11: Drawing Tools Implementation
+
+**Status:** ⏸️ Not Started
+**Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`
+**Priority:** High
+
+### Tasks:
+
+#### 11.1 Implement line drawing tool
+- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
+- **Current:** Line tool button exists in toolbar ('l' key) but does nothing when activated
+- **Implementation:**
+  - On mousedown: Record start position
+  - On mousemove: Show preview line from start to current position
+  - On mouseup: Place tiles along the line path using Bresenham's line algorithm
+  - Clear preview and return to normal mode
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` (add line drawing logic)
+  - `client/src/utils/canvasRenderer.ts` (add drawPreviewLine method)
+  - `client/src/hooks/useLevelEditor.ts` (may need batch tile placement method)
+- **Note:** Tool button already exists but functionality is missing
+
+#### 11.2 Implement rectangle drawing tool
+- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
+- **Current:** Rectangle tool button exists in toolbar ('r' key) but does nothing when activated
+- **Implementation:**
+  - On mousedown: Record start corner position
+  - On mousemove: Show preview rectangle from start to current position
+  - On mouseup: Place tiles to form rectangle outline or filled area (user preference?)
+  - Clear preview and return to normal mode
+- **Options to consider:**
+  - Outline only vs filled rectangle
+  - Could add modifier key (Shift) to toggle fill mode
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` (add rectangle drawing logic)
+  - `client/src/utils/canvasRenderer.ts` (add drawPreviewRectangle method)
+  - `client/src/hooks/useLevelEditor.ts` (may need batch tile placement method)
+- **Note:** Tool button already exists but functionality is missing
+
+#### 11.3 Implement selection tool (single select)
+- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
+- **Current:** Selection tool button exists in toolbar ('v' key) but does nothing when activated
+- **Implementation:**
+  - On click: Detect which object (tile/interactable/spawn) is at click position
+  - Select the clicked object and highlight it with selection outline
+  - Deselect previous selection if no modifier key pressed
+  - Update editorState.selectedObjects array
+  - Show selected object properties in PropertiesPanel
+- **Hit detection needed:**
+  - Check tiles array for position match
+  - Check objects array for position match
+  - Check spawnPoints array for position match
+  - Consider object layer/z-index for overlapping objects
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` (add click detection logic)
+  - `client/src/hooks/useLevelEditor.ts` (selectObject function may need updates)
+  - `client/src/utils/canvasRenderer.ts` (selection outline already exists)
+- **Note:** Tool button already exists but functionality is missing - critical for basic editor usage
+
+#### 11.4 Implement move tool and rethink selection/move interaction UX
+- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
+- **Current:** Move tool button exists in toolbar ('h' key) but does nothing when activated
+- **UX Design needed - consider these interaction patterns:**
+  1. **Separate move mode:** Move tool active → click object to grab → drag to move → click to drop
+  2. **Drag in selection mode:** Selection tool → click to select → drag selected to move (no separate move tool)
+  3. **Modifier key:** Selection tool → hold modifier (Alt/Shift) + drag to move selected
+- **Issues to resolve:**
+  - When should selection be cancelled? (Click empty space? Press Escape? Switch tools?)
+  - How to distinguish between click-to-select vs drag-to-move?
+  - Should moving update selection or maintain it?
+  - Multi-select move: move all selected objects together with relative positions preserved
+- **Implementation considerations:**
+  - Track drag start position and current drag offset
+  - Show ghost/preview of objects at new position during drag
+  - Snap to grid during move (optional)
+  - Update object positions on drag end
+  - Add to undo/redo history as single action
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` (add move/drag logic)
+  - `client/src/hooks/useLevelEditor.ts` (add moveObjects function)
+  - `client/src/utils/canvasRenderer.ts` (may need drag preview rendering)
+- **Note:** Needs UX design decision before implementation - critical for editor usability
+
+#### 11.5 Implement linking tool for interactable objects
+- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
+- **Current:** Link tool button exists in toolbar ('k' key) but does nothing when activated
+- **Purpose:** Link interactable objects (buttons → doors, levers → doors, etc.) to create cause-effect relationships
+- **Implementation:**
+  - Click first object (source): Mark as link source, highlight visually
+  - Click second object (target): Create link from source to target
+  - Store link in source object's `properties.linkedObjects` array
+  - Store reverse link in target object's `properties.linkedFrom` array (for bidirectional tracking)
+  - Draw visual connection line between linked objects (already exists in canvasRenderer.ts:829-855)
+  - Exit link mode or allow chaining multiple links
+- **Validation needed:**
+  - Only interactable objects can be linked (not tiles or spawn points)
+  - Prevent linking object to itself
+  - Prevent duplicate links
+  - Visual feedback for valid/invalid link targets
+- **UI considerations:**
+  - Show which object is currently the link source (highlight or indicator)
+  - Escape or right-click to cancel linking
+  - Visual preview line while selecting target
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` (add link mode logic)
+  - `client/src/hooks/useLevelEditor.ts` (add linkObjects function)
+  - `client/src/types/level.ts` (ObjectProperties already has linkedObjects/linkedFrom)
+- **Note:** Tool button already exists, visual line rendering exists, just needs interaction logic
+
+#### 11.6 Implement unlinking tool for removing object links
+- **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/components/level-editor/PropertiesPanel.tsx`
+- **Current:** No UI or functionality exists to remove links between objects
+- **Purpose:** Allow users to remove unwanted links between interactable objects
+- **Implementation options:**
+  1. **Properties Panel approach:** Show list of linked objects in properties panel, add "X" button to remove each link
+  2. **Selection-based:** Select linked object → keyboard shortcut (e.g., 'U' for unlink) → click link to remove
+  3. **Context menu:** Right-click on object → "Manage Links" → show dialog with checkboxes for each link
+- **Recommended approach:** Properties Panel (option 1) - most discoverable
+- **Implementation:**
+  - In PropertiesPanel, display `properties.linkedObjects` array as clickable list
+  - Add delete/remove button next to each linked object ID
+  - On click: Remove object ID from `properties.linkedObjects` array
+  - Also remove reverse link from target object's `properties.linkedFrom` array
+  - Update level state and trigger re-render
+  - Add to undo/redo history
+- **Files to modify:**
+  - `client/src/components/level-editor/PropertiesPanel.tsx` (add links UI section)
+  - `client/src/hooks/useLevelEditor.ts` (add unlinkObjects function)
+- **Note:** Currently there's no way to remove links once created - important for fixing mistakes
+
+#### 11.7 Decide on rotation tool approach or remove it
+- **Location:** `client/src/pages/LevelEditor.tsx` - Rotate left/right buttons in toolbar
+- **Current:** Rotate left/right buttons exist in header but unclear how rotation should work
+- **Decision needed:**
+  1. **Keep rotation - apply to selected objects:** When object(s) selected, rotate buttons rotate them (90° increments)
+  2. **Keep rotation - apply to tile being placed:** When placing tile, rotate buttons rotate preview before placement
+  3. **Remove rotation:** If rotation doesn't make sense for gameplay, remove buttons entirely
+- **Considerations:**
+  - Tiles have `rotation` property (0, 90, 180, 270) in level.ts:12
+  - Objects have `rotation` property in level.ts:40
+  - Rotation rendering already implemented in canvasRenderer.ts (tiles: 206-212, objects: 570-582)
+  - Current rotate left/right handlers exist in LevelEditor.tsx
+- **If keeping rotation:**
+  - Make buttons context-aware (only enabled when object selected or tile type selected)
+  - Add visual feedback showing rotation angle
+  - Consider keyboard shortcuts ([ and ] keys for rotate left/right)
+  - Update PropertiesPanel to show/edit rotation value
+- **If removing rotation:**
+  - Remove rotate buttons from toolbar
+  - Remove handleRotateLeft/handleRotateRight from LevelEditor.tsx
+  - Remove rotation keyboard handlers (if any)
+  - Keep rotation property in data model for future use
+- **Files to modify:**
+  - `client/src/pages/LevelEditor.tsx` (rotate button handlers)
+  - `client/src/hooks/useLevelEditor.ts` (add rotateObjects function if keeping)
+  - `client/src/components/level-editor/PropertiesPanel.tsx` (rotation UI if keeping)
+- **Note:** User requested decision on rotation tool - needs clarification on intended use case
+
+#### 11.8 Fix: Switching to selection tool should clear active brush/placement tool
+- **Location:** `client/src/pages/LevelEditor.tsx` - handleToolChange function
+- **Current:** When user has a tile type selected (brush mode) and switches to selection tool, the brush remains active
+- **Bug:** Clicking to select an object may instead place the active brush tile
+- **Expected behavior:** Switching to any non-placement tool (select, multiselect, move, link) should immediately clear `editorState.selectedTileType`
+- **Implementation:**
+  - In handleToolChange function, check if new tool is 'select', 'multiselect', 'move', or 'link'
+  - If so, also call `setEditorState(prev => ({ ...prev, selectedTileType: null }))`
+  - This ensures brush preview disappears and selection/move modes work as expected
+- **Files to modify:**
+  - `client/src/pages/LevelEditor.tsx` (handleToolChange function)
+  - May also need updates in `client/src/components/level-editor/TilePalette.tsx` to deselect tile visually
+- **Note:** Bug reported by user - affects basic workflow when switching between placing and selecting
+
+**Dependencies:** Task 11.3 (selection) should be implemented first if keeping rotation for selected objects
+**Notes:** All tools exist in UI but have no implementation - high priority for usability
 
 ---
 
@@ -439,12 +692,13 @@ Work through chapters sequentially. After implementing each chapter:
 | 2. Modern Toolbar | ✅ Completed | ✓ Approved | Labeled tool groups, glassmorphism, color-coded tools, animations |
 | 3. Canvas Experience | ✅ Completed | ✓ Approved | Solid Mario sky blue, canvas drop shadow, transparent canvas, default grass platform, custom scrollbars |
 | 4. Tile Palette | ✅ Completed | ✓ Approved | Color-coded category accents, glassmorphism cards, semi-transparent cursor preview |
-| 5. Properties Panel | ⏸️ Not Started | ❌ | |
-| 6. Level Tabs | ⏸️ Not Started | ❌ | |
-| 7. Animations | ⏸️ Not Started | ❌ | |
+| 5. Properties Panel | ❌ Skipped | N/A | User decision - not implementing |
+| 6. Level Tabs | ❌ Skipped | N/A | User decision - not implementing |
+| 7. Animations | ✅ Completed | ✓ Approved | Tool animations, delete fade-out, undo/redo flash, color-coded save indicator |
 | 8. Color & Theme | ⏸️ Not Started | ❌ | |
 | 9. Context & Feedback | ⏸️ Not Started | ❌ | |
 | 10. Special Effects | ⏸️ Not Started | ❌ | |
+| 11. Drawing Tools | ⏸️ Not Started | ❌ | Line and rectangle tools need implementation |
 
 **Legend:**
 - ⏸️ Not Started
@@ -468,8 +722,10 @@ Work through chapters sequentially. After implementing each chapter:
    - Color-coded category accent strips (gray/purple/green/blue)
    - Glassmorphism cards with shadows
    - Semi-transparent cursor preview (50% opacity)
-5. **Next:** Chapter 5: Polished Properties Panel
-6. Continue through remaining chapters sequentially
+5. ❌ Chapter 5: Polished Properties Panel - Skipped (user decision)
+6. ❌ Chapter 6: Level Tabs Enhancement - Skipped (user decision)
+7. **Next:** Chapter 7: Animations & Micro-interactions
+8. Continue through remaining chapters sequentially
 
 ---
 

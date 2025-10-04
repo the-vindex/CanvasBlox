@@ -22,6 +22,8 @@ export default function LevelEditor() {
   const { toast } = useToast();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showUndoRedoFlash, setShowUndoRedoFlash] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const {
     levels,
@@ -199,6 +201,27 @@ export default function LevelEditor() {
     });
   }, [currentLevel, setEditorState]);
 
+  // Track unsaved changes
+  useEffect(() => {
+    // Mark as unsaved when levels change
+    setHasUnsavedChanges(true);
+  }, [levels]);
+
+  // Mark as saved every 5 seconds (matching auto-save interval)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHasUnsavedChanges(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Trigger flash on undo/redo
+  const triggerUndoRedoFlash = useCallback(() => {
+    setShowUndoRedoFlash(true);
+    setTimeout(() => setShowUndoRedoFlash(false), 400);
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -208,13 +231,16 @@ export default function LevelEditor() {
             e.preventDefault();
             if (e.shiftKey) {
               redo();
+              triggerUndoRedoFlash();
             } else {
               undo();
+              triggerUndoRedoFlash();
             }
             break;
           case 'y':
             e.preventDefault();
             redo();
+            triggerUndoRedoFlash();
             break;
           case 'c':
             e.preventDefault();
@@ -258,7 +284,7 @@ export default function LevelEditor() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, copySelectedObjects, pasteObjects, deleteSelectedObjects, handleToolChange, setEditorState]);
+  }, [undo, redo, copySelectedObjects, pasteObjects, deleteSelectedObjects, handleToolChange, setEditorState, triggerUndoRedoFlash]);
 
   if (!currentLevel) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
@@ -314,7 +340,10 @@ export default function LevelEditor() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={undo}
+              onClick={() => {
+                undo();
+                triggerUndoRedoFlash();
+              }}
               disabled={historyIndex <= 0}
               title="Undo (Ctrl+Z)"
               className="text-white hover:bg-white/10 disabled:opacity-50 disabled:text-white/50"
@@ -325,7 +354,10 @@ export default function LevelEditor() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={redo}
+              onClick={() => {
+                redo();
+                triggerUndoRedoFlash();
+              }}
               disabled={historyIndex >= history.length - 1}
               title="Redo (Ctrl+Y)"
               className="text-white hover:bg-white/10 disabled:opacity-50 disabled:text-white/50"
@@ -373,8 +405,14 @@ export default function LevelEditor() {
         {/* Status Bar */}
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-            <span className="text-white font-medium">Auto-saved</span>
+            <i
+              className={`fas fa-save transition-colors duration-300 ${
+                hasUnsavedChanges ? 'text-orange-500' : 'text-green-500'
+              }`}
+            ></i>
+            <span className="text-white font-medium">
+              {hasUnsavedChanges ? 'Unsaved' : 'Saved'}
+            </span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
             <i className="fas fa-cubes text-blue-400"></i>
@@ -432,6 +470,7 @@ export default function LevelEditor() {
               onCanvasClick={handleCanvasClick}
               onTilePlaced={handleTilePlaced}
             />
+            {showUndoRedoFlash && <div className="undo-redo-flash" />}
           </div>
         </main>
 

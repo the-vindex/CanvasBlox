@@ -193,7 +193,7 @@ export class CanvasRenderer {
     this.ctx.fillRect(0, 0, width, height * 0.15);
   }
 
-  drawTile(tile: Tile, pan: Position, zoom: number, isSelected = false) {
+  drawTile(tile: Tile, pan: Position, zoom: number, isSelected = false, isDeleting = false) {
     // Convert tile position to pixel position
     const x = tile.position.x * TILE_SIZE * zoom + pan.x;
     const y = tile.position.y * TILE_SIZE * zoom + pan.y;
@@ -201,6 +201,11 @@ export class CanvasRenderer {
     const height = tile.dimensions.height * TILE_SIZE * zoom;
 
     this.ctx.save();
+
+    // Apply delete animation effect
+    if (isDeleting) {
+      this.ctx.globalAlpha = 0.3;
+    }
 
     // Apply rotation
     if (tile.rotation !== 0) {
@@ -556,7 +561,7 @@ export class CanvasRenderer {
     this.ctx.fill();
   }
 
-  drawObject(obj: InteractableObject, pan: Position, zoom: number, isSelected = false) {
+  drawObject(obj: InteractableObject, pan: Position, zoom: number, isSelected = false, isDeleting = false) {
     // Convert tile position to pixel position
     const x = obj.position.x * TILE_SIZE * zoom + pan.x;
     const y = obj.position.y * TILE_SIZE * zoom + pan.y;
@@ -564,6 +569,12 @@ export class CanvasRenderer {
     const height = obj.dimensions.height * TILE_SIZE * zoom;
 
     this.ctx.save();
+
+    // Apply delete animation effect
+    if (isDeleting) {
+      this.ctx.globalAlpha = 0.3;
+    }
+
     this.ctx.translate(x + width / 2, y + height / 2);
 
     // Apply rotation
@@ -801,13 +812,19 @@ export class CanvasRenderer {
     this.ctx.restore();
   }
 
-  drawSpawnPoint(spawn: SpawnPoint, pan: Position, zoom: number, isSelected = false) {
+  drawSpawnPoint(spawn: SpawnPoint, pan: Position, zoom: number, isSelected = false, isDeleting = false) {
     // Convert tile position to pixel position
     const x = spawn.position.x * TILE_SIZE * zoom + pan.x;
     const y = spawn.position.y * TILE_SIZE * zoom + pan.y;
     const size = TILE_SIZE * zoom;
 
     this.ctx.save();
+
+    // Apply delete animation effect
+    if (isDeleting) {
+      this.ctx.globalAlpha = 0.3;
+    }
+
     this.ctx.translate(x, y);
 
     if (spawn.type === 'player') {
@@ -954,19 +971,22 @@ export class CanvasRenderer {
     // Draw tiles
     levelData.tiles.forEach(tile => {
       const isSelected = editorState.selectedObjects.includes(tile.id);
-      this.drawTile(tile, editorState.pan, editorState.zoom, isSelected);
+      const isDeleting = editorState.deletingObjects.includes(tile.id);
+      this.drawTile(tile, editorState.pan, editorState.zoom, isSelected, isDeleting);
     });
 
     // Draw objects
     levelData.objects.forEach(obj => {
       const isSelected = editorState.selectedObjects.includes(obj.id);
-      this.drawObject(obj, editorState.pan, editorState.zoom, isSelected);
+      const isDeleting = editorState.deletingObjects.includes(obj.id);
+      this.drawObject(obj, editorState.pan, editorState.zoom, isSelected, isDeleting);
     });
 
     // Draw spawn points
     levelData.spawnPoints.forEach(spawn => {
       const isSelected = editorState.selectedObjects.includes(spawn.id);
-      this.drawSpawnPoint(spawn, editorState.pan, editorState.zoom, isSelected);
+      const isDeleting = editorState.deletingObjects.includes(spawn.id);
+      this.drawSpawnPoint(spawn, editorState.pan, editorState.zoom, isSelected, isDeleting);
     });
 
     // Draw links

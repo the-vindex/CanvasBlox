@@ -20,7 +20,8 @@ export function useLevelEditor() {
     zoom: 1,
     pan: { x: 0, y: 0 },
     showGrid: true,
-    mousePosition: { x: 0, y: 0 }
+    mousePosition: { x: 0, y: 0 },
+    deletingObjects: []
   });
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -33,16 +34,11 @@ export function useLevelEditor() {
       if (levels.length > 0) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(levels));
         localStorage.setItem(AUTOSAVE_KEY, new Date().toISOString());
-        toast({
-          title: "Auto-saved",
-          description: "Your levels have been automatically saved.",
-          duration: 1000
-        });
       }
     }, AUTOSAVE_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [levels, toast]);
+  }, [levels]);
 
   // Load saved levels on init
   useEffect(() => {
@@ -216,14 +212,27 @@ export function useLevelEditor() {
   const deleteSelectedObjects = useCallback(() => {
     if (editorState.selectedObjects.length === 0) return;
 
-    updateCurrentLevel(level => ({
-      ...level,
-      tiles: level.tiles.filter(tile => !editorState.selectedObjects.includes(tile.id)),
-      objects: level.objects.filter(obj => !editorState.selectedObjects.includes(obj.id)),
-      spawnPoints: level.spawnPoints.filter(spawn => !editorState.selectedObjects.includes(spawn.id))
-    }), `Deleted ${editorState.selectedObjects.length} objects`);
+    // Mark objects as deleting for animation
+    setEditorState(prev => ({
+      ...prev,
+      deletingObjects: [...editorState.selectedObjects]
+    }));
 
-    setEditorState(prev => ({ ...prev, selectedObjects: [] }));
+    // After animation completes (250ms), actually delete the objects
+    setTimeout(() => {
+      updateCurrentLevel(level => ({
+        ...level,
+        tiles: level.tiles.filter(tile => !editorState.selectedObjects.includes(tile.id)),
+        objects: level.objects.filter(obj => !editorState.selectedObjects.includes(obj.id)),
+        spawnPoints: level.spawnPoints.filter(spawn => !editorState.selectedObjects.includes(spawn.id))
+      }), `Deleted ${editorState.selectedObjects.length} objects`);
+
+      setEditorState(prev => ({
+        ...prev,
+        selectedObjects: [],
+        deletingObjects: []
+      }));
+    }, 250);
   }, [editorState.selectedObjects, updateCurrentLevel]);
 
   const copySelectedObjects = useCallback(() => {

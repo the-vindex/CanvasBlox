@@ -81,6 +81,7 @@ export interface EditorState {
   pan: Position;
   showGrid: boolean;
   mousePosition: Position;
+  deletingObjects: string[];
 }
 
 export interface HistoryEntry {
