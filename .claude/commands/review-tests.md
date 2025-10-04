@@ -24,9 +24,14 @@ Review test quality against TDD principles and best practices.
 
 When this command is invoked:
 
-1. **Determine scope:**
-   - If scope provided: Use that scope
-   - If no scope: Run `git diff --name-only` and `git status --short` to find changed test files (*.test.ts, *.spec.ts), extract the feature being tested from those files
+1. **Determine scope and find test files:**
+   - If scope provided:
+     - Use that scope as the review scope
+     - Search for test files: Use Glob to find `**/*{scope}*.test.ts*` and `**/*{scope}*.spec.ts` (case-insensitive)
+   - If no scope:
+     - Run `git diff --name-only` and `git status --short` to find changed test files (*.test.ts, *.test.tsx, *.spec.ts)
+     - Extract the feature being tested from those files as the scope
+   - Build a list of test file paths to review
 
 2. **Launch general-purpose agent with this prompt:**
 
@@ -36,12 +41,13 @@ You are a senior developer reviewing tests written by a junior developer.
 **Context:**
 - Project: CanvasBlox - Level editor for young game designers
 - Review scope: [INSERT SCOPE HERE]
+- Test files to review: [INSERT FILE PATHS HERE - comma separated list]
 
 **Your task:**
 1. Read TDD principles: docs/TDD_PRINCIPLES.md
-2. Read the test files for [SCOPE]:
-   - Find *.test.ts and *.spec.ts files related to [SCOPE]
-   - Use Glob and Read tools to find relevant test files
+2. Read the specific test files provided above:
+   - [List each file path provided]
+   - Use Read tool to examine each file
 3. Evaluate each test against:
    - **Scope**: Does it test the specified feature's actual scope?
    - **Behavior vs Implementation**: Is it testing what it does or how it does it?
