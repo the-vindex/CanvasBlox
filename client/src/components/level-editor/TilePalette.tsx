@@ -59,7 +59,7 @@ function TileItem({ type, label, color, icon, isSelected, onSelect, usePlatformT
   return (
     <div
       className={cn(
-        "tile-item bg-secondary/60 backdrop-blur-sm rounded p-2 text-center transition-all duration-150 cursor-pointer hover:transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl",
+        "tile-item bg-secondary/60 backdrop-blur-sm border border-white/10 rounded p-2 text-center transition-all duration-150 cursor-pointer hover:transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl",
         isSelected && "ring-2 ring-primary shadow-[0_0_20px_rgba(59,130,246,0.4)]"
       )}
       data-tile-type={type}
