@@ -15,6 +15,63 @@ All features from the original implementation need to be restored incrementally.
 
 ---
 
+## Testing Strategy 🧪
+
+### Framework Setup
+- **Vitest** - Fast unit test runner (integrates with Vite)
+- **React Testing Library** - Component testing
+- **@testing-library/user-event** - User interaction simulation
+- **jsdom** - DOM environment
+
+### NPM Scripts
+```bash
+npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event @vitest/ui jsdom
+```
+
+Add to `package.json`:
+```json
+"test": "vitest",
+"test:ui": "vitest --ui",
+"test:coverage": "vitest --coverage"
+```
+
+### Test File Structure
+```
+client/src/__tests__/
+  ├── hooks/
+  │   ├── useLevelEditor.test.ts
+  │   └── useCanvas.test.ts
+  ├── utils/
+  │   ├── canvasRenderer.test.ts
+  │   └── levelSerializer.test.ts
+  └── components/
+      ├── TilePalette.test.tsx
+      ├── PropertiesPanel.test.tsx
+      ├── Toolbar.test.tsx
+      └── LevelTabs.test.tsx
+```
+
+### TDD Workflow (for each step)
+1. **Write failing test** - Create test file with expected behavior
+2. **Implement feature** - Make the test pass
+3. **Verify** - Run tests, ensure all pass
+4. **Commit** - Commit code + tests together
+
+### Example Test (Step 1)
+```typescript
+// client/src/__tests__/hooks/useLevelEditor.test.ts
+import { renderHook } from '@testing-library/react';
+import { useLevelEditor } from '@/hooks/useLevelEditor';
+
+test('should load levels from localStorage', () => {
+  const { result } = renderHook(() => useLevelEditor());
+  expect(result.current.levels).toBeDefined();
+  expect(result.current.currentLevel).toBeDefined();
+});
+```
+
+---
+
 ## Section 1: Core Integration (Foundation)
 
 ### Step 1: Integrate useLevelEditor Hook
@@ -41,10 +98,14 @@ All features from the original implementation need to be restored incrementally.
 **Files to modify**:
 - `client/src/pages/LevelEditor.tsx`
 
-**Test**:
+**Manual Test**:
 - Level data should load from localStorage
 - Multiple levels should be available
 - State changes should persist
+
+**Automated Test** (write first):
+- File: `client/src/__tests__/hooks/useLevelEditor.test.ts`
+- Test: Hook initialization, localStorage loading, state management, undo/redo
 
 ---
 
@@ -70,10 +131,14 @@ All features from the original implementation need to be restored incrementally.
 **Files to modify**:
 - `client/src/pages/LevelEditor.tsx`
 
-**Test**:
+**Manual Test**:
 - Mouse position should update in overlay
 - Click should work on canvas
 - Zoom with Ctrl+wheel should work
+
+**Automated Test** (write first):
+- File: `client/src/__tests__/hooks/useCanvas.test.ts`
+- Test: Mouse event handling, coordinate conversion, painting mode tracking
 
 ---
 
@@ -106,10 +171,14 @@ All features from the original implementation need to be restored incrementally.
 - `client/src/pages/LevelEditor.tsx`
 - Verify `client/src/components/level-editor/Canvas.tsx` has correct structure
 
-**Test**:
+**Manual Test**:
 - Canvas should render all tiles and objects
 - Scrollbars should still work
 - CanvasRenderer should draw everything correctly
+
+**Automated Test** (write first):
+- File: `client/src/__tests__/utils/canvasRenderer.test.ts`
+- Test: Grid rendering, tile drawing, coordinate transformations
 
 ---
 
@@ -144,10 +213,14 @@ All features from the original implementation need to be restored incrementally.
 **Files to modify**:
 - `client/src/pages/LevelEditor.tsx`
 
-**Test**:
+**Manual Test**:
 - Clicking tiles should select them
 - Selected tile should highlight
 - Canvas should place selected tile type
+
+**Automated Test** (write first):
+- File: `client/src/__tests__/components/TilePalette.test.tsx`
+- Test: Tile selection, highlighting, callback invocation
 
 ---
 
@@ -297,10 +370,14 @@ All features from the original implementation need to be restored incrementally.
 **Files to modify**:
 - `client/src/pages/LevelEditor.tsx`
 
-**Test**:
+**Manual Test**:
 - All keyboard shortcuts should work
 - No interference with input fields
 - Visual feedback for undo/redo
+
+**Automated Test** (write first):
+- File: `client/src/__tests__/integration/keyboardShortcuts.test.tsx`
+- Test: All shortcuts (Ctrl+Z, V, M, etc.), input field prevention
 
 ---
 
@@ -522,11 +599,15 @@ All features from the original implementation need to be restored incrementally.
 **Files to modify**:
 - `client/src/pages/LevelEditor.tsx`
 
-**Test**:
+**Manual Test**:
 - Import JSON should load level
 - Export JSON should download file
 - Export PNG should download image
 - Validation should work (single player spawn)
+
+**Automated Test** (write first):
+- File: `client/src/__tests__/utils/levelSerializer.test.ts`
+- Test: JSON serialization/deserialization, validation, single player spawn rule
 
 ---
 
@@ -890,20 +971,30 @@ After completing all steps, verify all features work:
 - [ ] Data persists in localStorage
 - [ ] All defaults are correct
 
+### Automated Tests
+- [ ] All unit tests pass (`npm test`)
+- [ ] All component tests pass
+- [ ] Integration tests pass
+- [ ] Test coverage meets targets (>85%)
+
 ---
 
 ## Git Workflow
 
-After each section is complete:
-1. Test all features in that section
-2. Commit with descriptive message
-3. Continue to next section
+After each step is complete:
+1. **Write automated tests** (if applicable)
+2. **Implement feature** to make tests pass
+3. **Run tests** - `npm test` (all should pass)
+4. **Manual test** features in browser
+5. **Commit** with descriptive message (include test files)
 
 Example commit messages:
-- "Section 1 Step 1: Integrate useLevelEditor hook"
-- "Section 1 Step 2: Integrate useCanvas hook"
+- "Step 1: Integrate useLevelEditor hook with tests"
+- "Step 2: Integrate useCanvas hook with tests"
 - "Section 1 Complete: Core integration finished"
 - etc.
+
+**TDD Reminder**: Always write the test first, watch it fail, then implement the feature to make it pass.
 
 ---
 
@@ -915,3 +1006,5 @@ Example commit messages:
 - If scrollbars break, revert and analyze what changed
 - Each step should be small, testable, and incremental
 - Don't skip steps - dependencies matter
+- **TDD**: Write automated tests before implementation for rapid feedback and regression prevention
+- Run `npm test` frequently during development to catch issues early
