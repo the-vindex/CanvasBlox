@@ -1,656 +1,500 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useLevelEditor } from '@/hooks/useLevelEditor';
-import { Canvas } from '@/components/level-editor/Canvas';
-import { TilePalette } from '@/components/level-editor/TilePalette';
-import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
-import { Toolbar } from '@/components/level-editor/Toolbar';
-import { LevelTabs } from '@/components/level-editor/LevelTabs';
-import { ImportModal, ExportModal } from '@/components/level-editor/ImportExportModals';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Position, LevelData } from '@/types/level';
-import { LevelSerializer } from '@/utils/levelSerializer';
-import { useToast } from '@/hooks/use-toast';
-import { TILE_SIZE, DEFAULT_GRASS_Y } from '@/constants/editor';
+import { useRef, useEffect, useState } from 'react';
 
 export default function LevelEditor() {
-  const { toast } = useToast();
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [showUndoRedoFlash, setShowUndoRedoFlash] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
-  const [isDrawingSession, setIsDrawingSession] = useState(false);
-  const drawingSessionTileCount = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [propertiesPanelCollapsed, setPropertiesPanelCollapsed] = useState(false);
 
-  const {
-    levels,
-    currentLevel,
-    currentLevelIndex,
-    editorState,
-    history,
-    historyIndex,
-    setCurrentLevelIndex,
-    setEditorState,
-    updateCurrentLevel,
-    createNewLevel,
-    duplicateLevel,
-    deleteLevel,
-    addTile,
-    addObject,
-    selectObject,
-    deleteSelectedObjects,
-    copySelectedObjects,
-    pasteObjects,
-    undo,
-    redo,
-    commitBatchToHistory
-  } = useLevelEditor();
-
-  const handleMouseMove = useCallback((position: Position) => {
-    setEditorState(prev => ({ ...prev, mousePosition: position }));
-  }, [setEditorState]);
-
-  const handleCanvasClick = useCallback((position: Position, event: MouseEvent) => {
-    // Handle object selection logic here
-    // For now, just clear selection if clicking empty space
-    if (editorState.selectedTool === 'select') {
-      setEditorState(prev => ({ ...prev, selectedObjects: [] }));
-    }
-  }, [editorState.selectedTool, setEditorState]);
-
-  const handleTileSelect = useCallback((tileType: string) => {
-    // When selecting a tile, enter placement mode (clear tool selection)
-    setEditorState(prev => ({
-      ...prev,
-      selectedTileType: tileType,
-      selectedTool: null
-    }));
-  }, [setEditorState]);
-
-  const handleTilePlaced = useCallback((position: Position, tileType: string, isDrawing = false) => {
-    if (tileType.startsWith('spawn-')) {
-      // Spawn points are not batched (usually single placement)
-      addObject(position, tileType);
-    } else if (tileType.includes('platform')) {
-      // For tiles, use batching if in drawing session
-      if (isDrawing) {
-        addTile(position, tileType, true); // Skip history
-        drawingSessionTileCount.current++;
-      } else {
-        addTile(position, tileType, false); // Normal history
-      }
-    } else {
-      // Other objects are not batched
-      addObject(position, tileType);
-    }
-  }, [addTile, addObject]);
-
-  const handleDrawingSessionEnd = useCallback(() => {
-    // When drawing session ends, commit all placed tiles as a single history entry
-    if (drawingSessionTileCount.current > 0) {
-      const count = drawingSessionTileCount.current;
-      commitBatchToHistory(`Placed ${count} tile${count > 1 ? 's' : ''}`);
-      drawingSessionTileCount.current = 0;
-    }
-  }, [commitBatchToHistory]);
-
-  const handleToolChange = useCallback((tool: typeof editorState.selectedTool) => {
-    setEditorState(prev => ({
-      ...prev,
-      selectedTool: tool,
-      selectedTileType: null // Clear tile selection when activating a tool
-    }));
-  }, [setEditorState]);
-
-  const handleStateChange = useCallback((updates: Partial<typeof editorState>) => {
-    setEditorState(prev => ({ ...prev, ...updates }));
-  }, [setEditorState]);
-
-  const handleRotateLeft = useCallback(() => {
-    // Implementation for rotating selected objects left
-    toast({ title: "Rotate Left", description: "Feature coming soon!" });
-  }, [toast]);
-
-  const handleRotateRight = useCallback(() => {
-    // Implementation for rotating selected objects right
-    toast({ title: "Rotate Right", description: "Feature coming soon!" });
-  }, [toast]);
-
-  const handleZoomIn = useCallback(() => {
-    setEditorState(prev => {
-      const newZoom = Math.min(prev.zoom + 0.1, 3);
-
-      // Get canvas center for zoom anchor point
-      const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
-      if (!canvas) return { ...prev, zoom: newZoom };
-
-      const rect = canvas.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      // Calculate zoom ratio
-      const zoomRatio = newZoom / prev.zoom;
-
-      // Adjust pan to keep center point stationary
-      const newPan = {
-        x: prev.pan.x + (centerX - centerX * zoomRatio),
-        y: prev.pan.y + (centerY - centerY * zoomRatio)
-      };
-
-      return { ...prev, zoom: newZoom, pan: newPan };
-    });
-  }, [setEditorState]);
-
-  const handleZoomOut = useCallback(() => {
-    const minZoom = 0.1;
-
-    setEditorState(prev => {
-      const newZoom = Math.max(prev.zoom - 0.1, minZoom);
-
-      if (prev.zoom <= minZoom) {
-        toast({
-          title: "Maximum Zoom Out",
-          description: "Minimum zoom level reached"
-        });
-        return prev;
-      }
-
-      // Get canvas center for zoom anchor point
-      const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
-      if (!canvas) return { ...prev, zoom: newZoom };
-
-      const rect = canvas.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      // Calculate zoom ratio
-      const zoomRatio = newZoom / prev.zoom;
-
-      // Adjust pan to keep center point stationary
-      const newPan = {
-        x: prev.pan.x + (centerX - centerX * zoomRatio),
-        y: prev.pan.y + (centerY - centerY * zoomRatio)
-      };
-
-      return { ...prev, zoom: newZoom, pan: newPan };
-    });
-  }, [setEditorState, toast]);
-
-  const handleZoomReset = useCallback(() => {
-    setEditorState(prev => {
-      // Get canvas center for zoom anchor point
-      const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
-      if (!canvas) return { ...prev, zoom: 1 };
-
-      const rect = canvas.getBoundingClientRect();
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      // Calculate zoom ratio
-      const zoomRatio = 1 / prev.zoom;
-
-      // Adjust pan to keep center point stationary
-      const newPan = {
-        x: prev.pan.x + (centerX - centerX * zoomRatio),
-        y: prev.pan.y + (centerY - centerY * zoomRatio)
-      };
-
-      return { ...prev, zoom: 1, pan: newPan };
-    });
-  }, [setEditorState]);
-
-  const handleWheelZoom = useCallback((delta: number, mouseX: number, mouseY: number) => {
-    setEditorState(prev => {
-      const newZoom = Math.max(0.1, Math.min(3, prev.zoom + delta));
-
-      // If zoom didn't change (hit limits), don't update
-      if (newZoom === prev.zoom) return prev;
-
-      // Calculate zoom ratio
-      const zoomRatio = newZoom / prev.zoom;
-
-      // Adjust pan to keep mouse point stationary
-      // Formula: newPan = pan + (mousePos - mousePos * zoomRatio)
-      const newPan = {
-        x: prev.pan.x + (mouseX - mouseX * zoomRatio),
-        y: prev.pan.y + (mouseY - mouseY * zoomRatio)
-      };
-
-      return { ...prev, zoom: newZoom, pan: newPan };
-    });
-  }, [setEditorState]);
-
-  const handleExportPNG = useCallback(() => {
-    const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
-    if (canvas) {
-      LevelSerializer.exportToPNG(canvas, `${currentLevel?.levelName || 'level'}.png`);
-      toast({ title: "Exported", description: "Level exported as PNG!" });
-    }
-  }, [currentLevel, toast]);
-
-  const handleImportLevel = useCallback((levelData: LevelData) => {
-    // Ensure only one player spawn point exists
-    const playerSpawns = levelData.spawnPoints.filter(spawn => spawn.type === 'player');
-    const otherSpawns = levelData.spawnPoints.filter(spawn => spawn.type !== 'player');
-
-    // Keep only the first player spawn if multiple exist
-    const validatedSpawnPoints = playerSpawns.length > 0
-      ? [playerSpawns[0], ...otherSpawns]
-      : otherSpawns;
-
-    updateCurrentLevel(() => ({
-      ...levelData,
-      spawnPoints: validatedSpawnPoints
-    }));
-  }, [updateCurrentLevel]);
-
-  const handleLevelClose = useCallback((index: number) => {
-    if (levels.length > 1) {
-      const level = levels[index];
-      const hasData = level.tiles.length > 0 ||
-                      level.objects.length > 0 ||
-                      level.spawnPoints.length > 0;
-
-      if (hasData) {
-        const confirmed = window.confirm(
-          `"${level.levelName}" contains ${level.tiles.length} tiles, ${level.objects.length} objects, and ${level.spawnPoints.length} spawn points.\n\nAre you sure you want to close and delete this level?`
-        );
-        if (!confirmed) return;
-      }
-
-      deleteLevel(index);
-    }
-  }, [levels, deleteLevel]);
-
-  // Calculate initial zoom to ensure grass is visible on app load
   useEffect(() => {
-    // Only set zoom once when levels are first loaded
-    if (!currentLevel) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    // Use requestAnimationFrame to ensure DOM is fully rendered
-    requestAnimationFrame(() => {
-      // Calculate viewport height from window, subtracting all fixed-height UI elements
-      const header = document.querySelector('header');
-      const levelTabs = document.querySelector('[data-testid="level-tabs"], .level-tabs');
-      const toolbar = document.querySelector('[data-testid="toolbar"]');
-      const footer = document.querySelector('footer');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-      const headerHeight = header?.clientHeight || 56; // h-14 = 56px
-      const tabsHeight = levelTabs?.clientHeight || 40;
-      const toolbarHeight = toolbar?.clientHeight || 60;
-      const footerHeight = footer?.clientHeight || 32; // h-8 = 32px
+    // Draw sample content
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(320, 480, 256, 32);
+    ctx.fillRect(640, 360, 192, 32);
+    ctx.fillRect(960, 240, 224, 32);
 
-      const viewportHeight = window.innerHeight - headerHeight - tabsHeight - toolbarHeight - footerHeight;
+    ctx.fillStyle = '#FF6B6B';
+    ctx.fillRect(400, 448, 32, 32);
 
-      if (viewportHeight <= 0) return; // Container not ready yet
+    ctx.fillStyle = '#4ECDC4';
+    ctx.fillRect(700, 328, 32, 32);
 
-      // Calculate how many tiles are currently visible at 100% zoom
-      const currentlyVisibleTiles = viewportHeight / TILE_SIZE;
+    ctx.fillStyle = '#95E1D3';
+    ctx.beginPath();
+    ctx.arc(200, 700, 16, 0, Math.PI * 2);
+    ctx.fill();
 
-      // We want to show grass (at DEFAULT_GRASS_Y) + 5 tiles below it
-      const targetVisibleTiles = DEFAULT_GRASS_Y + 5;
-
-      // Calculate zoom: if we need to show MORE tiles, zoom OUT (< 1)
-      const calculatedZoom = currentlyVisibleTiles / targetVisibleTiles;
-
-      // Clamp between 0.1 and 1 (don't zoom in beyond 100%)
-      const initialZoom = Math.min(Math.max(calculatedZoom, 0.1), 1);
-
-      setEditorState(prev => {
-        // Only set zoom if it's still at default (1.0)
-        if (prev.zoom === 1) {
-          return { ...prev, zoom: initialZoom };
-        }
-        return prev;
-      });
-    });
-  }, [currentLevel, setEditorState]);
-
-  // Track unsaved changes
-  useEffect(() => {
-    // Mark as unsaved when levels change
-    setHasUnsavedChanges(true);
-  }, [levels]);
-
-  // Mark as saved every 5 seconds (matching auto-save interval)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHasUnsavedChanges(false);
-    }, 5000);
-
-    return () => clearInterval(interval);
+    ctx.fillStyle = '#F38181';
+    ctx.beginPath();
+    ctx.arc(1600, 150, 16, 0, Math.PI * 2);
+    ctx.fill();
   }, []);
-
-  // Trigger flash on undo/redo
-  const triggerUndoRedoFlash = useCallback(() => {
-    setShowUndoRedoFlash(true);
-    setTimeout(() => setShowUndoRedoFlash(false), 400);
-  }, []);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger shortcuts when typing in input/textarea fields
-      const target = e.target as HTMLElement;
-      const isInputField = target.tagName === 'INPUT' ||
-                          target.tagName === 'TEXTAREA' ||
-                          target.isContentEditable;
-
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key) {
-          case 'z':
-            e.preventDefault();
-            if (e.shiftKey) {
-              redo();
-              triggerUndoRedoFlash();
-            } else {
-              undo();
-              triggerUndoRedoFlash();
-            }
-            break;
-          case 'y':
-            e.preventDefault();
-            redo();
-            triggerUndoRedoFlash();
-            break;
-          case 'c':
-            // Allow Ctrl+C in input fields
-            if (!isInputField) {
-              e.preventDefault();
-              copySelectedObjects();
-            }
-            break;
-          case 'v':
-            // Allow Ctrl+V in input fields
-            if (!isInputField) {
-              e.preventDefault();
-              pasteObjects();
-            }
-            break;
-        }
-      } else {
-        // Don't process single-key shortcuts when typing in input fields
-        if (isInputField) return;
-
-        switch (e.key) {
-          case 'Escape':
-            setEditorState(prev => ({ ...prev, selectedTileType: null }));
-            break;
-          case 'Delete':
-            e.preventDefault();
-            deleteSelectedObjects();
-            break;
-          case 'v':
-            handleToolChange('select');
-            break;
-          case 'm':
-            handleToolChange('multiselect');
-            break;
-          case 'h':
-            handleToolChange('move');
-            break;
-          case 'l':
-            handleToolChange('line');
-            break;
-          case 'r':
-            handleToolChange('rectangle');
-            break;
-          case 'k':
-            handleToolChange('link');
-            break;
-          case 'p':
-            setShowPropertiesPanel(prev => !prev);
-            break;
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, copySelectedObjects, pasteObjects, deleteSelectedObjects, handleToolChange, setEditorState, triggerUndoRedoFlash]);
-
-  if (!currentLevel) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>;
-  }
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
-      {/* Top Toolbar */}
-      <header className="bg-roblox-gradient border-b border-border flex items-center justify-between px-4 py-2 h-14 shadow-lg">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-            <i className="fas fa-cube icon-hover"></i>
-            Roblox Level Designer
-          </h1>
-
-          {/* File Operations */}
-          <div className="flex items-center gap-1 border-l border-white/20 pl-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-2 text-white hover:bg-white/10"
-                >
-                  <i className="fas fa-file"></i>
-                  File
-                  <i className="fas fa-chevron-down text-xs"></i>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem onClick={() => createNewLevel()} data-testid="button-new-level">
-                  <i className="fas fa-file w-4"></i>
-                  New Level
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowImportModal(true)} data-testid="button-import-json">
-                  <i className="fas fa-folder-open w-4"></i>
-                  Import JSON
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowExportModal(true)} data-testid="button-export-json">
-                  <i className="fas fa-download w-4"></i>
-                  Export JSON
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportPNG} data-testid="button-export-png">
-                  <i className="fas fa-image w-4"></i>
-                  Export PNG
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Undo/Redo */}
-          <div className="flex items-center gap-1 border-l border-white/20 pl-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                undo();
-                triggerUndoRedoFlash();
-              }}
-              disabled={historyIndex <= 0}
-              title="Undo (Ctrl+Z)"
-              className="text-white hover:bg-white/10 disabled:opacity-50 disabled:text-white/50"
-              data-testid="button-undo"
-            >
-              <i className="fas fa-undo"></i>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                redo();
-                triggerUndoRedoFlash();
-              }}
-              disabled={historyIndex >= history.length - 1}
-              title="Redo (Ctrl+Y)"
-              className="text-white hover:bg-white/10 disabled:opacity-50 disabled:text-white/50"
-              data-testid="button-redo"
-            >
-              <i className="fas fa-redo"></i>
-            </Button>
-          </div>
-
-          {/* Edit Tools */}
-          <div className="flex items-center gap-1 border-l border-white/20 pl-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copySelectedObjects}
-              title="Copy (Ctrl+C)"
-              className="text-white hover:bg-white/10"
-              data-testid="button-copy"
-            >
-              <i className="fas fa-copy"></i>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={pasteObjects}
-              title="Paste (Ctrl+V)"
-              className="text-white hover:bg-white/10"
-              data-testid="button-paste"
-            >
-              <i className="fas fa-paste"></i>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={deleteSelectedObjects}
-              title="Delete (Del)"
-              className="text-white hover:bg-white/10"
-              data-testid="button-delete"
-            >
-              <i className="fas fa-trash"></i>
-            </Button>
-          </div>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateRows: '56px 40px 1fr 32px',
+        height: '100vh',
+        width: '100vw',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
+        background: '#1a1a1a',
+        color: '#e0e0e0',
+        overflow: 'hidden',
+      }}
+    >
+      {/* HEADER BAR */}
+      <header
+        style={{
+          background: 'linear-gradient(90deg, #e74c3c 0%, #8e44ad 50%, #3498db 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+          zIndex: 100,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px', fontWeight: 'bold', color: 'white', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
+          <span>🎮</span>
+          <span>Level Editor</span>
         </div>
 
-        {/* Status Bar */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
-            <i
-              className={`fas fa-save transition-colors duration-300 ${
-                hasUnsavedChanges ? 'text-orange-500' : 'text-green-500'
-              }`}
-            ></i>
-            <span className="text-white font-medium">
-              {hasUnsavedChanges ? 'Unsaved' : 'Saved'}
-            </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '6px', color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', backdropFilter: 'blur(10px)' }}>New Level</button>
+          <button style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '6px', color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', backdropFilter: 'blur(10px)' }}>Import</button>
+          <button style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '6px', color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', backdropFilter: 'blur(10px)' }}>Export</button>
+          <button style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '6px', color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', backdropFilter: 'blur(10px)' }}>Save</button>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'white', fontSize: '13px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(255, 255, 255, 0.15)', borderRadius: '4px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2ecc71' }}></div>
+            <span>Saved</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
-            <i className="fas fa-cubes text-blue-400"></i>
-            <span className="text-white">
-              {currentLevel.tiles.length + currentLevel.objects.length + currentLevel.spawnPoints.length} objects
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(255, 255, 255, 0.15)', borderRadius: '4px' }}>
+            <span>42 Objects</span>
           </div>
         </div>
       </header>
 
-      {/* Level Tabs */}
-      <LevelTabs
-        levels={levels}
-        currentLevelIndex={currentLevelIndex}
-        onLevelSelect={setCurrentLevelIndex}
-        onLevelClose={handleLevelClose}
-        onNewLevel={() => createNewLevel()}
-      />
-
-      {/* Main Workspace */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Tile Palette */}
-        <TilePalette 
-          selectedTileType={editorState.selectedTileType} 
-          onTileSelect={handleTileSelect} 
-        />
-
-        {/* Center Canvas */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <Toolbar
-            editorState={editorState}
-            onToolChange={handleToolChange}
-            onStateChange={handleStateChange}
-            onRotateLeft={handleRotateLeft}
-            onRotateRight={handleRotateRight}
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            onZoomReset={handleZoomReset}
-            showPropertiesPanel={showPropertiesPanel}
-            onTogglePropertiesPanel={() => setShowPropertiesPanel(prev => !prev)}
-          />
-
-          <div className="flex-1 flex overflow-hidden">
-            <div
-              className="flex-1 relative"
-              style={{
-                background: `
-                  repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px),
-                  repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px)
-                `,
-                backgroundSize: '20px 20px'
-              }}
-            >
-              <Canvas
-                levelData={currentLevel}
-                editorState={editorState}
-                onMouseMove={handleMouseMove}
-                onCanvasClick={handleCanvasClick}
-                onTilePlaced={handleTilePlaced}
-                onDrawingSessionEnd={handleDrawingSessionEnd}
-                onZoom={handleWheelZoom}
-              />
-              {showUndoRedoFlash && <div className="undo-redo-flash" />}
-            </div>
-
-            {/* Properties Panel - below toolbar, right of canvas */}
-            {showPropertiesPanel && (
-              <PropertiesPanel
-                levelData={currentLevel}
-                editorState={editorState}
-                onLevelUpdate={updateCurrentLevel}
-                onDuplicateLevel={() => duplicateLevel()}
-                onClose={() => setShowPropertiesPanel(false)}
-              />
-            )}
-          </div>
-        </main>
+      {/* LEVEL TABS BAR */}
+      <div
+        style={{
+          background: '#252525',
+          display: 'flex',
+          alignItems: 'center',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          borderBottom: '1px solid #333',
+          padding: '0 8px',
+          gap: '4px',
+        }}
+      >
+        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#1a1a1a', borderRadius: '6px 6px 0 0', fontSize: '13px', whiteSpace: 'nowrap', border: '1px solid #555', borderBottom: 'none', color: '#fff', cursor: 'pointer' }}>
+          <span>Level 1</span>
+          <span style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px', fontSize: '16px', lineHeight: 1 }}>×</span>
+        </button>
+        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#2a2a2a', borderRadius: '6px 6px 0 0', fontSize: '13px', whiteSpace: 'nowrap', border: '1px solid transparent', borderBottom: 'none', cursor: 'pointer', color: '#e0e0e0' }}>
+          <span>Level 2</span>
+          <span style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px', fontSize: '16px', lineHeight: 1 }}>×</span>
+        </button>
+        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#2a2a2a', borderRadius: '6px 6px 0 0', fontSize: '13px', whiteSpace: 'nowrap', border: '1px solid transparent', borderBottom: 'none', cursor: 'pointer', color: '#e0e0e0' }}>
+          <span>Test Arena</span>
+          <span style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px', fontSize: '16px', lineHeight: 1 }}>×</span>
+        </button>
+        <button style={{ padding: '8px 16px', color: '#888', fontSize: '13px', cursor: 'pointer', border: 'none', background: 'none', flexShrink: 0 }}>+ New Level</button>
       </div>
 
-      {/* Status Bar */}
-      <footer className="bg-card border-t border-border px-4 py-2 flex items-center justify-between text-xs h-8">
-        <div className="flex items-center gap-4 text-muted-foreground">
-          <span>Objects: <span data-testid="object-count">
-            {currentLevel.tiles.length + currentLevel.objects.length + currentLevel.spawnPoints.length}
-          </span></span>
-          <span>|</span>
-          <span>Canvas: <span data-testid="canvas-size">
-            {currentLevel.metadata.dimensions.width}×{currentLevel.metadata.dimensions.height}
-          </span></span>
-          <span>|</span>
-          <span>Zoom: <span data-testid="zoom-level">{Math.round(editorState.zoom * 100)}%</span></span>
+      {/* MAIN CONTENT AREA (3 columns) */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: propertiesPanelCollapsed ? '250px 1fr 0px' : '250px 1fr 300px',
+          overflow: 'hidden',
+          background: '#1a1a1a',
+        }}
+      >
+        {/* LEFT SIDEBAR: Tile Palette */}
+        <aside style={{ background: '#222', borderRight: '1px solid #333', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', background: '#2a2a2a', borderBottom: '1px solid #333', fontWeight: 600, fontSize: '14px' }}>Tile Palette</div>
+          <div
+            style={{
+              overflowY: 'auto',
+              padding: '12px',
+              flex: 1,
+            }}
+          >
+            {/* Platforms Section */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>Platforms</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                <div style={{ aspectRatio: '1', background: '#2c3e50', border: '2px solid #3498db', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>⬜</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Basic</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🧱</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Stone</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🌿</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Grass</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>❄</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Ice</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🔥</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Lava</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🔩</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Metal</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Objects Section */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>Objects</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🔘</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Button</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🚪</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Door</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🎛</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Lever</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🌀</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Teleport</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🌲</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Tree</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🪨</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Rock</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🪙</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Coin</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🏁</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Checkpoint</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Spawn Points Section */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>Spawn Points</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>👤</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Player</div>
+                </div>
+                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>👾</div>
+                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Enemy</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* CENTER: Canvas Area */}
+        <main style={{ display: 'flex', flexDirection: 'column', background: '#1a1a1a', overflow: 'hidden' }}>
+          {/* Canvas Toolbar */}
+          <div style={{ height: '48px', background: '#252525', borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', padding: '0 12px', gap: '8px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333' }}>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3498db', borderRadius: '4px', fontSize: '16px', border: '1px solid #2980b9', cursor: 'pointer', color: '#e0e0e0' }}>⬜</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>✥</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>∕</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>■</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>🔗</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333' }}>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>⬛</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>☰</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333', alignItems: 'center' }}>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>-</button>
+              <div style={{ padding: '0 12px', fontSize: '13px', color: '#aaa', minWidth: '60px', textAlign: 'center' }}>100%</div>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>+</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↺</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '4px', padding: '0 8px' }}>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↶</button>
+              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↷</button>
+            </div>
+          </div>
+
+          {/* SCROLLABLE Canvas Wrapper - CRITICAL FOR SCROLLING */}
+          <div
+            className="scrollbar-custom"
+            style={{
+              flex: 1,
+              overflow: 'auto',
+              background: '#1a1a1a',
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                width: '1920px',
+                height: '960px',
+                padding: '20px',
+                display: 'inline-block',
+                minWidth: '100%',
+                minHeight: '100%',
+              }}
+            >
+              <canvas
+                ref={canvasRef}
+                width={1920}
+                height={960}
+                style={{
+                  display: 'block',
+                  width: '1920px',
+                  height: '960px',
+                  background: '#5C94FC',
+                  border: '2px solid #333',
+                  borderRadius: '4px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+                  backgroundSize: '32px 32px',
+                }}
+              />
+            </div>
+
+            {/* Canvas Overlay Info Panel */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '68px',
+                left: '20px',
+                background: 'rgba(0, 0, 0, 0.8)',
+                padding: '12px 16px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontFamily: '"Courier New", monospace',
+                color: '#0f0',
+                pointerEvents: 'none',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              <div style={{ marginBottom: '4px' }}>Mouse: (0, 0) | Grid: (0, 0)</div>
+              <div style={{ marginBottom: '4px' }}>Selected: 3 objects</div>
+              <div style={{ marginBottom: '4px' }}>Tool: Select</div>
+            </div>
+          </div>
+        </main>
+
+        {/* RIGHT SIDEBAR: Properties Panel (Collapsible) */}
+        {!propertiesPanelCollapsed && (
+          <aside style={{ background: '#222', borderLeft: '1px solid #333', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'all 0.3s ease' }}>
+            <div style={{ padding: '12px 16px', background: '#2a2a2a', borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 600, fontSize: '14px' }}>
+              <span>Properties</span>
+              <button
+                onClick={() => setPropertiesPanelCollapsed(true)}
+                style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', cursor: 'pointer', border: 'none', background: 'none', color: '#e0e0e0' }}
+              >
+                ▶
+              </button>
+            </div>
+
+            <div
+              style={{
+                overflowY: 'auto',
+                padding: '16px',
+                flex: 1,
+              }}
+            >
+              {/* Level Properties */}
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>Level Settings</div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Level Name</label>
+                  <input type="text" defaultValue="Level 1" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Background Color</label>
+                  <input type="color" defaultValue="#5C94FC" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Grid Size</label>
+                  <input type="number" defaultValue="32" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                  <input type="checkbox" id="show-grid" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <label htmlFor="show-grid" style={{ color: '#aaa', fontSize: '13px' }}>Show Grid</label>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                  <input type="checkbox" id="snap-to-grid" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <label htmlFor="snap-to-grid" style={{ color: '#aaa', fontSize: '13px' }}>Snap to Grid</label>
+                </div>
+              </div>
+
+              {/* Object Properties */}
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>Selected Object</div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Type</label>
+                  <input type="text" defaultValue="Platform" readOnly style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Position X</label>
+                  <input type="number" defaultValue="320" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Position Y</label>
+                  <input type="number" defaultValue="480" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Width</label>
+                  <input type="number" defaultValue="256" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Height</label>
+                  <input type="number" defaultValue="32" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                  <input type="checkbox" id="has-collision" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <label htmlFor="has-collision" style={{ color: '#aaa', fontSize: '13px' }}>Has Collision</label>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                  <input type="checkbox" id="is-visible" defaultChecked style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <label htmlFor="is-visible" style={{ color: '#aaa', fontSize: '13px' }}>Visible</label>
+                </div>
+              </div>
+
+              {/* Platform-Specific Properties */}
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '12px', fontWeight: 600 }}>Platform Properties</div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Material</label>
+                  <select style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }}>
+                    <option>Basic</option>
+                    <option>Stone</option>
+                    <option>Grass</option>
+                    <option>Ice</option>
+                    <option>Lava</option>
+                    <option>Metal</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', color: '#aaa', marginBottom: '6px', display: 'block' }}>Friction</label>
+                  <input type="range" min="0" max="100" defaultValue="50" style={{ width: '100%', padding: '8px 12px', background: '#2a2a2a', border: '1px solid #333', borderRadius: '4px', color: '#e0e0e0', fontSize: '13px', fontFamily: 'inherit' }} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                  <input type="checkbox" id="is-one-way" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <label htmlFor="is-one-way" style={{ color: '#aaa', fontSize: '13px' }}>One-Way Platform</label>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                  <input type="checkbox" id="is-breakable" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <label htmlFor="is-breakable" style={{ color: '#aaa', fontSize: '13px' }}>Breakable</label>
+                </div>
+              </div>
+            </div>
+          </aside>
+        )}
+      </div>
+
+      {/* Collapse toggle button (when properties panel is collapsed) */}
+      {propertiesPanelCollapsed && (
+        <button
+          onClick={() => setPropertiesPanelCollapsed(false)}
+          style={{
+            position: 'fixed',
+            right: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '32px',
+            height: '64px',
+            background: '#2a2a2a',
+            border: '1px solid #333',
+            borderRight: 'none',
+            borderRadius: '6px 0 0 6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 50,
+            color: '#e0e0e0',
+          }}
+        >
+          ◀
+        </button>
+      )}
+
+      {/* BOTTOM STATUS BAR */}
+      <footer style={{ background: '#252525', borderTop: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', fontSize: '12px', color: '#aaa' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ color: '#666' }}>Objects:</span>
+            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>42</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ color: '#666' }}>Tiles:</span>
+            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>156</span>
+          </div>
         </div>
-        <div className="flex items-center gap-4 text-muted-foreground">
-          <span>History: <span data-testid="history-state">{historyIndex + 1}/{history.length}</span></span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ color: '#666' }}>Canvas:</span>
+            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>1920 × 960 px</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ color: '#666' }}>Grid:</span>
+            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>60 × 30 tiles</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ color: '#666' }}>Zoom:</span>
+            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>100%</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ color: '#666' }}>History:</span>
+            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>5/10</span>
+          </div>
         </div>
       </footer>
-
-      {/* Modals */}
-      <ImportModal
-        isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onImport={handleImportLevel}
-      />
-      
-      <ExportModal
-        isOpen={showExportModal}
-        onClose={() => setShowExportModal(false)}
-        levelData={currentLevel}
-      />
     </div>
   );
 }

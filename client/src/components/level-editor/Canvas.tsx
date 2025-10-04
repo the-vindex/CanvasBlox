@@ -1,14 +1,13 @@
 import { useCanvas } from '@/hooks/useCanvas';
-import { LevelData, EditorState, Position } from '@/types/level';
-import { cn } from '@/lib/utils';
+import { LevelData, EditorState } from '@/types/level';
 import { TILE_SIZE } from '@/constants/editor';
 
 interface CanvasProps {
   levelData: LevelData;
   editorState: EditorState;
-  onMouseMove: (position: Position) => void;
-  onCanvasClick: (position: Position, event: MouseEvent) => void;
-  onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
+  onMouseMove: (position: any) => void;
+  onCanvasClick: (position: any, event: MouseEvent) => void;
+  onTilePlaced: (position: any, tileType: string, isDrawing?: boolean) => void;
   onDrawingSessionEnd?: () => void;
   onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
   className?: string;
@@ -38,47 +37,81 @@ export function Canvas({
   const canvasWidth = levelData.metadata.dimensions.width * TILE_SIZE;
   const canvasHeight = levelData.metadata.dimensions.height * TILE_SIZE;
 
-  // Calculate parallax background position (moves at 50% speed of pan)
-  const parallaxX = editorState.pan.x * 0.5;
-  const parallaxY = editorState.pan.y * 0.5;
-
   return (
     <div
       ref={wrapperRef}
-      className={cn("flex-1 relative overflow-auto canvas-wrapper scrollbar-custom", className)}
+      className="scrollbar-custom"
       style={{
-        minHeight: canvasHeight,
-        backgroundPosition: `${parallaxX}px ${parallaxY}px`
+        width: '100%',
+        height: '100%',
+        overflow: 'auto',
+        background: '#1a1a1a',
+        position: 'relative'
       }}
     >
-      <canvas
-        id="levelCanvas"
-        ref={canvasRef}
-        width={canvasWidth}
-        height={canvasHeight}
-        className="absolute top-0 left-0 cursor-crosshair border-2 border-primary/30"
-        style={{ imageRendering: 'pixelated' }}
-        data-testid="level-canvas"
-      />
+      {/* Inner wrapper - sized to canvas dimensions, creates scrollable content */}
+      <div
+        style={{
+          width: canvasWidth,
+          height: canvasHeight,
+          padding: '20px',
+          display: 'inline-block',
+          minWidth: '100%',
+          minHeight: '100%'
+        }}
+      >
+        <canvas
+          id="levelCanvas"
+          ref={canvasRef}
+          width={canvasWidth}
+          height={canvasHeight}
+          style={{
+            display: 'block',
+            width: canvasWidth,
+            height: canvasHeight,
+            background: '#5C94FC',
+            border: '2px solid #333',
+            borderRadius: '4px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            imageRendering: 'pixelated'
+          }}
+        />
 
-      {/* Scanlines Overlay */}
-      {editorState.showScanlines && (
-        <div className="scanlines-overlay" />
-      )}
+        {/* Scanlines Overlay - absolutely positioned relative to wrapper */}
+        {editorState.showScanlines && (
+          <div
+            className="scanlines-overlay"
+            style={{
+              position: 'absolute',
+              top: '20px',
+              left: '20px',
+              right: '20px',
+              bottom: '20px',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
 
-      {/* Canvas Info Overlay */}
-      <div className="absolute top-4 left-4 bg-black/30 backdrop-blur-sm border border-white/20 rounded px-3 py-2 text-xs space-y-1 z-10 text-white">
-        <div className="flex items-center gap-2">
-          <span className="text-white/70">Mouse:</span>
-          <span data-testid="mouse-position">
-            X: {editorState.mousePosition.x}, Y: {editorState.mousePosition.y}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-white/70">Selected:</span>
-          <span data-testid="selected-count">
-            {editorState.selectedObjects.length} objects
-          </span>
+        {/* Info Overlay - absolutely positioned relative to wrapper */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '36px',
+            left: '36px',
+            background: 'rgba(0, 0, 0, 0.8)',
+            padding: '12px 16px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontFamily: "'Courier New', monospace",
+            color: '#0f0',
+            pointerEvents: 'none',
+            backdropFilter: 'blur(4px)'
+          }}
+        >
+          <div style={{ marginBottom: '4px' }}>
+            Mouse: X: {editorState.mousePosition.x}, Y: {editorState.mousePosition.y}
+          </div>
+          <div>Selected: {editorState.selectedObjects.length} objects</div>
         </div>
       </div>
     </div>

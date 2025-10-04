@@ -164,21 +164,32 @@
 }
 
 .scrollbar-custom::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 14px;
+  height: 14px;
 }
 
 .scrollbar-custom::-webkit-scrollbar-track {
   background: hsl(0 0% 13%);
+  border: 1px solid hsl(0 0% 20%);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 30%);
-  border-radius: 4px;
+  background: hsl(0 0% 45%);
+  border-radius: 7px;
+  border: 2px solid hsl(0 0% 13%);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 40%);
+  background: hsl(217 91% 60%);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:active {
+  background: hsl(217 91% 70%);
+}
+
+.scrollbar-custom::-webkit-scrollbar-corner {
+  background: hsl(0 0% 13%);
+  border: 1px solid hsl(0 0% 20%);
 }
 
 .modal-overlay {
