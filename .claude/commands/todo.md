@@ -1,6 +1,6 @@
 # /todo
 
-Add a todo item to @VISUAL_ENHANCEMENTS.md without implementing it.
+Add a todo item to @TASKS.md without implementing it.
 
 ## Usage
 
@@ -18,7 +18,7 @@ Add a todo item to @VISUAL_ENHANCEMENTS.md without implementing it.
 
 When this command is invoked:
 
-1. Read the VISUAL_ENHANCEMENTS.md file
+1. Read the TASKS.md file
 2. Find the appropriate chapter for the todo item (ask the user if unclear)
 3. **IMPORTANT:** Check the chapter's status - DO NOT add tasks to completed chapters (marked with ✅ Completed)
 4. If the suggested chapter is completed, find the next appropriate non-completed chapter or ask the user

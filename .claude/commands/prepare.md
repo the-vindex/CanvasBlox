@@ -17,7 +17,7 @@ This command reads all the key files needed to understand the CanvasBlox project
 When this command is invoked:
 
 1. **Read project documentation**:
-   - `VISUAL_ENHANCEMENTS.md` - Current roadmap and implementation status
+   - `TASKS.md` - Current roadmap and implementation status
    - `CLAUDE.md` - Project architecture and development guidelines
    - `replit.md` - Detailed architecture and system design (Replit-specific)
    - `.replit` - Replit configuration
@@ -45,7 +45,7 @@ When this command is invoked:
    - `client/src/index.css` - Global CSS and custom classes
 
 7. **Provide summary**:
-   - Current chapter status from VISUAL_ENHANCEMENTS.md
+   - Current chapter status from TASKS.md
    - Key architectural patterns identified
    - Important constants and configuration values
    - Brief overview of state management flow
