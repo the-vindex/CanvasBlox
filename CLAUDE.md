@@ -97,7 +97,13 @@ e2e/                                    # End-to-end tests
 1. Write failing test first (BOTH unit AND e2e)
 2. Implement feature to make test pass
 3. Verify all tests pass (`npm test && npm run test:e2e`)
-4. Commit code + tests together
+4. **Review test quality:** Run `/review-tests [scope]` to check for:
+   - Tests outside the feature's scope
+   - Implementation coupling instead of behavior testing
+   - Redundant or duplicate test coverage
+   - Missing test coverage
+5. Refactor tests based on review feedback
+6. Commit code + tests together
 
 **⚠️ IMPORTANT:** When implementing features, write E2E tests as you build, not after!
 
