@@ -104,6 +104,7 @@ export function useCanvas({
   const handleWheel = useCallback((e: WheelEvent) => {
     // Check for Ctrl/Cmd key for zoom
     if (e.ctrlKey || e.metaKey) {
+      // Only prevent default when zooming
       e.preventDefault();
 
       if (!onZoom) return;
@@ -121,6 +122,7 @@ export function useCanvas({
 
       onZoom(delta, mouseX, mouseY);
     }
+    // If no Ctrl/Cmd, allow normal scroll behavior (no preventDefault)
   }, [onZoom]);
 
   useEffect(() => {
