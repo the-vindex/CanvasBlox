@@ -353,4 +353,147 @@ test.describe('Level Editor', () => {
     // Verify the value updated
     await expect(colorTextInput).toHaveValue('#FF5733');
   });
+
+  test('Step 6: should render Toolbar component', async ({ page }) => {
+    const toolbar = page.getByTestId('toolbar');
+    await expect(toolbar).toBeVisible();
+  });
+
+  test('Step 6: should have selection tools in toolbar', async ({ page }) => {
+    // Check for selection tools
+    await expect(page.getByTestId('tool-select')).toBeVisible();
+    await expect(page.getByTestId('tool-multiselect')).toBeVisible();
+    await expect(page.getByTestId('tool-move')).toBeVisible();
+  });
+
+  test('Step 6: should have drawing tools in toolbar', async ({ page }) => {
+    // Check for drawing tools
+    await expect(page.getByTestId('tool-line')).toBeVisible();
+    await expect(page.getByTestId('tool-rectangle')).toBeVisible();
+  });
+
+  test('Step 6: should have linking tools in toolbar', async ({ page }) => {
+    await expect(page.getByTestId('tool-link')).toBeVisible();
+  });
+
+  test('Step 6: should have rotation controls in toolbar', async ({ page }) => {
+    await expect(page.getByTestId('button-rotate-left')).toBeVisible();
+    await expect(page.getByTestId('button-rotate-right')).toBeVisible();
+    await expect(page.getByTestId('rotation-display')).toBeVisible();
+  });
+
+  test('Step 6: should have zoom controls in toolbar', async ({ page }) => {
+    await expect(page.getByTestId('button-zoom-in')).toBeVisible();
+    await expect(page.getByTestId('button-zoom-out')).toBeVisible();
+    await expect(page.getByTestId('button-reset-zoom')).toBeVisible();
+    await expect(page.getByTestId('zoom-level')).toBeVisible();
+  });
+
+  test('Step 6: should display current zoom level in toolbar', async ({ page }) => {
+    const zoomLevel = page.getByTestId('zoom-level');
+    await expect(zoomLevel).toHaveText('100%');
+  });
+
+  test('Step 6: should have grid and scanlines toggles', async ({ page }) => {
+    await expect(page.getByTestId('switch-show-grid')).toBeVisible();
+    await expect(page.getByTestId('switch-show-scanlines')).toBeVisible();
+  });
+
+  test('Step 6: should have properties panel toggle button', async ({ page }) => {
+    const toggleButton = page.getByTestId('button-toggle-properties');
+    await expect(toggleButton).toBeVisible();
+  });
+
+  test('Step 6: should toggle properties panel when button clicked', async ({ page }) => {
+    const toggleButton = page.getByTestId('button-toggle-properties');
+    const propertiesPanel = page.getByTestId('properties-panel');
+
+    // Initially visible
+    await expect(propertiesPanel).toBeVisible();
+
+    // Click to hide
+    await toggleButton.click();
+    await expect(propertiesPanel).not.toBeVisible();
+
+    // Click to show again
+    await toggleButton.click();
+    await expect(propertiesPanel).toBeVisible();
+  });
+
+  test('Step 6: should select tool when tool button clicked', async ({ page }) => {
+    const selectTool = page.getByTestId('tool-select');
+    const lineTool = page.getByTestId('tool-line');
+
+    // Click select tool
+    await selectTool.click();
+    // Tool should be pressed
+    await expect(selectTool).toHaveAttribute('aria-pressed', 'true');
+
+    // Click line tool
+    await lineTool.click();
+    // Line tool should be pressed
+    await expect(lineTool).toHaveAttribute('aria-pressed', 'true');
+    // Select tool should no longer be pressed
+    await expect(selectTool).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('Step 6: should increase zoom when zoom in button clicked', async ({ page }) => {
+    const zoomInButton = page.getByTestId('button-zoom-in');
+    const zoomLevel = page.getByTestId('zoom-level');
+
+    // Initial zoom
+    await expect(zoomLevel).toHaveText('100%');
+
+    // Click zoom in
+    await zoomInButton.click();
+
+    // Zoom should have increased
+    const zoomText = await zoomLevel.textContent();
+    const zoomValue = parseInt(zoomText?.replace('%', '') || '0');
+    expect(zoomValue).toBeGreaterThan(100);
+  });
+
+  test('Step 6: should decrease zoom when zoom out button clicked', async ({ page }) => {
+    const zoomInButton = page.getByTestId('button-zoom-in');
+    const zoomOutButton = page.getByTestId('button-zoom-out');
+    const zoomLevel = page.getByTestId('zoom-level');
+
+    // Zoom in first
+    await zoomInButton.click();
+    await page.waitForTimeout(50);
+
+    const zoomedInText = await zoomLevel.textContent();
+    const zoomedInValue = parseInt(zoomedInText?.replace('%', '') || '0');
+
+    // Zoom out
+    await zoomOutButton.click();
+    await page.waitForTimeout(50);
+
+    const zoomedOutText = await zoomLevel.textContent();
+    const zoomedOutValue = parseInt(zoomedOutText?.replace('%', '') || '0');
+
+    expect(zoomedOutValue).toBeLessThan(zoomedInValue);
+  });
+
+  test('Step 6: should reset zoom when reset button clicked', async ({ page }) => {
+    const zoomInButton = page.getByTestId('button-zoom-in');
+    const resetButton = page.getByTestId('button-reset-zoom');
+    const zoomLevel = page.getByTestId('zoom-level');
+
+    // Zoom in first
+    await zoomInButton.click();
+    await page.waitForTimeout(50);
+
+    // Verify zoomed in
+    const zoomedText = await zoomLevel.textContent();
+    const zoomedValue = parseInt(zoomedText?.replace('%', '') || '0');
+    expect(zoomedValue).toBeGreaterThan(100);
+
+    // Reset zoom
+    await resetButton.click();
+    await page.waitForTimeout(50);
+
+    // Should be back to 100%
+    await expect(zoomLevel).toHaveText('100%');
+  });
 });

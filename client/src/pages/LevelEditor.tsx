@@ -3,7 +3,8 @@ import { useLevelEditor } from '@/hooks/useLevelEditor';
 import { Canvas } from '@/components/level-editor/Canvas';
 import { TilePalette } from '@/components/level-editor/TilePalette';
 import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
-import { Position } from '@/types/level';
+import { Toolbar } from '@/components/level-editor/Toolbar';
+import { Position, EditorState } from '@/types/level';
 
 export default function LevelEditor() {
   const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
@@ -94,6 +95,50 @@ export default function LevelEditor() {
       ...prev,
       selectedTileType: tileType,
       selectedTool: null
+    }));
+  }, [setEditorState]);
+
+  // Toolbar handlers
+  const handleToolChange = useCallback((tool: EditorState['selectedTool']) => {
+    setEditorState(prev => ({
+      ...prev,
+      selectedTool: tool,
+      selectedTileType: null
+    }));
+  }, [setEditorState]);
+
+  const handleStateChange = useCallback((updates: Partial<EditorState>) => {
+    setEditorState(prev => ({ ...prev, ...updates }));
+  }, [setEditorState]);
+
+  const handleRotateLeft = useCallback(() => {
+    // TODO: Implement rotation left
+    console.log('Rotate left');
+  }, []);
+
+  const handleRotateRight = useCallback(() => {
+    // TODO: Implement rotation right
+    console.log('Rotate right');
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setEditorState(prev => ({
+      ...prev,
+      zoom: Math.min(prev.zoom + 0.1, 5)
+    }));
+  }, [setEditorState]);
+
+  const handleZoomOut = useCallback(() => {
+    setEditorState(prev => ({
+      ...prev,
+      zoom: Math.max(prev.zoom - 0.1, 0.1)
+    }));
+  }, [setEditorState]);
+
+  const handleZoomReset = useCallback(() => {
+    setEditorState(prev => ({
+      ...prev,
+      zoom: 1.0
     }));
   }, [setEditorState]);
 
@@ -195,33 +240,19 @@ export default function LevelEditor() {
 
         {/* CENTER: Canvas Area */}
         <main style={{ display: 'flex', flexDirection: 'column', background: '#1a1a1a', overflow: 'hidden' }}>
-          {/* Canvas Toolbar */}
-          <div style={{ height: '48px', background: '#252525', borderBottom: '1px solid #333', display: 'flex', alignItems: 'center', padding: '0 12px', gap: '8px', flexShrink: 0 }}>
-            <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333' }}>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#3498db', borderRadius: '4px', fontSize: '16px', border: '1px solid #2980b9', cursor: 'pointer', color: '#e0e0e0' }}>⬜</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>✥</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>∕</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>■</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>🔗</button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333' }}>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>⬛</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>☰</button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333', alignItems: 'center' }}>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>-</button>
-              <div data-testid="toolbar-zoom-display" style={{ padding: '0 12px', fontSize: '13px', color: '#aaa', minWidth: '60px', textAlign: 'center' }}>{Math.round(editorState.zoom * 100)}%</div>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>+</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↺</button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '4px', padding: '0 8px' }}>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↶</button>
-              <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↷</button>
-            </div>
-          </div>
+          {/* Toolbar Component */}
+          <Toolbar
+            editorState={editorState}
+            onToolChange={handleToolChange}
+            onStateChange={handleStateChange}
+            onRotateLeft={handleRotateLeft}
+            onRotateRight={handleRotateRight}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onZoomReset={handleZoomReset}
+            showPropertiesPanel={showPropertiesPanel}
+            onTogglePropertiesPanel={() => setShowPropertiesPanel(prev => !prev)}
+          />
 
           {/* Canvas Component with CanvasRenderer */}
           <div style={{ flex: 1, overflow: 'hidden' }}>

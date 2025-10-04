@@ -2,6 +2,8 @@
 
 Implement the next step from the Feature Restoration Plan.
 
+mode: plan
+
 ## Usage
 
 ```

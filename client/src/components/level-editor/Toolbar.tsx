@@ -99,6 +99,7 @@ export function Toolbar({
         onClick={() => onToolChange(tool)}
         title={title}
         data-testid={testId}
+        aria-pressed={isActive ? "true" : "false"}
       >
         <Icon className="w-4 h-4" />
       </Button>
