@@ -1,153 +1,168 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { CanvasRenderer } from '@/utils/canvasRenderer';
-import { LevelData, EditorState, Position } from '@/types/level';
+import { useCallback, useEffect, useRef } from 'react';
 import { TILE_SIZE } from '@/constants/editor';
+import type { EditorState, LevelData, Position } from '@/types/level';
+import { CanvasRenderer } from '@/utils/canvasRenderer';
 
 interface UseCanvasProps {
-  levelData: LevelData;
-  editorState: EditorState;
-  onMouseMove: (position: Position) => void;
-  onCanvasClick: (position: Position, event: MouseEvent) => void;
-  onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
-  onDrawingSessionEnd?: () => void;
-  onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
+    levelData: LevelData;
+    editorState: EditorState;
+    onMouseMove: (position: Position) => void;
+    onCanvasClick: (position: Position, event: MouseEvent) => void;
+    onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
+    onDrawingSessionEnd?: () => void;
+    onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
 }
 
 export function useCanvas({
-  levelData,
-  editorState,
-  onMouseMove,
-  onCanvasClick,
-  onTilePlaced,
-  onDrawingSessionEnd,
-  onZoom
+    levelData,
+    editorState,
+    onMouseMove,
+    onCanvasClick,
+    onTilePlaced,
+    onDrawingSessionEnd,
+    onZoom,
 }: UseCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<CanvasRenderer | null>(null);
-  const isPaintingRef = useRef(false);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const rendererRef = useRef<CanvasRenderer | null>(null);
+    const isPaintingRef = useRef(false);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-    rendererRef.current = new CanvasRenderer(ctx);
-  }, []);
+        rendererRef.current = new CanvasRenderer(ctx);
+    }, []);
 
-  useEffect(() => {
-    if (rendererRef.current) {
-      rendererRef.current.render(levelData, editorState);
-    }
-  }, [levelData, editorState]);
+    useEffect(() => {
+        if (rendererRef.current) {
+            rendererRef.current.render(levelData, editorState);
+        }
+    }, [levelData, editorState]);
 
-  const getWorldPosition = useCallback((e: MouseEvent): Position => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+    const getWorldPosition = useCallback(
+        (e: MouseEvent): Position => {
+            const canvas = canvasRef.current;
+            if (!canvas) return { x: 0, y: 0 };
 
-    const rect = canvas.getBoundingClientRect();
-    const canvasPos = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
+            const rect = canvas.getBoundingClientRect();
+            const canvasPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+            };
 
-    // Convert pixel position to world pixel coordinates, then to tile indices
-    const worldPixelX = (canvasPos.x - editorState.pan.x) / editorState.zoom;
-    const worldPixelY = (canvasPos.y - editorState.pan.y) / editorState.zoom;
+            // Convert pixel position to world pixel coordinates, then to tile indices
+            const worldPixelX = (canvasPos.x - editorState.pan.x) / editorState.zoom;
+            const worldPixelY = (canvasPos.y - editorState.pan.y) / editorState.zoom;
 
-    return {
-      x: Math.floor(worldPixelX / TILE_SIZE),
-      y: Math.floor(worldPixelY / TILE_SIZE)
-    };
-  }, [editorState.pan, editorState.zoom]);
+            return {
+                x: Math.floor(worldPixelX / TILE_SIZE),
+                y: Math.floor(worldPixelY / TILE_SIZE),
+            };
+        },
+        [editorState.pan, editorState.zoom]
+    );
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    const worldPos = getWorldPosition(e);
-    onMouseMove(worldPos);
+    const handleMouseMove = useCallback(
+        (e: MouseEvent) => {
+            const worldPos = getWorldPosition(e);
+            onMouseMove(worldPos);
 
-    if (isPaintingRef.current && editorState.selectedTileType) {
-      onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
-    }
-  }, [getWorldPosition, onMouseMove, onTilePlaced, editorState.selectedTileType]);
+            if (isPaintingRef.current && editorState.selectedTileType) {
+                onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
+            }
+        },
+        [getWorldPosition, onMouseMove, onTilePlaced, editorState.selectedTileType]
+    );
 
-  const handleMouseDown = useCallback((e: MouseEvent) => {
-    const worldPos = getWorldPosition(e);
+    const handleMouseDown = useCallback(
+        (e: MouseEvent) => {
+            const worldPos = getWorldPosition(e);
 
-    if (editorState.selectedTileType) {
-      isPaintingRef.current = true;
-      onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
-    } else {
-      onCanvasClick(worldPos, e);
-    }
-  }, [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType]);
+            if (editorState.selectedTileType) {
+                isPaintingRef.current = true;
+                onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
+            } else {
+                onCanvasClick(worldPos, e);
+            }
+        },
+        [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType]
+    );
 
-  const handleMouseUp = useCallback(() => {
-    if (isPaintingRef.current) {
-      isPaintingRef.current = false;
-      // End the drawing session
-      if (onDrawingSessionEnd) {
-        onDrawingSessionEnd();
-      }
-    }
-  }, [onDrawingSessionEnd]);
+    const handleMouseUp = useCallback(() => {
+        if (isPaintingRef.current) {
+            isPaintingRef.current = false;
+            // End the drawing session
+            if (onDrawingSessionEnd) {
+                onDrawingSessionEnd();
+            }
+        }
+    }, [onDrawingSessionEnd]);
 
-  const handleClick = useCallback((e: MouseEvent) => {
-    const worldPos = getWorldPosition(e);
+    const handleClick = useCallback(
+        (e: MouseEvent) => {
+            const worldPos = getWorldPosition(e);
 
-    if (!editorState.selectedTileType) {
-      onCanvasClick(worldPos, e);
-    }
-  }, [getWorldPosition, onCanvasClick, editorState.selectedTileType]);
+            if (!editorState.selectedTileType) {
+                onCanvasClick(worldPos, e);
+            }
+        },
+        [getWorldPosition, onCanvasClick, editorState.selectedTileType]
+    );
 
-  const handleWheel = useCallback((e: WheelEvent) => {
-    // Check for Ctrl/Cmd key for zoom
-    if (e.ctrlKey || e.metaKey) {
-      // Only prevent default when zooming
-      e.preventDefault();
+    const handleWheel = useCallback(
+        (e: WheelEvent) => {
+            // Check for Ctrl/Cmd key for zoom
+            if (e.ctrlKey || e.metaKey) {
+                // Only prevent default when zooming
+                e.preventDefault();
 
-      if (!onZoom) return;
+                if (!onZoom) return;
 
-      const wrapper = wrapperRef.current;
-      if (!wrapper) return;
+                const wrapper = wrapperRef.current;
+                if (!wrapper) return;
 
-      const rect = wrapper.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+                const rect = wrapper.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
 
-      // Negative deltaY = scroll up = zoom in
-      // Positive deltaY = scroll down = zoom out
-      const delta = -Math.sign(e.deltaY) * 0.1;
+                // Negative deltaY = scroll up = zoom in
+                // Positive deltaY = scroll down = zoom out
+                const delta = -Math.sign(e.deltaY) * 0.1;
 
-      onZoom(delta, mouseX, mouseY);
-    }
-    // If no Ctrl/Cmd, allow normal scroll behavior (no preventDefault)
-  }, [onZoom]);
+                onZoom(delta, mouseX, mouseY);
+            }
+            // If no Ctrl/Cmd, allow normal scroll behavior (no preventDefault)
+        },
+        [onZoom]
+    );
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const wrapper = wrapperRef.current;
-    if (!canvas || !wrapper) return;
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const wrapper = wrapperRef.current;
+        if (!canvas || !wrapper) return;
 
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mouseup', handleMouseUp);
-    canvas.addEventListener('mouseleave', handleMouseUp);
-    canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseleave', handleMouseUp);
+        canvas.addEventListener('click', handleClick);
 
-    // Attach wheel event to wrapper div instead of canvas
-    wrapper.addEventListener('wheel', handleWheel as any, { passive: false });
+        // Attach wheel event to wrapper div instead of canvas
+        wrapper.addEventListener('wheel', handleWheel as any, { passive: false });
 
-    return () => {
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      canvas.removeEventListener('mouseup', handleMouseUp);
-      canvas.removeEventListener('mouseleave', handleMouseUp);
-      canvas.removeEventListener('click', handleClick);
-      wrapper.removeEventListener('wheel', handleWheel as any);
-    };
-  }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick, handleWheel]);
+        return () => {
+            canvas.removeEventListener('mousemove', handleMouseMove);
+            canvas.removeEventListener('mousedown', handleMouseDown);
+            canvas.removeEventListener('mouseup', handleMouseUp);
+            canvas.removeEventListener('mouseleave', handleMouseUp);
+            canvas.removeEventListener('click', handleClick);
+            wrapper.removeEventListener('wheel', handleWheel as any);
+        };
+    }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick, handleWheel]);
 
-  return { canvasRef, wrapperRef, renderer: rendererRef.current };
+    return { canvasRef, wrapperRef, renderer: rendererRef.current };
 }

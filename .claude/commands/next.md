@@ -21,8 +21,9 @@ When this command is invoked:
    - ✅ Implement feature to make tests pass
    - ✅ Verify all tests pass: `npm test && npm run test:e2e`
    - ✅ **Run `/review-tests [scope]`** to check test quality
-   - ✅ Refactor tests based on review feedback
+   - ✅ **Automatically refactor tests** based on review feedback (don't ask, just do it)
    - ✅ Run tests again to verify refactoring
+   - ✅ **Run linter**: `npm run lint:fix` to fix code style issues
    - ✅ Commit code + tests together
    - ✅ Push to remote: `git push`
 4. **Update** the step's status to: 🧪 Ready for User Testing

@@ -1,130 +1,130 @@
 // Copy and paste this into the browser console to load test data
 
 const testData = [
-  {
-    "levelName": "Test Level - Step 3",
-    "metadata": {
-      "version": "1.0",
-      "createdAt": "2025-10-04T00:00:00.000Z",
-      "author": "Test",
-      "description": "Test level for Step 3 Canvas integration",
-      "dimensions": { "width": 60, "height": 30 },
-      "backgroundColor": "#87CEEB"
+    {
+        levelName: 'Test Level - Step 3',
+        metadata: {
+            version: '1.0',
+            createdAt: '2025-10-04T00:00:00.000Z',
+            author: 'Test',
+            description: 'Test level for Step 3 Canvas integration',
+            dimensions: { width: 60, height: 30 },
+            backgroundColor: '#87CEEB',
+        },
+        tiles: [
+            {
+                id: 'tile-grass-1',
+                type: 'platform-grass',
+                position: { x: 5, y: 25 },
+                dimensions: { width: 10, height: 2 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true, material: 'grass' },
+            },
+            {
+                id: 'tile-stone-1',
+                type: 'platform-stone',
+                position: { x: 20, y: 25 },
+                dimensions: { width: 8, height: 2 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true, material: 'stone' },
+            },
+            {
+                id: 'tile-ice-1',
+                type: 'platform-ice',
+                position: { x: 35, y: 25 },
+                dimensions: { width: 6, height: 2 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true, material: 'ice' },
+            },
+            {
+                id: 'tile-basic-1',
+                type: 'platform-basic',
+                position: { x: 10, y: 20 },
+                dimensions: { width: 4, height: 1 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true },
+            },
+            {
+                id: 'tile-metal-1',
+                type: 'platform-metal',
+                position: { x: 25, y: 18 },
+                dimensions: { width: 5, height: 1 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true, material: 'metal' },
+            },
+        ],
+        objects: [
+            {
+                id: 'button-1',
+                type: 'button',
+                position: { x: 8, y: 24 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: { linkedObjects: ['door-1'] },
+            },
+            {
+                id: 'door-1',
+                type: 'door',
+                position: { x: 18, y: 23 },
+                dimensions: { width: 1, height: 2 },
+                rotation: 0,
+                properties: { linkedObjects: [] },
+            },
+            {
+                id: 'teleport-1',
+                type: 'teleport',
+                position: { x: 40, y: 23 },
+                dimensions: { width: 2, height: 2 },
+                rotation: 0,
+                properties: { linkedObjects: [] },
+            },
+            {
+                id: 'tree-1',
+                type: 'tree',
+                position: { x: 12, y: 23 },
+                dimensions: { width: 2, height: 2 },
+                rotation: 0,
+                properties: {},
+            },
+            {
+                id: 'coin-1',
+                type: 'coin',
+                position: { x: 15, y: 22 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: {},
+            },
+            {
+                id: 'checkpoint-1',
+                type: 'checkpoint',
+                position: { x: 38, y: 24 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: {},
+            },
+        ],
+        spawnPoints: [
+            {
+                id: 'spawn-player-1',
+                type: 'player',
+                position: { x: 6, y: 23 },
+                facingDirection: 'right',
+                properties: {},
+            },
+            {
+                id: 'spawn-enemy-1',
+                type: 'enemy',
+                position: { x: 30, y: 24 },
+                facingDirection: 'left',
+                properties: { aiType: 'patrol', patrolPath: [] },
+            },
+        ],
     },
-    "tiles": [
-      {
-        "id": "tile-grass-1",
-        "type": "platform-grass",
-        "position": { "x": 5, "y": 25 },
-        "dimensions": { "width": 10, "height": 2 },
-        "rotation": 0,
-        "layer": 0,
-        "properties": { "collidable": true, "material": "grass" }
-      },
-      {
-        "id": "tile-stone-1",
-        "type": "platform-stone",
-        "position": { "x": 20, "y": 25 },
-        "dimensions": { "width": 8, "height": 2 },
-        "rotation": 0,
-        "layer": 0,
-        "properties": { "collidable": true, "material": "stone" }
-      },
-      {
-        "id": "tile-ice-1",
-        "type": "platform-ice",
-        "position": { "x": 35, "y": 25 },
-        "dimensions": { "width": 6, "height": 2 },
-        "rotation": 0,
-        "layer": 0,
-        "properties": { "collidable": true, "material": "ice" }
-      },
-      {
-        "id": "tile-basic-1",
-        "type": "platform-basic",
-        "position": { "x": 10, "y": 20 },
-        "dimensions": { "width": 4, "height": 1 },
-        "rotation": 0,
-        "layer": 0,
-        "properties": { "collidable": true }
-      },
-      {
-        "id": "tile-metal-1",
-        "type": "platform-metal",
-        "position": { "x": 25, "y": 18 },
-        "dimensions": { "width": 5, "height": 1 },
-        "rotation": 0,
-        "layer": 0,
-        "properties": { "collidable": true, "material": "metal" }
-      }
-    ],
-    "objects": [
-      {
-        "id": "button-1",
-        "type": "button",
-        "position": { "x": 8, "y": 24 },
-        "dimensions": { "width": 1, "height": 1 },
-        "rotation": 0,
-        "properties": { "linkedObjects": ["door-1"] }
-      },
-      {
-        "id": "door-1",
-        "type": "door",
-        "position": { "x": 18, "y": 23 },
-        "dimensions": { "width": 1, "height": 2 },
-        "rotation": 0,
-        "properties": { "linkedObjects": [] }
-      },
-      {
-        "id": "teleport-1",
-        "type": "teleport",
-        "position": { "x": 40, "y": 23 },
-        "dimensions": { "width": 2, "height": 2 },
-        "rotation": 0,
-        "properties": { "linkedObjects": [] }
-      },
-      {
-        "id": "tree-1",
-        "type": "tree",
-        "position": { "x": 12, "y": 23 },
-        "dimensions": { "width": 2, "height": 2 },
-        "rotation": 0,
-        "properties": {}
-      },
-      {
-        "id": "coin-1",
-        "type": "coin",
-        "position": { "x": 15, "y": 22 },
-        "dimensions": { "width": 1, "height": 1 },
-        "rotation": 0,
-        "properties": {}
-      },
-      {
-        "id": "checkpoint-1",
-        "type": "checkpoint",
-        "position": { "x": 38, "y": 24 },
-        "dimensions": { "width": 1, "height": 1 },
-        "rotation": 0,
-        "properties": {}
-      }
-    ],
-    "spawnPoints": [
-      {
-        "id": "spawn-player-1",
-        "type": "player",
-        "position": { "x": 6, "y": 23 },
-        "facingDirection": "right",
-        "properties": {}
-      },
-      {
-        "id": "spawn-enemy-1",
-        "type": "enemy",
-        "position": { "x": 30, "y": 24 },
-        "facingDirection": "left",
-        "properties": { "aiType": "patrol", "patrolPath": [] }
-      }
-    ]
-  }
 ];
 
 localStorage.setItem('levelEditor_levels', JSON.stringify(testData));

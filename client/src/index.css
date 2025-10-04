@@ -3,359 +3,374 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0 0% 10%);
-  --foreground: hsl(0 0% 90%);
-  --card: hsl(0 0% 13%);
-  --card-foreground: hsl(0 0% 90%);
-  --popover: hsl(0 0% 16%);
-  --popover-foreground: hsl(0 0% 90%);
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(0 0% 18%);
-  --secondary-foreground: hsl(0 0% 90%);
-  --muted: hsl(0 0% 18%);
-  --muted-foreground: hsl(0 0% 61%);
-  --accent: hsl(188 95% 43%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(0 0% 23%);
-  --input: hsl(0 0% 23%);
-  --ring: hsl(217 91% 60%);
-  --chart-1: hsl(217 91% 60%);
-  --chart-2: hsl(159 100% 36%);
-  --chart-3: hsl(42 93% 56%);
-  --chart-4: hsl(147 79% 42%);
-  --chart-5: hsl(341 75% 51%);
-  --sidebar: hsl(0 0% 13%);
-  --sidebar-foreground: hsl(0 0% 90%);
-  --sidebar-primary: hsl(217 91% 60%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(0 0% 18%);
-  --sidebar-accent-foreground: hsl(0 0% 90%);
-  --sidebar-border: hsl(0 0% 23%);
-  --sidebar-ring: hsl(217 91% 60%);
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: 0.5rem;
+    --background: hsl(0 0% 10%);
+    --foreground: hsl(0 0% 90%);
+    --card: hsl(0 0% 13%);
+    --card-foreground: hsl(0 0% 90%);
+    --popover: hsl(0 0% 16%);
+    --popover-foreground: hsl(0 0% 90%);
+    --primary: hsl(217 91% 60%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(0 0% 18%);
+    --secondary-foreground: hsl(0 0% 90%);
+    --muted: hsl(0 0% 18%);
+    --muted-foreground: hsl(0 0% 61%);
+    --accent: hsl(188 95% 43%);
+    --accent-foreground: hsl(0 0% 100%);
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 100%);
+    --border: hsl(0 0% 23%);
+    --input: hsl(0 0% 23%);
+    --ring: hsl(217 91% 60%);
+    --chart-1: hsl(217 91% 60%);
+    --chart-2: hsl(159 100% 36%);
+    --chart-3: hsl(42 93% 56%);
+    --chart-4: hsl(147 79% 42%);
+    --chart-5: hsl(341 75% 51%);
+    --sidebar: hsl(0 0% 13%);
+    --sidebar-foreground: hsl(0 0% 90%);
+    --sidebar-primary: hsl(217 91% 60%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(0 0% 18%);
+    --sidebar-accent-foreground: hsl(0 0% 90%);
+    --sidebar-border: hsl(0 0% 23%);
+    --sidebar-ring: hsl(217 91% 60%);
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --font-serif: Georgia, serif;
+    --font-mono: Menlo, monospace;
+    --radius: 0.5rem;
 }
 
 .dark {
-  --background: hsl(0 0% 10%);
-  --foreground: hsl(0 0% 90%);
-  --card: hsl(0 0% 13%);
-  --card-foreground: hsl(0 0% 90%);
-  --popover: hsl(0 0% 16%);
-  --popover-foreground: hsl(0 0% 90%);
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(0 0% 18%);
-  --secondary-foreground: hsl(0 0% 90%);
-  --muted: hsl(0 0% 18%);
-  --muted-foreground: hsl(0 0% 61%);
-  --accent: hsl(188 95% 43%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 84% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(0 0% 23%);
-  --input: hsl(0 0% 23%);
-  --ring: hsl(217 91% 60%);
+    --background: hsl(0 0% 10%);
+    --foreground: hsl(0 0% 90%);
+    --card: hsl(0 0% 13%);
+    --card-foreground: hsl(0 0% 90%);
+    --popover: hsl(0 0% 16%);
+    --popover-foreground: hsl(0 0% 90%);
+    --primary: hsl(217 91% 60%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(0 0% 18%);
+    --secondary-foreground: hsl(0 0% 90%);
+    --muted: hsl(0 0% 18%);
+    --muted-foreground: hsl(0 0% 61%);
+    --accent: hsl(188 95% 43%);
+    --accent-foreground: hsl(0 0% 100%);
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 100%);
+    --border: hsl(0 0% 23%);
+    --input: hsl(0 0% 23%);
+    --ring: hsl(217 91% 60%);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+    * {
+        @apply border-border;
+    }
 
-  body {
-    @apply font-sans antialiased bg-background text-foreground;
-    overflow: hidden;
-  }
+    body {
+        @apply font-sans antialiased bg-background text-foreground;
+        overflow: hidden;
+    }
 }
 
 .canvas-wrapper {
-  position: relative;
-  background: #5C94FC;
+    position: relative;
+    background: #5c94fc;
 }
 
 #levelCanvas {
-  cursor: crosshair;
-  image-rendering: pixelated;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  transition: transform 0.15s ease-out;
+    cursor: crosshair;
+    image-rendering: pixelated;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease-out;
 }
 
 .tile-item {
-  transition: all 0.15s ease;
-  cursor: grab;
+    transition: all 0.15s ease;
+    cursor: grab;
 }
 
 .tile-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
 .tile-item.selected {
-  box-shadow: 0 0 0 2px hsl(217 91% 60%);
+    box-shadow: 0 0 0 2px hsl(217 91% 60%);
 }
 
 .tool-btn {
-  transition: all 0.15s ease;
-  position: relative;
+    transition: all 0.15s ease;
+    position: relative;
 }
 
 .tool-btn:hover {
-  background-color: hsl(0 0% 23%);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+    background-color: hsl(0 0% 23%);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
 }
 
 .tool-btn.active {
-  background-color: hsl(217 91% 60%);
-  color: white;
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
+    background-color: hsl(217 91% 60%);
+    color: white;
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
 }
 
 .tool-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: hsl(217 91% 60%);
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: hsl(217 91% 60%);
 }
 
 .level-tab {
-  transition: all 0.15s ease;
-  cursor: pointer;
-  position: relative;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    position: relative;
 }
 
 .level-tab:hover {
-  background-color: hsl(0 0% 18%);
+    background-color: hsl(0 0% 18%);
 }
 
 .level-tab.active {
-  background-color: hsl(0 0% 18%);
-  border-bottom: 2px solid hsl(217 91% 60%);
+    background-color: hsl(0 0% 18%);
+    border-bottom: 2px solid hsl(217 91% 60%);
 }
 
 .zoom-control {
-  transition: all 0.15s ease;
+    transition: all 0.15s ease;
 }
 
 .zoom-control:hover {
-  background-color: hsl(0 0% 23%);
-  transform: scale(1.05);
+    background-color: hsl(0 0% 23%);
+    transform: scale(1.05);
 }
 
 .property-input {
-  background-color: hsl(0 0% 13%);
-  border: 1px solid hsl(0 0% 23%);
-  color: hsl(0 0% 90%);
-  transition: border-color 0.15s ease;
+    background-color: hsl(0 0% 13%);
+    border: 1px solid hsl(0 0% 23%);
+    color: hsl(0 0% 90%);
+    transition: border-color 0.15s ease;
 }
 
 .property-input:focus {
-  outline: none;
-  border-color: hsl(217 91% 60%);
-  box-shadow: 0 0 0 2px hsla(217 91% 60% / 0.2);
+    outline: none;
+    border-color: hsl(217 91% 60%);
+    box-shadow: 0 0 0 2px hsla(217 91% 60% / 0.2);
 }
 
 .scrollbar-custom::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
+    width: 14px;
+    height: 14px;
 }
 
 .scrollbar-custom::-webkit-scrollbar-track {
-  background: hsl(0 0% 13%);
-  border: 1px solid hsl(0 0% 20%);
+    background: hsl(0 0% 13%);
+    border: 1px solid hsl(0 0% 20%);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 45%);
-  border-radius: 7px;
-  border: 2px solid hsl(0 0% 13%);
+    background: hsl(0 0% 45%);
+    border-radius: 7px;
+    border: 2px solid hsl(0 0% 13%);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: hsl(217 91% 60%);
+    background: hsl(217 91% 60%);
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:active {
-  background: hsl(217 91% 70%);
+    background: hsl(217 91% 70%);
 }
 
 .scrollbar-custom::-webkit-scrollbar-corner {
-  background: hsl(0 0% 13%);
-  border: 1px solid hsl(0 0% 20%);
+    background: hsl(0 0% 13%);
+    border: 1px solid hsl(0 0% 20%);
 }
 
 .modal-overlay {
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
-  animation: slideUp 0.3s ease;
+    animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .tooltip {
-  position: absolute;
-  background: hsl(0 0% 5%);
-  color: hsl(0 0% 90%);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+    position: absolute;
+    background: hsl(0 0% 5%);
+    color: hsl(0 0% 90%);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
 .has-tooltip:hover .tooltip {
-  opacity: 1;
+    opacity: 1;
 }
 
 .status-indicator {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
 }
 
 .interactable-link {
-  stroke: hsl(188 95% 43%);
-  stroke-width: 2;
-  stroke-dasharray: 5, 5;
-  fill: none;
+    stroke: hsl(188 95% 43%);
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+    fill: none;
 }
 
 /* Roblox-inspired gradient */
 .bg-roblox-gradient {
-  background: linear-gradient(135deg, #E4261F 0%, #9333EA 50%, #3B82F6 100%);
+    background: linear-gradient(135deg, #e4261f 0%, #9333ea 50%, #3b82f6 100%);
 }
 
 /* Icon hover animation */
 @keyframes iconHover {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(-10deg) scale(1.1); }
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(-10deg) scale(1.1);
+    }
 }
 
 .icon-hover:hover {
-  animation: iconHover 0.5s ease-in-out;
+    animation: iconHover 0.5s ease-in-out;
 }
 
 /* Glow effects for active elements */
 .active-glow {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 .active-glow-red {
-  box-shadow: 0 0 20px rgba(228, 38, 31, 0.4);
+    box-shadow: 0 0 20px rgba(228, 38, 31, 0.4);
 }
 
 /* Delete action fade-out animation */
 @keyframes deleteObject {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
 }
 
 .deleting {
-  animation: deleteObject 250ms ease-out forwards;
+    animation: deleteObject 250ms ease-out forwards;
 }
 
 /* Selection glow pulse animation */
 @keyframes selectionGlowPulse {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1.0;
-  }
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
 .selection-glow-pulse {
-  animation: selectionGlowPulse 2s ease-in-out infinite;
+    animation: selectionGlowPulse 2s ease-in-out infinite;
 }
 
 /* Undo/Redo flash effect */
 @keyframes undoRedoFlash {
-  0% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 0;
-  }
+    0% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .undo-redo-flash {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(59, 130, 246, 0.2);
-  pointer-events: none;
-  animation: undoRedoFlash 400ms ease-out forwards;
-  z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(59, 130, 246, 0.2);
+    pointer-events: none;
+    animation: undoRedoFlash 400ms ease-out forwards;
+    z-index: 10;
 }
 
 /* Scanline effect for retro/tech aesthetic */
 @keyframes scanlines {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 4px;
-  }
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 4px;
+    }
 }
 
 .scanlines-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 5;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15) 0px,
-    transparent 1px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.15) 3px
-  );
-  background-size: 100% 4px;
-  animation: scanlines 0.5s linear infinite;
-  opacity: 0.3;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        transparent 1px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.15) 3px
+    );
+    background-size: 100% 4px;
+    animation: scanlines 0.5s linear infinite;
+    opacity: 0.3;
 }

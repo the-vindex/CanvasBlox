@@ -24,6 +24,12 @@ npm run test:e2e     # Run end-to-end tests
 npm run test:e2e:ui  # Run E2E tests with UI
 npm run test:e2e:debug # Debug E2E tests
 
+# Linting & Formatting (Biome)
+npm run lint         # Check code for lint errors
+npm run lint:fix     # Fix lint errors automatically
+npm run format       # Format code with Biome
+npm run format:check # Check if code is formatted
+
 npm run db:push      # Push database schema changes with Drizzle
 ```
 
@@ -156,7 +162,47 @@ This app is vibe coded - built for fun and creativity - but still follows best p
 - **Automated Testing** - Good test coverage with Vitest
 - **Type Safety** - TypeScript for catching bugs early
 - **Modular Architecture** - Clean code organization with hooks and utilities
-- **Code Quality** - Type checking with `npm run check`
+- **Code Quality** - Type checking with `npm run check` and linting with `npm run lint`
+- **Code Formatting** - Consistent style with Biome formatter (4-space indentation, IntelliJ style)
+
+## Linting & Formatting Workflow
+
+**When to run linting:**
+1. **Before committing** - Always run `npm run lint:fix` before creating a commit
+2. **After major refactoring** - Check for unused imports, variables, or other issues
+3. **When tests fail mysteriously** - Sometimes lint errors cause runtime issues
+4. **Periodically during development** - Run `npm run lint` to catch issues early
+
+**What Biome checks that TypeScript doesn't:**
+- Code style and formatting (indentation, quotes, spacing)
+- Unused variables and imports (warnings)
+- Code complexity and best practices
+- Import organization and sorting
+- Potential bugs that aren't type errors
+
+**What TypeScript checks (not Biome):**
+- Type correctness and inference
+- Interface implementations
+- Generics and type parameters
+- Module resolution
+
+**Workflow:**
+```bash
+# During development - check for issues
+npm run lint
+
+# Before commit - fix auto-fixable issues
+npm run lint:fix
+
+# Verify formatting
+npm run format:check
+
+# Fix formatting
+npm run format
+
+# Always run type check separately
+npm run check
+```
 
 ## Development Principles
 
