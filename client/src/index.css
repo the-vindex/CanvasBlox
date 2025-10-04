@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 10%);
+  --foreground: hsl(0 0% 90%);
+  --card: hsl(0 0% 13%);
+  --card-foreground: hsl(0 0% 90%);
+  --popover: hsl(0 0% 16%);
+  --popover-foreground: hsl(0 0% 90%);
+  --primary: hsl(217 91% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 18%);
+  --secondary-foreground: hsl(0 0% 90%);
+  --muted: hsl(0 0% 18%);
+  --muted-foreground: hsl(0 0% 61%);
+  --accent: hsl(188 95% 43%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 23%);
+  --input: hsl(0 0% 23%);
+  --ring: hsl(217 91% 60%);
+  --chart-1: hsl(217 91% 60%);
+  --chart-2: hsl(159 100% 36%);
+  --chart-3: hsl(42 93% 56%);
+  --chart-4: hsl(147 79% 42%);
+  --chart-5: hsl(341 75% 51%);
+  --sidebar: hsl(0 0% 13%);
+  --sidebar-foreground: hsl(0 0% 90%);
+  --sidebar-primary: hsl(217 91% 60%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(0 0% 18%);
+  --sidebar-accent-foreground: hsl(0 0% 90%);
+  --sidebar-border: hsl(0 0% 23%);
+  --sidebar-ring: hsl(217 91% 60%);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(0 0% 10%);
+  --foreground: hsl(0 0% 90%);
+  --card: hsl(0 0% 13%);
+  --card-foreground: hsl(0 0% 90%);
+  --popover: hsl(0 0% 16%);
+  --popover-foreground: hsl(0 0% 90%);
+  --primary: hsl(217 91% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 18%);
+  --secondary-foreground: hsl(0 0% 90%);
+  --muted: hsl(0 0% 18%);
+  --muted-foreground: hsl(0 0% 61%);
+  --accent: hsl(188 95% 43%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 23%);
+  --input: hsl(0 0% 23%);
+  --ring: hsl(217 91% 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    overflow: hidden;
+  }
+}
+
+.canvas-wrapper {
+  position: relative;
+  background: 
+    repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px),
+    repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px);
+  background-size: 20px 20px;
+}
+
+#levelCanvas {
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+.tile-item {
+  transition: all 0.15s ease;
+  cursor: grab;
+}
+
+.tile-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.tile-item.selected {
+  box-shadow: 0 0 0 2px hsl(217 91% 60%);
+}
+
+.tool-btn {
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.tool-btn:hover {
+  background-color: hsl(0 0% 23%);
+}
+
+.tool-btn.active {
+  background-color: hsl(217 91% 60%);
+  color: white;
+}
+
+.tool-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: hsl(217 91% 60%);
+}
+
+.level-tab {
+  transition: all 0.15s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.level-tab:hover {
+  background-color: hsl(0 0% 18%);
+}
+
+.level-tab.active {
+  background-color: hsl(0 0% 18%);
+  border-bottom: 2px solid hsl(217 91% 60%);
+}
+
+.zoom-control {
+  transition: all 0.15s ease;
+}
+
+.zoom-control:hover {
+  background-color: hsl(0 0% 23%);
+  transform: scale(1.05);
+}
+
+.property-input {
+  background-color: hsl(0 0% 13%);
+  border: 1px solid hsl(0 0% 23%);
+  color: hsl(0 0% 90%);
+  transition: border-color 0.15s ease;
+}
+
+.property-input:focus {
+  outline: none;
+  border-color: hsl(217 91% 60%);
+  box-shadow: 0 0 0 2px hsla(217 91% 60% / 0.2);
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: hsl(0 0% 13%);
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 30%);
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 40%);
+}
+
+.modal-overlay {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip {
+  position: absolute;
+  background: hsl(0 0% 5%);
+  color: hsl(0 0% 90%);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.has-tooltip:hover .tooltip {
+  opacity: 1;
+}
+
+.status-indicator {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.interactable-link {
+  stroke: hsl(188 95% 43%);
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
+  fill: none;
+}
