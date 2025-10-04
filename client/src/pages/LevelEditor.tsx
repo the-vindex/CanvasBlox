@@ -129,6 +129,9 @@ export default function LevelEditor() {
         }
       } else {
         switch (e.key) {
+          case 'Escape':
+            setEditorState(prev => ({ ...prev, selectedTileType: null }));
+            break;
           case 'Delete':
             e.preventDefault();
             deleteSelectedObjects();
@@ -157,7 +160,7 @@ export default function LevelEditor() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, copySelectedObjects, pasteObjects, deleteSelectedObjects, handleToolChange]);
+  }, [undo, redo, copySelectedObjects, pasteObjects, deleteSelectedObjects, handleToolChange, setEditorState]);
 
   if (!currentLevel) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
