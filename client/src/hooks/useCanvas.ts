@@ -7,7 +7,7 @@ interface UseCanvasProps {
   editorState: EditorState;
   onMouseMove: (position: Position) => void;
   onCanvasClick: (position: Position, event: MouseEvent) => void;
-  onCanvasDrop: (position: Position, tileType: string) => void;
+  onTilePlaced: (position: Position, tileType: string) => void;
 }
 
 export function useCanvas({
@@ -15,10 +15,11 @@ export function useCanvas({
   editorState,
   onMouseMove,
   onCanvasClick,
-  onCanvasDrop
+  onTilePlaced
 }: UseCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<CanvasRenderer | null>(null);
+  const isPaintingRef = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,9 +37,9 @@ export function useCanvas({
     }
   }, [levelData, editorState]);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  const getWorldPosition = useCallback((e: MouseEvent): Position => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
     const canvasPos = {
@@ -46,73 +47,62 @@ export function useCanvas({
       y: e.clientY - rect.top
     };
 
-    // Convert to world coordinates
-    const worldPos = {
+    return {
       x: Math.floor((canvasPos.x - editorState.pan.x) / editorState.zoom),
       y: Math.floor((canvasPos.y - editorState.pan.y) / editorState.zoom)
     };
+  }, [editorState.pan, editorState.zoom]);
 
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const worldPos = getWorldPosition(e);
     onMouseMove(worldPos);
-  }, [editorState.pan, editorState.zoom, onMouseMove]);
+
+    if (isPaintingRef.current && editorState.selectedTileType) {
+      onTilePlaced(worldPos, editorState.selectedTileType);
+    }
+  }, [getWorldPosition, onMouseMove, onTilePlaced, editorState.selectedTileType]);
+
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    const worldPos = getWorldPosition(e);
+
+    if (editorState.selectedTileType) {
+      isPaintingRef.current = true;
+      onTilePlaced(worldPos, editorState.selectedTileType);
+    } else {
+      onCanvasClick(worldPos, e);
+    }
+  }, [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType]);
+
+  const handleMouseUp = useCallback(() => {
+    isPaintingRef.current = false;
+  }, []);
 
   const handleClick = useCallback((e: MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const canvasPos = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-
-    // Convert to world coordinates
-    const worldPos = {
-      x: Math.floor((canvasPos.x - editorState.pan.x) / editorState.zoom),
-      y: Math.floor((canvasPos.y - editorState.pan.y) / editorState.zoom)
-    };
-
-    onCanvasClick(worldPos, e);
-  }, [editorState.pan, editorState.zoom, onCanvasClick]);
-
-  const handleDrop = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const tileType = e.dataTransfer?.getData('tile-type');
-    if (!tileType) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const canvasPos = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-
-    // Convert to world coordinates
-    const worldPos = {
-      x: Math.floor((canvasPos.x - editorState.pan.x) / editorState.zoom),
-      y: Math.floor((canvasPos.y - editorState.pan.y) / editorState.zoom)
-    };
-
-    onCanvasDrop(worldPos, tileType);
-  }, [editorState.pan, editorState.zoom, onCanvasDrop]);
+    const worldPos = getWorldPosition(e);
+    
+    if (!editorState.selectedTileType) {
+      onCanvasClick(worldPos, e);
+    }
+  }, [getWorldPosition, onCanvasClick, editorState.selectedTileType]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseUp);
     canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('drop', handleDrop);
-    canvas.addEventListener('dragover', (e) => e.preventDefault());
 
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mouseup', handleMouseUp);
+      canvas.removeEventListener('mouseleave', handleMouseUp);
       canvas.removeEventListener('click', handleClick);
-      canvas.removeEventListener('drop', handleDrop);
-      canvas.removeEventListener('dragover', (e) => e.preventDefault());
     };
-  }, [handleMouseMove, handleClick, handleDrop]);
+  }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick]);
 
   return { canvasRef, renderer: rendererRef.current };
 }

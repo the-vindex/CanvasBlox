@@ -51,7 +51,11 @@ export default function LevelEditor() {
     }
   }, [editorState.selectedTool, setEditorState]);
 
-  const handleCanvasDrop = useCallback((position: Position, tileType: string) => {
+  const handleTileSelect = useCallback((tileType: string) => {
+    setEditorState(prev => ({ ...prev, selectedTileType: tileType }));
+  }, [setEditorState]);
+
+  const handleTilePlaced = useCallback((position: Position, tileType: string) => {
     if (tileType.startsWith('spawn-')) {
       addObject(position, tileType);
     } else if (tileType.includes('platform')) {
@@ -60,10 +64,6 @@ export default function LevelEditor() {
       addObject(position, tileType);
     }
   }, [addTile, addObject]);
-
-  const handleTileDrag = useCallback((tileType: string) => {
-    // Visual feedback for dragging (implementation specific)
-  }, []);
 
   const handleToolChange = useCallback((tool: typeof editorState.selectedTool) => {
     setEditorState(prev => ({ ...prev, selectedTool: tool }));
@@ -294,7 +294,10 @@ export default function LevelEditor() {
       {/* Main Workspace */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar - Tile Palette */}
-        <TilePalette onTileDrag={handleTileDrag} />
+        <TilePalette 
+          selectedTileType={editorState.selectedTileType} 
+          onTileSelect={handleTileSelect} 
+        />
 
         {/* Center Canvas */}
         <main className="flex-1 flex flex-col overflow-hidden">
@@ -321,7 +324,7 @@ export default function LevelEditor() {
               editorState={editorState}
               onMouseMove={handleMouseMove}
               onCanvasClick={handleCanvasClick}
-              onCanvasDrop={handleCanvasDrop}
+              onTilePlaced={handleTilePlaced}
             />
           </div>
         </main>

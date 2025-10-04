@@ -7,7 +7,7 @@ interface CanvasProps {
   editorState: EditorState;
   onMouseMove: (position: Position) => void;
   onCanvasClick: (position: Position, event: MouseEvent) => void;
-  onCanvasDrop: (position: Position, tileType: string) => void;
+  onTilePlaced: (position: Position, tileType: string) => void;
   className?: string;
 }
 
@@ -16,7 +16,7 @@ export function Canvas({
   editorState,
   onMouseMove,
   onCanvasClick,
-  onCanvasDrop,
+  onTilePlaced,
   className
 }: CanvasProps) {
   const { canvasRef } = useCanvas({
@@ -24,7 +24,7 @@ export function Canvas({
     editorState,
     onMouseMove,
     onCanvasClick,
-    onCanvasDrop
+    onTilePlaced
   });
 
   return (
