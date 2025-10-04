@@ -33,31 +33,28 @@ Work through chapters sequentially. After implementing each chapter:
 ## Chapter 8: Color & Theme Enhancements
 
 **Status:** ✅ Completed (Minimized)
-**Files:** `tailwind.config.ts`
+**Files:** `tailwind.config.ts`, `client/src/components/level-editor/TilePalette.tsx`
 **Priority:** High → Low (minimized to avoid visual overload)
 
-### Implementation Decision:
+### Tasks:
 
-**SKIPPED (already sufficient or counterproductive):**
-- ❌ 8.1: Gradient accents - Header gradient already works great, more would be excessive
-- ❌ 8.2: Glow effects - Existing glows are sufficient, more creates visual noise
-- ❌ 8.3: Glassmorphism - Performance cost, already applied where needed (toolbar)
+#### 8.1 Gradient accents
+- **Status:** ❌ Skipped - Header gradient sufficient
 
-**IMPLEMENTED:**
-- ✅ 8.4: Layered shadow system - Adds genuine visual hierarchy
+#### 8.2 Glow effects
+- **Status:** ❌ Skipped - Existing glows sufficient
 
-### What Was Added:
+#### 8.3 Glassmorphism
+- **Status:** ❌ Skipped - Already applied where needed
 
-Custom shadow system in `tailwind.config.ts`:
-- `shadow-sm`: 0 1px 2px - Subtle elements
-- `shadow-md`: 0 4px 6px - Cards, tiles
-- `shadow-lg`: 0 10px 15px - Panels, modals
-- `shadow-xl`: 0 20px 25px - Floating elements
+#### 8.4 Layered shadow system
+- **Status:** ✅ Completed - Custom dark-optimized shadows in tailwind.config.ts
 
-**Rationale:** Focus on value over decoration. One targeted enhancement that improves hierarchy without performance cost or visual overload.
+#### 8.5 Tile card border fix (bonus)
+- **Status:** ✅ Completed - Added border-white/10 for edge clarity
 
 **Dependencies:** None
-**Notes:** Minimalist approach - quality over quantity
+**Notes:** See git commits 83c9d57 and e4d3dd6 for implementation details
 
 ---
 
@@ -171,6 +168,20 @@ Custom shadow system in `tailwind.config.ts`:
   - `client/src/components/level-editor/PropertiesPanel.tsx` (add close button)
   - `client/src/pages/LevelEditor.tsx` (manage panel visibility state)
 - **Note:** User improvement request - more canvas space when properties not needed
+
+#### 9.8 Bug: Deactivate tool when choosing tile for placement
+- **Location:** `client/src/pages/LevelEditor.tsx` - handleTileSelect function
+- **Current:** When user selects a tile from the palette, any active tool (select, move, link, etc.) remains active
+- **Bug:** This causes confusion - user expects to enter "placement mode" but tool is still active
+- **Expected behavior:** Selecting a tile from palette should automatically switch to placement mode and deactivate any active tool
+- **Implementation:**
+  - In handleTileSelect function, clear selectedTool by setting it to null or a default state
+  - Alternatively, set selectedTool to a dedicated 'place' tool mode
+  - Ensure tool buttons visually deselect when tile is chosen
+- **Files to modify:**
+  - `client/src/pages/LevelEditor.tsx` (handleTileSelect function around line 63-65)
+  - May need to update `client/src/types/level.ts` if adding a 'place' tool type
+- **Note:** User reported bug - improves UX consistency
 
 **Dependencies:** 9.3 should be done first
 **Notes:** Make editor more discoverable for new users
@@ -387,8 +398,67 @@ Custom shadow system in `tailwind.config.ts`:
   - May also need updates in `client/src/components/level-editor/TilePalette.tsx` to deselect tile visually
 - **Note:** Bug reported by user - affects basic workflow when switching between placing and selecting
 
+#### 11.9 Implement button numbering system (coordinate with linking tool)
+- **Location:** `client/src/utils/canvasRenderer.ts` - drawObject method (button rendering), `client/src/types/level.ts`
+- **Current:** Buttons are drawn with generic appearance, no visual identification system
+- **Purpose:** Add visual numbering to buttons on canvas so users can identify which button links to which door
+- **Implementation:**
+  - Add optional `buttonNumber` or `label` property to InteractableObject type
+  - Auto-assign numbers when buttons are created (e.g., Button 1, Button 2, etc.)
+  - Render number/label on button visual in canvasRenderer.ts drawButton method
+  - Display as white text or small badge on the button graphic
+- **Integration with linking:**
+  - When linking button to door, could optionally label door with same number
+  - Show button number in Properties Panel when selected
+  - Show linked button numbers on linked doors
+- **Files to modify:**
+  - `client/src/types/level.ts` (add label/number property to InteractableObject)
+  - `client/src/utils/canvasRenderer.ts` (drawButton method - add text rendering)
+  - `client/src/hooks/useLevelEditor.ts` (addObject - auto-assign button numbers)
+  - `client/src/components/level-editor/PropertiesPanel.tsx` (display button number/label)
+- **Note:** Should be implemented together with Task 11.5 (linking tool) for coherent UX
+
 **Dependencies:** Task 11.3 (selection) should be implemented first if keeping rotation for selected objects
 **Notes:** All tools exist in UI but have no implementation - high priority for usability
+
+---
+
+## Chapter 12: Documentation & Project Organization
+
+**Status:** ⏸️ Not Started
+**Files:** `replit.md`, `CLAUDE.md`, `DESIGN_SYSTEM.md`, various `.md` files
+**Priority:** Low
+
+### Tasks:
+
+#### 12.1 Reshape and consolidate project documentation
+- **Location:** Root directory - `replit.md`, `CLAUDE.md`, `DESIGN_SYSTEM.md`, and other .md files
+- **Current:** Multiple documentation files with overlapping content:
+  - `replit.md` - Original Replit-generated architecture docs
+  - `CLAUDE.md` - Development guidelines for Claude Code
+  - `DESIGN_SYSTEM.md` - Design system and visual decisions
+  - `VISUAL_ENHANCEMENTS.md` - Task roadmap
+- **Goal:** Organize into coherent, well-structured documentation
+- **Proposed structure:**
+  - `README.md` - Project overview, quick start, high-level architecture
+  - `ARCHITECTURE.md` - Technical architecture, data flow, key patterns
+  - `DESIGN_SYSTEM.md` - Visual design system (already exists, may need updates)
+  - `DEVELOPMENT.md` - Development workflow, commands, conventions
+  - `CLAUDE.md` - Keep for Claude Code specific instructions
+  - Archive or merge `replit.md` content as appropriate
+- **Tasks:**
+  - Audit all existing .md files for content overlap
+  - Extract duplicate/conflicting information
+  - Reorganize into logical sections
+  - Ensure single source of truth for each topic
+  - Update cross-references between docs
+- **Files to review:**
+  - `replit.md`, `CLAUDE.md`, `DESIGN_SYSTEM.md`, `VISUAL_ENHANCEMENTS.md`
+  - Any other .md files in root
+- **Note:** User requested - improve documentation structure and clarity
+
+**Dependencies:** None
+**Notes:** Low priority - doesn't affect functionality, but improves developer experience
 
 ---
 
@@ -433,6 +503,7 @@ Custom shadow system in `tailwind.config.ts`:
 | 9. Context & Feedback | ⏸️ Not Started | ❌ | History panel, tooltips, bug fixes, UX improvements |
 | 10. Special Effects | ⏸️ Not Started | ❌ | Parallax, glow pulse, trail effects, scanlines |
 | 11. Drawing Tools | ⏸️ Not Started | ❌ | Line, rectangle, selection, move, linking tools implementation |
+| 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
 - ⏸️ Not Started
