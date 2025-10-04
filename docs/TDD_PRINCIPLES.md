@@ -1,5 +1,28 @@
 # TDD Principles
 
+## What is Proper TDD?
+
+**Test-Driven Development (TDD)** is writing tests BEFORE writing code, then using those tests to guide implementation.
+
+**The Workflow:**
+1. **Red** - Write a test that fails (feature doesn't exist yet)
+2. **Green** - Write minimal code to make test pass
+3. **Refactor** - Clean up code while keeping tests green
+4. **Review** - Check test quality, remove bad tests
+5. **Commit** - Save code + tests together
+
+**Why TDD?**
+- Tests guide design (write the API you wish you had)
+- Prevents over-engineering (only code what's needed)
+- Fast feedback (know immediately if something breaks)
+- Confidence to refactor (tests protect against regressions)
+
+**TDD is NOT:**
+- Writing tests after code is working
+- Testing everything exhaustively
+- Never refactoring tests
+- Skipping the Red phase
+
 ## The Red-Green-Refactor Cycle
 
 ### 1. Red - Write a Failing Test
