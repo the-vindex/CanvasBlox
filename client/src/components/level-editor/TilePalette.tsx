@@ -19,10 +19,7 @@ function TileItem({ type, label, color, icon, isSelected, onSelect }: TileItemPr
         isSelected && "ring-2 ring-primary shadow-lg"
       )}
       data-tile-type={type}
-      onClick={() => {
-        console.log('TileItem clicked:', type);
-        onSelect(type);
-      }}
+      onClick={() => onSelect(type)}
       data-testid={`tile-${type}`}
       aria-selected={isSelected}
     >
