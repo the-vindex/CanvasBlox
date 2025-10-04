@@ -189,19 +189,6 @@ export default function LevelEditor() {
       // Clamp between 0.1 and 1 (don't zoom in beyond 100%)
       const initialZoom = Math.min(Math.max(calculatedZoom, 0.1), 1);
 
-      console.log('Initial zoom calculation:', {
-        windowHeight: window.innerHeight,
-        headerHeight,
-        tabsHeight,
-        toolbarHeight,
-        footerHeight,
-        viewportHeight,
-        currentlyVisibleTiles,
-        targetVisibleTiles,
-        calculatedZoom,
-        finalZoom: initialZoom
-      });
-
       setEditorState(prev => {
         // Only set zoom if it's still at default (1.0)
         if (prev.zoom === 1) {
