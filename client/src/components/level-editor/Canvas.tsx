@@ -10,6 +10,7 @@ interface CanvasProps {
   onCanvasClick: (position: Position, event: MouseEvent) => void;
   onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
   onDrawingSessionEnd?: () => void;
+  onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ export function Canvas({
   onCanvasClick,
   onTilePlaced,
   onDrawingSessionEnd,
+  onZoom,
   className
 }: CanvasProps) {
   const { canvasRef } = useCanvas({
@@ -28,7 +30,8 @@ export function Canvas({
     onMouseMove,
     onCanvasClick,
     onTilePlaced,
-    onDrawingSessionEnd
+    onDrawingSessionEnd,
+    onZoom
   });
 
   // Calculate canvas pixel size from tile dimensions

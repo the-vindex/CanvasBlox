@@ -123,26 +123,107 @@ export default function LevelEditor() {
   }, [toast]);
 
   const handleZoomIn = useCallback(() => {
-    setEditorState(prev => ({ ...prev, zoom: Math.min(prev.zoom + 0.1, 3) }));
+    setEditorState(prev => {
+      const newZoom = Math.min(prev.zoom + 0.1, 3);
+
+      // Get canvas center for zoom anchor point
+      const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
+      if (!canvas) return { ...prev, zoom: newZoom };
+
+      const rect = canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Calculate zoom ratio
+      const zoomRatio = newZoom / prev.zoom;
+
+      // Adjust pan to keep center point stationary
+      const newPan = {
+        x: prev.pan.x + (centerX - centerX * zoomRatio),
+        y: prev.pan.y + (centerY - centerY * zoomRatio)
+      };
+
+      return { ...prev, zoom: newZoom, pan: newPan };
+    });
   }, [setEditorState]);
 
   const handleZoomOut = useCallback(() => {
     const minZoom = 0.1;
-    const newZoom = Math.max(editorState.zoom - 0.1, minZoom);
 
-    if (editorState.zoom <= minZoom) {
-      toast({
-        title: "Maximum Zoom Out",
-        description: "Minimum zoom level reached"
-      });
-      return;
-    }
+    setEditorState(prev => {
+      const newZoom = Math.max(prev.zoom - 0.1, minZoom);
 
-    setEditorState(prev => ({ ...prev, zoom: newZoom }));
-  }, [setEditorState, editorState.zoom, toast]);
+      if (prev.zoom <= minZoom) {
+        toast({
+          title: "Maximum Zoom Out",
+          description: "Minimum zoom level reached"
+        });
+        return prev;
+      }
+
+      // Get canvas center for zoom anchor point
+      const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
+      if (!canvas) return { ...prev, zoom: newZoom };
+
+      const rect = canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Calculate zoom ratio
+      const zoomRatio = newZoom / prev.zoom;
+
+      // Adjust pan to keep center point stationary
+      const newPan = {
+        x: prev.pan.x + (centerX - centerX * zoomRatio),
+        y: prev.pan.y + (centerY - centerY * zoomRatio)
+      };
+
+      return { ...prev, zoom: newZoom, pan: newPan };
+    });
+  }, [setEditorState, toast]);
 
   const handleZoomReset = useCallback(() => {
-    setEditorState(prev => ({ ...prev, zoom: 1 }));
+    setEditorState(prev => {
+      // Get canvas center for zoom anchor point
+      const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
+      if (!canvas) return { ...prev, zoom: 1 };
+
+      const rect = canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Calculate zoom ratio
+      const zoomRatio = 1 / prev.zoom;
+
+      // Adjust pan to keep center point stationary
+      const newPan = {
+        x: prev.pan.x + (centerX - centerX * zoomRatio),
+        y: prev.pan.y + (centerY - centerY * zoomRatio)
+      };
+
+      return { ...prev, zoom: 1, pan: newPan };
+    });
+  }, [setEditorState]);
+
+  const handleWheelZoom = useCallback((delta: number, mouseX: number, mouseY: number) => {
+    setEditorState(prev => {
+      const newZoom = Math.max(0.1, Math.min(3, prev.zoom + delta));
+
+      // If zoom didn't change (hit limits), don't update
+      if (newZoom === prev.zoom) return prev;
+
+      // Calculate zoom ratio
+      const zoomRatio = newZoom / prev.zoom;
+
+      // Adjust pan to keep mouse point stationary
+      // Formula: newPan = pan + (mousePos - mousePos * zoomRatio)
+      const newPan = {
+        x: prev.pan.x + (mouseX - mouseX * zoomRatio),
+        y: prev.pan.y + (mouseY - mouseY * zoomRatio)
+      };
+
+      return { ...prev, zoom: newZoom, pan: newPan };
+    });
   }, [setEditorState]);
 
   const handleExportPNG = useCallback(() => {
@@ -521,6 +602,7 @@ export default function LevelEditor() {
                 onCanvasClick={handleCanvasClick}
                 onTilePlaced={handleTilePlaced}
                 onDrawingSessionEnd={handleDrawingSessionEnd}
+                onZoom={handleWheelZoom}
               />
               {showUndoRedoFlash && <div className="undo-redo-flash" />}
             </div>

@@ -10,6 +10,7 @@ interface UseCanvasProps {
   onCanvasClick: (position: Position, event: MouseEvent) => void;
   onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
   onDrawingSessionEnd?: () => void;
+  onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
 }
 
 export function useCanvas({
@@ -18,7 +19,8 @@ export function useCanvas({
   onMouseMove,
   onCanvasClick,
   onTilePlaced,
-  onDrawingSessionEnd
+  onDrawingSessionEnd,
+  onZoom
 }: UseCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<CanvasRenderer | null>(null);
@@ -92,11 +94,33 @@ export function useCanvas({
 
   const handleClick = useCallback((e: MouseEvent) => {
     const worldPos = getWorldPosition(e);
-    
+
     if (!editorState.selectedTileType) {
       onCanvasClick(worldPos, e);
     }
   }, [getWorldPosition, onCanvasClick, editorState.selectedTileType]);
+
+  const handleWheel = useCallback((e: WheelEvent) => {
+    // Check for Ctrl/Cmd key for zoom
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+
+      if (!onZoom) return;
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      // Negative deltaY = scroll up = zoom in
+      // Positive deltaY = scroll down = zoom out
+      const delta = -Math.sign(e.deltaY) * 0.1;
+
+      onZoom(delta, mouseX, mouseY);
+    }
+  }, [onZoom]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -107,6 +131,7 @@ export function useCanvas({
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mouseleave', handleMouseUp);
     canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('wheel', handleWheel as any, { passive: false });
 
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
@@ -114,8 +139,9 @@ export function useCanvas({
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('mouseleave', handleMouseUp);
       canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('wheel', handleWheel as any);
     };
-  }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick]);
+  }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick, handleWheel]);
 
   return { canvasRef, renderer: rendererRef.current };
 }

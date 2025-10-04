@@ -133,70 +133,71 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 10: Special Effects
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Completed
 **Files:** `client/src/index.css`, `client/src/components/level-editor/Canvas.tsx`, `client/src/hooks/useCanvas.ts`
 **Priority:** Low
 
 ### Tasks:
 
 #### 10.1 Parallax effect on background grid when panning
-- **Location:** useCanvas hook - pan handler
-- **Implementation:** Background moves slower than canvas content
-- **Math:** Background offset = pan offset * 0.5 (or other factor)
+- **Status:** ✅ Completed
+- **Location:** `client/src/components/level-editor/Canvas.tsx`
+- **Implementation:** Background moves at 50% speed of canvas content
+- **Math:** Background offset = pan offset * 0.5
 - **Apply to:** Canvas wrapper background-position
 
 #### 10.2 Glow pulse on selected objects
-- **Location:** Canvas rendering - selected objects
-- **Implementation:** CSS animation or canvas-based glow
-- **Effect:** Subtle pulsing glow around selection
-- **Keyframe:** Opacity oscillates between 0.6 and 1.0
+- **Status:** ✅ Completed
+- **Location:** `client/src/utils/canvasRenderer.ts`, `client/src/index.css`
+- **Implementation:** Canvas-based glow with time-based animation
+- **Effect:** Pulsing shadow blur around selected objects
+- **Keyframe:** Opacity oscillates between 0.6 and 1.0 using sine wave
 
 #### 10.3 Trail effect when dragging objects
+- **Status:** ⏸️ Skipped - Requires Chapter 11 move tool implementation
 - **Location:** Canvas during drag operation
 - **Implementation:** Draw semi-transparent copies along drag path
 - **Effect:** Motion blur / trail effect
 - **Clear:** Trail fades out on drop
 
 #### 10.4 Scanline effect for retro/tech aesthetic (optional toggle)
-- **Location:** Canvas overlay
-- **Implementation:** CSS pseudo-element with repeating gradient
-- **Toggle:** State variable in EditorState
-- **UI:** Checkbox in settings or view menu
-- **Effect:** Subtle horizontal lines moving slowly
+- **Status:** ✅ Completed
+- **Location:** `client/src/components/level-editor/Canvas.tsx`, `client/src/index.css`, `client/src/components/level-editor/Toolbar.tsx`
+- **Implementation:** CSS overlay with repeating gradient animation
+- **Toggle:** `showScanlines` in EditorState
+- **UI:** Toggle switch in Toolbar view options
+- **Effect:** Animated horizontal scanlines with 0.3 opacity
 
 #### 10.5 Fix "Show Grid" checkbox visual consistency
-- **Location:** `client/src/components/level-editor/Toolbar.tsx` - Show Grid checkbox
-- **Current:** "Show Grid" checkbox styling is inconsistent with the rest of the toolbar UI
-- **Change:** Update checkbox styling to match the overall design system and toolbar aesthetic
+- **Status:** ✅ Completed
+- **Location:** `client/src/components/level-editor/Toolbar.tsx`
+- **Change:** Replaced checkbox with modern toggle switch
 - **Implementation:**
-  - Review current checkbox component styling in Toolbar
-  - Apply consistent spacing, colors, and hover effects
-  - Consider using a toggle switch instead of checkbox for modern look
-  - Ensure label and checkbox alignment matches other toolbar elements
-- **Files to modify:**
-  - `client/src/components/level-editor/Toolbar.tsx` (Show Grid checkbox section)
-- **Note:** User reported inconsistency - UI polish for visual coherence
+  - Replaced Checkbox component with Switch component (shadcn/ui)
+  - Applied consistent spacing and label styling
+  - Matches toolbar design aesthetic
+- **Files modified:**
+  - `client/src/components/level-editor/Toolbar.tsx`
 
 #### 10.6 Improve zoom functionality UX - feels disconnected
-- **Location:** `client/src/pages/LevelEditor.tsx` - zoom handlers, `client/src/hooks/useCanvas.ts`
-- **Current:** Zoom functionality feels like "floating in the air" - lacks tactile feedback and proper anchor point
-- **Issues:**
-  - Zoom doesn't anchor to mouse cursor position (zooms from center instead)
-  - No visual feedback during zoom operation
-  - Pan position doesn't adjust correctly when zooming
-  - Missing smooth zoom transitions
-- **Change:** Implement mouse-centered zoom with proper pan adjustment
+- **Status:** ✅ Completed
+- **Location:** `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useCanvas.ts`, `client/src/components/level-editor/Canvas.tsx`
+- **Fixed Issues:**
+  - ✅ Zoom buttons now anchor to canvas center with pan adjustment
+  - ✅ Wheel zoom (Ctrl+Scroll) anchors to mouse cursor position
+  - ✅ Pan position adjusts correctly to keep anchor point stationary
+  - ✅ Smooth CSS transitions added (0.15s ease-out)
 - **Implementation:**
-  - Zoom should center on mouse cursor position (like Figma/Photoshop)
-  - Calculate new pan offset to keep mouse point stationary: `newPan = pan + (mousePos - mousePos * zoomRatio)`
-  - Add smooth CSS transitions for zoom changes
-  - Consider adding zoom indicator tooltip showing current zoom level
-  - Add wheel zoom support (Ctrl+Scroll)
-- **Files to modify:**
-  - `client/src/pages/LevelEditor.tsx` (handleZoomIn/handleZoomOut)
-  - `client/src/hooks/useCanvas.ts` (zoom logic)
-  - `client/src/components/level-editor/Canvas.tsx` (wheel event handler)
-- **Note:** User reported poor UX - zoom needs to feel grounded and predictable
+  - Button zoom: Centers on canvas viewport center
+  - Wheel zoom: Centers on mouse cursor using formula `newPan = pan + (mousePos - mousePos * zoomRatio)`
+  - Added `handleWheelZoom` callback with mouse position tracking
+  - Added wheel event handler with Ctrl/Cmd modifier check
+  - CSS transition on canvas transform for smooth zoom feel
+- **Files modified:**
+  - `client/src/pages/LevelEditor.tsx` (zoom handlers with pan adjustment)
+  - `client/src/hooks/useCanvas.ts` (wheel event handler)
+  - `client/src/components/level-editor/Canvas.tsx` (onZoom prop)
+  - `client/src/index.css` (transition on #levelCanvas)
 
 **Dependencies:** None
 **Notes:** These are polish effects - keep subtle and performant
