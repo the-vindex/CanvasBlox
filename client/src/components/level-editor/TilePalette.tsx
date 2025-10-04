@@ -59,8 +59,8 @@ function TileItem({ type, label, color, icon, isSelected, onSelect, usePlatformT
   return (
     <div
       className={cn(
-        "tile-item bg-secondary rounded p-2 text-center transition-all duration-150 cursor-pointer hover:transform hover:-translate-y-0.5 hover:shadow-md",
-        isSelected && "ring-2 ring-primary shadow-lg"
+        "tile-item bg-secondary/60 backdrop-blur-sm rounded p-2 text-center transition-all duration-150 cursor-pointer hover:transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl",
+        isSelected && "ring-2 ring-primary shadow-[0_0_20px_rgba(59,130,246,0.4)]"
       )}
       data-tile-type={type}
       onClick={() => onSelect(type)}
@@ -212,11 +212,12 @@ function drawPlatformMetal(ctx: CanvasRenderingContext2D, width: number, height:
 interface TileCategoryProps {
   title: string;
   children: React.ReactNode;
+  accentColor?: string;
 }
 
-function TileCategory({ title, children }: TileCategoryProps) {
+function TileCategory({ title, children, accentColor = 'border-gray-500' }: TileCategoryProps) {
   return (
-    <div className="p-3 border-t border-border first:border-t-0">
+    <div className={`p-3 border-t border-border first:border-t-0 border-l-4 ${accentColor}`}>
       <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">{title}</h3>
       <div className="grid grid-cols-2 gap-2">
         {children}
@@ -251,7 +252,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-custom">
-        <TileCategory title="Platforms">
+        <TileCategory title="Platforms" accentColor="border-gray-500">
           <TileItem
             type="platform-basic"
             label="Basic"
@@ -296,7 +297,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
           />
         </TileCategory>
 
-        <TileCategory title="Interactables">
+        <TileCategory title="Interactables" accentColor="border-purple-500">
           <TileItem
             type="button"
             label="Button"
@@ -331,7 +332,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
           />
         </TileCategory>
 
-        <TileCategory title="Decorations">
+        <TileCategory title="Decorations" accentColor="border-green-500">
           <TileItem
             type="tree"
             label="Tree"
@@ -366,7 +367,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
           />
         </TileCategory>
 
-        <TileCategory title="Spawn Points">
+        <TileCategory title="Spawn Points" accentColor="border-blue-500">
           <TileItem
             type="spawn-player"
             label="Player"

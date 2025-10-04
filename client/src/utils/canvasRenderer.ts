@@ -870,6 +870,82 @@ export class CanvasRenderer {
     this.ctx.setLineDash([]);
   }
 
+  drawPreviewTile(position: Position, tileType: string, pan: Position, zoom: number) {
+    this.ctx.save();
+    this.ctx.globalAlpha = 0.5;
+
+    const x = position.x * TILE_SIZE * zoom + pan.x;
+    const y = position.y * TILE_SIZE * zoom + pan.y;
+    const width = TILE_SIZE * zoom;
+    const height = TILE_SIZE * zoom;
+
+    this.ctx.translate(x, y);
+
+    // Draw preview based on tile type
+    if (tileType.includes('platform')) {
+      switch (tileType) {
+        case 'platform-basic':
+          this.drawPlatformBasic(width, height);
+          break;
+        case 'platform-stone':
+          this.drawPlatformStone(width, height);
+          break;
+        case 'platform-grass':
+          this.drawPlatformGrass(width, height);
+          break;
+        case 'platform-ice':
+          this.drawPlatformIce(width, height);
+          break;
+        case 'platform-lava':
+          this.drawPlatformLava(width, height);
+          break;
+        case 'platform-metal':
+          this.drawPlatformMetal(width, height);
+          break;
+        default:
+          this.drawPlatformBasic(width, height);
+      }
+    } else if (tileType.startsWith('spawn-')) {
+      this.ctx.translate(width / 2, height / 2);
+      if (tileType === 'spawn-player') {
+        this.drawPlayerCharacter(width, 'right');
+      } else {
+        this.drawEnemyCharacter(width, 'right');
+      }
+    } else {
+      // Draw object previews
+      this.ctx.translate(width / 2, height / 2);
+      switch (tileType) {
+        case 'button':
+          this.drawButton(width, height);
+          break;
+        case 'door':
+          this.drawDoor(width, height);
+          break;
+        case 'lever':
+          this.drawLever(width, height);
+          break;
+        case 'teleport':
+          this.drawTeleport(width, height);
+          break;
+        case 'tree':
+          this.drawTree(width, height);
+          break;
+        case 'rock':
+          this.drawRock(width, height);
+          break;
+        case 'coin':
+          this.drawCoin(width, height);
+          break;
+        case 'checkpoint':
+          this.drawCheckpoint(width, height);
+          break;
+      }
+    }
+
+    this.ctx.restore();
+  }
+
   render(levelData: LevelData, editorState: EditorState) {
     this.clear();
     this.drawBackground(levelData.metadata.backgroundColor);
@@ -895,5 +971,10 @@ export class CanvasRenderer {
 
     // Draw links
     this.drawLinks(levelData.objects, editorState.pan, editorState.zoom);
+
+    // Draw preview tile if a tile type is selected
+    if (editorState.selectedTileType && editorState.mousePosition) {
+      this.drawPreviewTile(editorState.mousePosition, editorState.selectedTileType, editorState.pan, editorState.zoom);
+    }
   }
 }
