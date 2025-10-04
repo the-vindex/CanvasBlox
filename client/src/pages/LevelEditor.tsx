@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
 import { Canvas } from '@/components/level-editor/Canvas';
+import { TilePalette } from '@/components/level-editor/TilePalette';
 import { Position } from '@/types/level';
 
 export default function LevelEditor() {
@@ -85,6 +86,14 @@ export default function LevelEditor() {
         pan: newPan
       };
     });
+  }, [setEditorState]);
+
+  const handleTileSelect = useCallback((tileType: string) => {
+    setEditorState(prev => ({
+      ...prev,
+      selectedTileType: tileType,
+      selectedTool: null
+    }));
   }, [setEditorState]);
 
   // Don't render until we have a current level
@@ -178,101 +187,10 @@ export default function LevelEditor() {
         }}
       >
         {/* LEFT SIDEBAR: Tile Palette */}
-        <aside style={{ background: '#222', borderRight: '1px solid #333', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', background: '#2a2a2a', borderBottom: '1px solid #333', fontWeight: 600, fontSize: '14px' }}>Tile Palette</div>
-          <div
-            style={{
-              overflowY: 'auto',
-              padding: '12px',
-              flex: 1,
-            }}
-          >
-            {/* Platforms Section */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>Platforms</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                <div style={{ aspectRatio: '1', background: '#2c3e50', border: '2px solid #3498db', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>⬜</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Basic</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🧱</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Stone</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🌿</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Grass</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>❄</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Ice</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🔥</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Lava</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🔩</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Metal</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Objects Section */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>Objects</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🔘</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Button</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🚪</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Door</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🎛</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Lever</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🌀</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Teleport</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🌲</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Tree</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🪨</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Rock</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🪙</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Coin</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🏁</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Checkpoint</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Spawn Points Section */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', color: '#999', textTransform: 'uppercase', marginBottom: '8px', fontWeight: 600 }}>Spawn Points</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>👤</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Player</div>
-                </div>
-                <div style={{ aspectRatio: '1', background: '#2a2a2a', border: '2px solid #333', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '8px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>👾</div>
-                  <div style={{ fontSize: '10px', color: '#aaa', textAlign: 'center' }}>Enemy</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <TilePalette
+          selectedTileType={editorState.selectedTileType}
+          onTileSelect={handleTileSelect}
+        />
 
         {/* CENTER: Canvas Area */}
         <main style={{ display: 'flex', flexDirection: 'column', background: '#1a1a1a', overflow: 'hidden' }}>

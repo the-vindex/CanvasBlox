@@ -235,7 +235,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <aside className="w-64 bg-card border-r border-border flex flex-col" data-testid="tile-palette">
+    <aside className="bg-card border-r border-border flex flex-col overflow-hidden" data-testid="tile-palette">
       <div className="p-4 border-b border-border">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <i className="fas fa-palette"></i>

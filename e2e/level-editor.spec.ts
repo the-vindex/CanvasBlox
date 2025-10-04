@@ -9,22 +9,22 @@ test.describe('Level Editor', () => {
     // Check that the main elements are visible
     await expect(page.getByText('🎮')).toBeVisible();
     await expect(page.getByText('Roblox Level Designer')).toBeVisible();
-    await expect(page.locator('canvas')).toBeVisible();
+    await expect(page.getByTestId('level-canvas')).toBeVisible();
   });
 
   test('should display tile palette', async ({ page }) => {
     // Look for tile palette sidebar
     await expect(page.getByText('Tile Palette')).toBeVisible();
     await expect(page.getByText('Platforms')).toBeVisible();
-    // Use more specific selector for Objects in the tile palette section
-    const tilePaletteSection = page.locator('aside').first();
-    await expect(tilePaletteSection.getByText('Objects')).toBeVisible();
+    // Check for the new category names from TilePalette component
+    await expect(page.getByText('Interactables')).toBeVisible();
+    await expect(page.getByText('Decorations')).toBeVisible();
     await expect(page.getByText('Spawn Points')).toBeVisible();
   });
 
   test('should have default level loaded', async ({ page }) => {
     // Canvas should be present and have default dimensions
-    const canvas = page.locator('canvas');
+    const canvas = page.getByTestId('level-canvas');
     await expect(canvas).toBeVisible();
 
     const width = await canvas.getAttribute('width');
@@ -70,7 +70,7 @@ test.describe('Level Editor', () => {
 
     // Verify the custom level was loaded by checking canvas dimensions
     // (100 tiles * 32px = 3200, 50 tiles * 32px = 1600)
-    const canvas = page.locator('canvas');
+    const canvas = page.getByTestId('level-canvas');
     const width = await canvas.getAttribute('width');
     const height = await canvas.getAttribute('height');
     expect(width).toBe('3200');
@@ -206,5 +206,120 @@ test.describe('Level Editor', () => {
     });
 
     expect(hasContent).toBe(true);
+  });
+
+  test('Step 4: should select tile from palette', async ({ page }) => {
+    // Click on a platform tile (grass platform)
+    const grassTile = page.getByTestId('tile-platform-grass');
+    await expect(grassTile).toBeVisible();
+    await grassTile.click();
+
+    // Tile should be visually selected (aria-selected attribute)
+    await expect(grassTile).toHaveAttribute('aria-selected', 'true');
+
+    // Other tiles should not be selected
+    const basicTile = page.getByTestId('tile-platform-basic');
+    await expect(basicTile).toHaveAttribute('aria-selected', 'false');
+  });
+
+  test('Step 4: should place selected tile on canvas', async ({ page }) => {
+    // Select a tile from palette
+    const iceTile = page.getByTestId('tile-platform-ice');
+    await iceTile.click();
+    await expect(iceTile).toHaveAttribute('aria-selected', 'true');
+
+    // Click on canvas to place tile
+    const canvas = page.getByTestId('level-canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Click at a specific position on canvas
+    await page.mouse.click(box.x + 200, box.y + 200);
+
+    // Wait a bit for rendering
+    await page.waitForTimeout(100);
+
+    // Verify tile was placed by checking canvas has more content than before
+    // (This is a basic check - more specific checks can be added later)
+    const hasContent = await canvas.evaluate((canvasEl) => {
+      const ctx = (canvasEl as HTMLCanvasElement).getContext('2d');
+      if (!ctx) return false;
+
+      // Sample the area where we clicked to verify something was drawn
+      const imageData = ctx.getImageData(200, 200, 32, 32);
+      const data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const alpha = data[i + 3];
+        if (alpha > 0) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    expect(hasContent).toBe(true);
+  });
+
+  test('Step 4: should switch between different tile types', async ({ page }) => {
+    // Select platform tile
+    const grassTile = page.getByTestId('tile-platform-grass');
+    await grassTile.click();
+    await expect(grassTile).toHaveAttribute('aria-selected', 'true');
+
+    // Select spawn point
+    const playerSpawn = page.getByTestId('tile-spawn-player');
+    await playerSpawn.click();
+    await expect(playerSpawn).toHaveAttribute('aria-selected', 'true');
+
+    // Previous selection should be deselected
+    await expect(grassTile).toHaveAttribute('aria-selected', 'false');
+
+    // Select interactable object
+    const buttonTile = page.getByTestId('tile-button');
+    await buttonTile.click();
+    await expect(buttonTile).toHaveAttribute('aria-selected', 'true');
+    await expect(playerSpawn).toHaveAttribute('aria-selected', 'false');
+  });
+
+  test('Step 4: tile palette should be scrollable', async ({ page }) => {
+    // Get the tile palette container
+    const tilePalette = page.getByTestId('tile-palette');
+    await expect(tilePalette).toBeVisible();
+
+    // Get the scrollable content area (the div with overflow-y-auto)
+    const scrollableArea = tilePalette.locator('.overflow-y-auto').first();
+    await expect(scrollableArea).toBeVisible();
+
+    // Verify the scrollable area has scrollable content
+    const hasScroll = await scrollableArea.evaluate(el => {
+      return el.scrollHeight > el.clientHeight;
+    });
+    expect(hasScroll).toBe(true);
+
+    // Get initial scroll position
+    const initialScrollTop = await scrollableArea.evaluate(el => el.scrollTop);
+    expect(initialScrollTop).toBe(0); // Should start at top
+
+    // Scroll down in the palette
+    await scrollableArea.evaluate(el => {
+      el.scrollTop = el.scrollHeight / 2; // Scroll to middle
+    });
+
+    // Wait a moment for scroll to complete
+    await page.waitForTimeout(100);
+
+    // Verify scroll position changed
+    const finalScrollTop = await scrollableArea.evaluate(el => el.scrollTop);
+    expect(finalScrollTop).toBeGreaterThan(initialScrollTop);
+
+    // Verify we can scroll back to top
+    await scrollableArea.evaluate(el => {
+      el.scrollTop = 0;
+    });
+    await page.waitForTimeout(100);
+
+    const backToTop = await scrollableArea.evaluate(el => el.scrollTop);
+    expect(backToTop).toBe(0);
   });
 });
