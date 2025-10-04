@@ -173,7 +173,7 @@ export default function LevelEditor() {
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-primary flex items-center gap-2">
             <i className="fas fa-cube"></i>
-            Roblox Level Editor
+            Roblox Level Designer
           </h1>
           
           {/* File Operations */}

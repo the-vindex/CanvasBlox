@@ -117,17 +117,6 @@ export function Toolbar({
             Show Grid
           </Label>
         </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="snapToGrid"
-            checked={editorState.snapToGrid}
-            onCheckedChange={(checked) => onStateChange({ snapToGrid: !!checked })}
-            data-testid="checkbox-snap-grid"
-          />
-          <Label htmlFor="snapToGrid" className="text-muted-foreground cursor-pointer">
-            Snap to Grid
-          </Label>
-        </div>
       </div>
     </div>
   );

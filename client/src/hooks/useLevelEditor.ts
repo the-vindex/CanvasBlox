@@ -20,7 +20,6 @@ export function useLevelEditor() {
     zoom: 1,
     pan: { x: 0, y: 0 },
     showGrid: true,
-    snapToGrid: false,
     mousePosition: { x: 0, y: 0 }
   });
   const [history, setHistory] = useState<HistoryEntry[]>([]);

@@ -80,7 +80,6 @@ export interface EditorState {
   zoom: number;
   pan: Position;
   showGrid: boolean;
-  snapToGrid: boolean;
   mousePosition: Position;
 }
 
