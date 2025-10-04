@@ -23,6 +23,7 @@ export function useCanvas({
   onZoom
 }: UseCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<CanvasRenderer | null>(null);
   const isPaintingRef = useRef(false);
 
@@ -107,10 +108,10 @@ export function useCanvas({
 
       if (!onZoom) return;
 
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
 
-      const rect = canvas.getBoundingClientRect();
+      const rect = wrapper.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
@@ -124,14 +125,17 @@ export function useCanvas({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const wrapper = wrapperRef.current;
+    if (!canvas || !wrapper) return;
 
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mouseleave', handleMouseUp);
     canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('wheel', handleWheel as any, { passive: false });
+
+    // Attach wheel event to wrapper div instead of canvas
+    wrapper.addEventListener('wheel', handleWheel as any, { passive: false });
 
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
@@ -139,9 +143,9 @@ export function useCanvas({
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('mouseleave', handleMouseUp);
       canvas.removeEventListener('click', handleClick);
-      canvas.removeEventListener('wheel', handleWheel as any);
+      wrapper.removeEventListener('wheel', handleWheel as any);
     };
   }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick, handleWheel]);
 
-  return { canvasRef, renderer: rendererRef.current };
+  return { canvasRef, wrapperRef, renderer: rendererRef.current };
 }

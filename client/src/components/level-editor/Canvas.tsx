@@ -24,7 +24,7 @@ export function Canvas({
   onZoom,
   className
 }: CanvasProps) {
-  const { canvasRef } = useCanvas({
+  const { canvasRef, wrapperRef } = useCanvas({
     levelData,
     editorState,
     onMouseMove,
@@ -44,6 +44,7 @@ export function Canvas({
 
   return (
     <div
+      ref={wrapperRef}
       className={cn("flex-1 relative overflow-auto canvas-wrapper scrollbar-custom", className)}
       style={{
         minHeight: canvasHeight,
