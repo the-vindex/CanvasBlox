@@ -10,6 +10,12 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        sm: "0 1px 2px 0 rgba(0, 0, 0, 0.3)",
+        md: "0 4px 6px -1px rgba(0, 0, 0, 0.4)",
+        lg: "0 10px 15px -3px rgba(0, 0, 0, 0.5)",
+        xl: "0 20px 25px -5px rgba(0, 0, 0, 0.6)",
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
