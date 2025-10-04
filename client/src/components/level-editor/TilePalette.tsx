@@ -5,6 +5,8 @@ import ButtonIcon from '@/assets/icons/button.svg?react';
 import DoorIcon from '@/assets/icons/door.svg?react';
 import LeverIcon from '@/assets/icons/lever.svg?react';
 import TeleportIcon from '@/assets/icons/teleport.svg?react';
+import PlayerIcon from '@/assets/icons/player.svg?react';
+import EnemyIcon from '@/assets/icons/enemy.svg?react';
 
 interface TileItemProps {
   type: string;
@@ -369,7 +371,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
             type="spawn-player"
             label="Player"
             color="bg-secondary"
-            icon="fas fa-user text-primary"
+            icon={PlayerIcon}
             isSelected={selectedTileType === 'spawn-player'}
             onSelect={onTileSelect}
           />
@@ -377,7 +379,7 @@ export function TilePalette({ selectedTileType, onTileSelect }: TilePaletteProps
             type="spawn-enemy"
             label="Enemy"
             color="bg-secondary"
-            icon="fas fa-skull text-destructive"
+            icon={EnemyIcon}
             isSelected={selectedTileType === 'spawn-enemy'}
             onSelect={onTileSelect}
           />

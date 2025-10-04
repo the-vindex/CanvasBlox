@@ -92,7 +92,19 @@ export default function LevelEditor() {
   }, [currentLevel, toast]);
 
   const handleImportLevel = useCallback((levelData: LevelData) => {
-    updateCurrentLevel(() => levelData);
+    // Ensure only one player spawn point exists
+    const playerSpawns = levelData.spawnPoints.filter(spawn => spawn.type === 'player');
+    const otherSpawns = levelData.spawnPoints.filter(spawn => spawn.type !== 'player');
+
+    // Keep only the first player spawn if multiple exist
+    const validatedSpawnPoints = playerSpawns.length > 0
+      ? [playerSpawns[0], ...otherSpawns]
+      : otherSpawns;
+
+    updateCurrentLevel(() => ({
+      ...levelData,
+      spawnPoints: validatedSpawnPoints
+    }));
   }, [updateCurrentLevel]);
 
   const handleLevelClose = useCallback((index: number) => {

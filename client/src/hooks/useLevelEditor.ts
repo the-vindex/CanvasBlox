@@ -172,10 +172,18 @@ export function useLevelEditor() {
         properties: { spawnId: `spawn_${Date.now()}` }
       } as SpawnPoint;
 
-      updateCurrentLevel(level => ({
-        ...level,
-        spawnPoints: [...level.spawnPoints, newObject as SpawnPoint]
-      }), `Added ${objectType}`);
+      updateCurrentLevel(level => {
+        // For player spawn points, ensure only one exists by removing any existing player spawn
+        let updatedSpawnPoints = level.spawnPoints;
+        if (objectType === 'spawn-player') {
+          updatedSpawnPoints = level.spawnPoints.filter(spawn => spawn.type !== 'player');
+        }
+
+        return {
+          ...level,
+          spawnPoints: [...updatedSpawnPoints, newObject as SpawnPoint]
+        };
+      }, `Added ${objectType}`);
     } else {
       newObject = {
         id: `obj_${Date.now()}_${Math.random()}`,
@@ -248,7 +256,17 @@ export function useLevelEditor() {
 
     updateCurrentLevel(level => {
       const newLevel = { ...level };
-      
+
+      // Check if we're pasting a player spawn point
+      const hasPlayerSpawn = pastedItems.some(item =>
+        'facingDirection' in item && (item as SpawnPoint).type === 'player'
+      );
+
+      // If pasting a player spawn, remove existing player spawn
+      if (hasPlayerSpawn) {
+        newLevel.spawnPoints = newLevel.spawnPoints.filter(spawn => spawn.type !== 'player');
+      }
+
       pastedItems.forEach(item => {
         if ('properties' in item && 'collidable' in item.properties) {
           // It's a tile
