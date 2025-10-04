@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
-import { useCanvas } from '@/hooks/useCanvas';
+import { Canvas } from '@/components/level-editor/Canvas';
 import { Position } from '@/types/level';
 
 export default function LevelEditor() {
@@ -87,17 +87,6 @@ export default function LevelEditor() {
     });
   }, [setEditorState]);
 
-  // Integrate useCanvas hook (only if currentLevel is available)
-  const { canvasRef, wrapperRef } = useCanvas({
-    levelData: currentLevel,
-    editorState,
-    onMouseMove: handleMouseMove,
-    onCanvasClick: handleCanvasClick,
-    onTilePlaced: handleTilePlaced,
-    onDrawingSessionEnd: handleDrawingSessionEnd,
-    onZoom: handleWheelZoom
-  });
-
   // Don't render until we have a current level
   if (!currentLevel) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#fff' }}>Loading...</div>;
@@ -131,11 +120,6 @@ export default function LevelEditor() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px', fontWeight: 'bold', color: 'white', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
           <span>🎮</span>
           <span>Roblox Level Designer</span>
-          {currentLevel && (
-            <span style={{ fontSize: '14px', opacity: 0.8, fontWeight: 'normal' }}>
-              - {currentLevel.levelName}
-            </span>
-          )}
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -320,69 +304,17 @@ export default function LevelEditor() {
             </div>
           </div>
 
-          {/* SCROLLABLE Canvas Wrapper - CRITICAL FOR SCROLLING */}
-          <div
-            ref={wrapperRef}
-            className="scrollbar-custom"
-            style={{
-              flex: 1,
-              overflow: 'auto',
-              background: '#1a1a1a',
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                width: '1920px',
-                height: '960px',
-                padding: '20px',
-                display: 'inline-block',
-                minWidth: '100%',
-                minHeight: '100%',
-              }}
-            >
-              <canvas
-                data-testid="level-canvas"
-                ref={canvasRef}
-                width={1920}
-                height={960}
-                style={{
-                  display: 'block',
-                  width: '1920px',
-                  height: '960px',
-                  background: '#5C94FC',
-                  border: '2px solid #333',
-                  borderRadius: '4px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
-                  backgroundSize: '32px 32px',
-                }}
-              />
-            </div>
-
-            {/* Canvas Overlay Info Panel */}
-            <div
-              data-testid="canvas-overlay"
-              style={{
-                position: 'absolute',
-                top: '68px',
-                left: '20px',
-                background: 'rgba(0, 0, 0, 0.8)',
-                padding: '12px 16px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontFamily: '"Courier New", monospace',
-                color: '#0f0',
-                pointerEvents: 'none',
-                backdropFilter: 'blur(4px)',
-              }}
-            >
-              <div data-testid="mouse-position" style={{ marginBottom: '4px' }}>
-                Mouse: ({editorState.mousePosition.x}, {editorState.mousePosition.y}) | Grid: ({editorState.mousePosition.x}, {editorState.mousePosition.y})
-              </div>
-              <div data-testid="selection-count" style={{ marginBottom: '4px' }}>Selected: {editorState.selectedObjects.length} objects</div>
-              <div data-testid="current-tool" style={{ marginBottom: '4px' }}>Tool: {editorState.selectedTool || editorState.selectedTileType || 'None'}</div>
-            </div>
+          {/* Canvas Component with CanvasRenderer */}
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <Canvas
+              levelData={currentLevel}
+              editorState={editorState}
+              onMouseMove={handleMouseMove}
+              onCanvasClick={handleCanvasClick}
+              onTilePlaced={handleTilePlaced}
+              onDrawingSessionEnd={handleDrawingSessionEnd}
+              onZoom={handleWheelZoom}
+            />
           </div>
         </main>
 

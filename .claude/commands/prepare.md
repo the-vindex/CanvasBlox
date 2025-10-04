@@ -49,7 +49,7 @@ When this command is invoked:
    - Key architectural patterns identified
    - Important constants and configuration values
    - Brief overview of state management flow
-   - Development environment (Replit-managed, port 5000)
+   - Development environment (check server output for port)
    - Ready to work message
 
 ## Output Format
@@ -60,8 +60,8 @@ After reading all files, provide a concise summary:
 📋 Project Preparation Complete
 
 **Environment:**
-- Replit-managed application (port 5000 → 80 external)
 - Development: npm run dev (tsx server/index.ts)
+- Check terminal for actual port (default: 3000)
 
 **Current Status:**
 - Chapter X: [Status] - [Notes]

@@ -9,7 +9,6 @@ test.describe('Level Editor', () => {
     // Check that the main elements are visible
     await expect(page.getByText('🎮')).toBeVisible();
     await expect(page.getByText('Roblox Level Designer')).toBeVisible();
-    await expect(page.getByText('- New Level')).toBeVisible(); // Shows current level name from state
     await expect(page.locator('canvas')).toBeVisible();
   });
 
@@ -69,8 +68,13 @@ test.describe('Level Editor', () => {
 
     await page.goto('/');
 
-    // Verify the custom level name appears in the header
-    await expect(page.getByText('- Test Level From Storage')).toBeVisible();
+    // Verify the custom level was loaded by checking canvas dimensions
+    // (100 tiles * 32px = 3200, 50 tiles * 32px = 1600)
+    const canvas = page.locator('canvas');
+    const width = await canvas.getAttribute('width');
+    const height = await canvas.getAttribute('height');
+    expect(width).toBe('3200');
+    expect(height).toBe('1600');
   });
 
   test('Step 2: should track mouse position over canvas', async ({ page }) => {
@@ -140,5 +144,67 @@ test.describe('Level Editor', () => {
 
     // Initially should be 0 selected
     await expect(selectionCount).toHaveText('Selected: 0 objects');
+  });
+
+  test('Step 3: Canvas component should render with CanvasRenderer', async ({ page }) => {
+    const canvas = page.getByTestId('level-canvas');
+    await expect(canvas).toBeVisible();
+
+    // Canvas should have proper dimensions from level data
+    const width = await canvas.getAttribute('width');
+    const height = await canvas.getAttribute('height');
+    expect(width).toBe('1920');
+    expect(height).toBe('960');
+
+    // Canvas should be rendered (check it has content by checking it's not blank)
+    // We can verify this by checking the canvas has a non-zero dimension
+    const box = await canvas.boundingBox();
+    expect(box).toBeTruthy();
+    if (box) {
+      expect(box.width).toBeGreaterThan(0);
+      expect(box.height).toBeGreaterThan(0);
+    }
+  });
+
+  test('Step 3: CanvasRenderer should draw to canvas', async ({ page }) => {
+    const canvas = page.getByTestId('level-canvas');
+    await expect(canvas).toBeVisible();
+
+    // Wait for rendering to complete
+    await page.waitForTimeout(100);
+
+    // Verify CanvasRenderer actually draws content (canvas is not blank)
+    const hasContent = await canvas.evaluate((canvasEl) => {
+      const ctx = (canvasEl as HTMLCanvasElement).getContext('2d');
+      if (!ctx) return false;
+
+      // Sample multiple areas of canvas to check if anything was drawn
+      const width = (canvasEl as HTMLCanvasElement).width;
+      const height = (canvasEl as HTMLCanvasElement).height;
+
+      // Sample from different areas: top-left, center, bottom
+      const areas = [
+        { x: 0, y: 0, w: 100, h: 100 },              // Top-left
+        { x: width / 2 - 50, y: height / 2 - 50, w: 100, h: 100 },  // Center
+        { x: 0, y: height - 100, w: 100, h: 100 }    // Bottom
+      ];
+
+      for (const area of areas) {
+        const imageData = ctx.getImageData(area.x, area.y, area.w, area.h);
+        const data = imageData.data;
+
+        // Check if this area has any drawn pixels
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+          if (alpha > 0) {
+            return true; // Found at least one drawn pixel
+          }
+        }
+      }
+
+      return false; // Canvas is blank
+    });
+
+    expect(hasContent).toBe(true);
   });
 });

@@ -28,7 +28,7 @@ npm run db:push      # Push database schema changes with Drizzle
 ```
 
 **Development Server:**
-- Development server runs on port 5000 (configurable via PORT env variable)
+- Development server runs on port 3000 (configurable via PORT env variable)
 - Hot Module Replacement (HMR) enabled via Vite
 - TypeScript compilation with tsx for server-side code
 
@@ -100,6 +100,13 @@ e2e/                                    # End-to-end tests
 4. Commit code + tests together
 
 **⚠️ IMPORTANT:** When implementing features, write E2E tests as you build, not after!
+
+**TDD Principles:**
+See `docs/TDD_PRINCIPLES.md` for detailed TDD guidelines including:
+- Red-Green-Refactor cycle
+- How to add, remove, and change features with tests
+- Common anti-patterns to avoid
+- Practical examples
 
 **E2E Testing Quick Reference:**
 

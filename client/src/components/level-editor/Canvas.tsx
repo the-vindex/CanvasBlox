@@ -40,7 +40,7 @@ export function Canvas({
   return (
     <div
       ref={wrapperRef}
-      className="scrollbar-custom"
+      className="scrollbar-custom overflow-auto"
       style={{
         width: '100%',
         height: '100%',
@@ -62,6 +62,7 @@ export function Canvas({
       >
         <canvas
           id="levelCanvas"
+          data-testid="level-canvas"
           ref={canvasRef}
           width={canvasWidth}
           height={canvasHeight}
@@ -94,6 +95,7 @@ export function Canvas({
 
         {/* Info Overlay - absolutely positioned relative to wrapper */}
         <div
+          data-testid="canvas-overlay"
           style={{
             position: 'absolute',
             top: '36px',
@@ -108,10 +110,10 @@ export function Canvas({
             backdropFilter: 'blur(4px)'
           }}
         >
-          <div style={{ marginBottom: '4px' }}>
-            Mouse: X: {editorState.mousePosition.x}, Y: {editorState.mousePosition.y}
+          <div data-testid="mouse-position" style={{ marginBottom: '4px' }}>
+            Mouse: ({editorState.mousePosition.x}, {editorState.mousePosition.y})
           </div>
-          <div>Selected: {editorState.selectedObjects.length} objects</div>
+          <div data-testid="selection-count">Selected: {editorState.selectedObjects.length} objects</div>
         </div>
       </div>
     </div>
