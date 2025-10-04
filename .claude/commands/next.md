@@ -22,6 +22,7 @@ When this command is invoked:
    - ✅ Refactor tests based on review feedback
    - ✅ Run tests again to verify refactoring
    - ✅ Commit code + tests together
+   - ✅ Push to remote: `git push`
 4. **Update** the step's status to: 🧪 Ready for User Testing
 5. **Report** to the user:
    - Which step was implemented
