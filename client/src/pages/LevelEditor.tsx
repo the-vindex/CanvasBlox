@@ -1,8 +1,9 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
+import { useCanvas } from '@/hooks/useCanvas';
+import { Position } from '@/types/level';
 
 export default function LevelEditor() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [propertiesPanelCollapsed, setPropertiesPanelCollapsed] = useState(false);
 
   // Integrate useLevelEditor hook
@@ -30,35 +31,77 @@ export default function LevelEditor() {
     commitBatchToHistory
   } = useLevelEditor();
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // Handler callbacks for useCanvas
+  const handleMouseMove = useCallback((position: Position) => {
+    setEditorState(prev => ({ ...prev, mousePosition: position }));
+  }, [setEditorState]);
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const handleCanvasClick = useCallback((position: Position, event: MouseEvent) => {
+    if (editorState.selectedTool === 'select') {
+      // Clear selection when clicking empty space with select tool
+      setEditorState(prev => ({ ...prev, selectedObjects: [] }));
+    }
+  }, [editorState.selectedTool, setEditorState]);
 
-    // Draw sample content
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(320, 480, 256, 32);
-    ctx.fillRect(640, 360, 192, 32);
-    ctx.fillRect(960, 240, 224, 32);
+  const drawingSessionTileCount = useRef(0);
 
-    ctx.fillStyle = '#FF6B6B';
-    ctx.fillRect(400, 448, 32, 32);
+  const handleTilePlaced = useCallback((position: Position, tileType: string, isDrawing = false) => {
+    if (tileType.startsWith('spawn-')) {
+      addObject(position, tileType);
+    } else if (tileType.includes('platform')) {
+      if (isDrawing) {
+        addTile(position, tileType, true); // Skip history
+        drawingSessionTileCount.current++;
+      } else {
+        addTile(position, tileType, false);
+      }
+    } else {
+      addObject(position, tileType);
+    }
+  }, [addTile, addObject]);
 
-    ctx.fillStyle = '#4ECDC4';
-    ctx.fillRect(700, 328, 32, 32);
+  const handleDrawingSessionEnd = useCallback(() => {
+    if (drawingSessionTileCount.current > 0) {
+      const count = drawingSessionTileCount.current;
+      commitBatchToHistory(`Placed ${count} tile${count > 1 ? 's' : ''}`);
+      drawingSessionTileCount.current = 0;
+    }
+  }, [commitBatchToHistory]);
 
-    ctx.fillStyle = '#95E1D3';
-    ctx.beginPath();
-    ctx.arc(200, 700, 16, 0, Math.PI * 2);
-    ctx.fill();
+  const handleWheelZoom = useCallback((delta: number, mouseX: number, mouseY: number) => {
+    setEditorState(prev => {
+      const newZoom = Math.min(Math.max(prev.zoom + delta, 0.1), 5);
 
-    ctx.fillStyle = '#F38181';
-    ctx.beginPath();
-    ctx.arc(1600, 150, 16, 0, Math.PI * 2);
-    ctx.fill();
-  }, []);
+      // Calculate pan adjustment to zoom at mouse position
+      const zoomRatio = newZoom / prev.zoom;
+      const newPan = {
+        x: prev.pan.x + (mouseX - mouseX * zoomRatio),
+        y: prev.pan.y + (mouseY - mouseY * zoomRatio)
+      };
+
+      return {
+        ...prev,
+        zoom: newZoom,
+        pan: newPan
+      };
+    });
+  }, [setEditorState]);
+
+  // Integrate useCanvas hook (only if currentLevel is available)
+  const { canvasRef, wrapperRef } = useCanvas({
+    levelData: currentLevel,
+    editorState,
+    onMouseMove: handleMouseMove,
+    onCanvasClick: handleCanvasClick,
+    onTilePlaced: handleTilePlaced,
+    onDrawingSessionEnd: handleDrawingSessionEnd,
+    onZoom: handleWheelZoom
+  });
+
+  // Don't render until we have a current level
+  if (!currentLevel) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#fff' }}>Loading...</div>;
+  }
 
   return (
     <div
@@ -266,7 +309,7 @@ export default function LevelEditor() {
 
             <div style={{ display: 'flex', gap: '4px', padding: '0 8px', borderRight: '1px solid #333', alignItems: 'center' }}>
               <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>-</button>
-              <div style={{ padding: '0 12px', fontSize: '13px', color: '#aaa', minWidth: '60px', textAlign: 'center' }}>100%</div>
+              <div data-testid="toolbar-zoom-display" style={{ padding: '0 12px', fontSize: '13px', color: '#aaa', minWidth: '60px', textAlign: 'center' }}>{Math.round(editorState.zoom * 100)}%</div>
               <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>+</button>
               <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2a2a2a', borderRadius: '4px', fontSize: '16px', border: '1px solid transparent', cursor: 'pointer', color: '#e0e0e0' }}>↺</button>
             </div>
@@ -279,6 +322,7 @@ export default function LevelEditor() {
 
           {/* SCROLLABLE Canvas Wrapper - CRITICAL FOR SCROLLING */}
           <div
+            ref={wrapperRef}
             className="scrollbar-custom"
             style={{
               flex: 1,
@@ -298,6 +342,7 @@ export default function LevelEditor() {
               }}
             >
               <canvas
+                data-testid="level-canvas"
                 ref={canvasRef}
                 width={1920}
                 height={960}
@@ -317,6 +362,7 @@ export default function LevelEditor() {
 
             {/* Canvas Overlay Info Panel */}
             <div
+              data-testid="canvas-overlay"
               style={{
                 position: 'absolute',
                 top: '68px',
@@ -331,9 +377,11 @@ export default function LevelEditor() {
                 backdropFilter: 'blur(4px)',
               }}
             >
-              <div style={{ marginBottom: '4px' }}>Mouse: (0, 0) | Grid: (0, 0)</div>
-              <div style={{ marginBottom: '4px' }}>Selected: 3 objects</div>
-              <div style={{ marginBottom: '4px' }}>Tool: Select</div>
+              <div data-testid="mouse-position" style={{ marginBottom: '4px' }}>
+                Mouse: ({editorState.mousePosition.x}, {editorState.mousePosition.y}) | Grid: ({editorState.mousePosition.x}, {editorState.mousePosition.y})
+              </div>
+              <div data-testid="selection-count" style={{ marginBottom: '4px' }}>Selected: {editorState.selectedObjects.length} objects</div>
+              <div data-testid="current-tool" style={{ marginBottom: '4px' }}>Tool: {editorState.selectedTool || editorState.selectedTileType || 'None'}</div>
             </div>
           </div>
         </main>
@@ -518,11 +566,11 @@ export default function LevelEditor() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: '#666' }}>Zoom:</span>
-            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>100%</span>
+            <span data-testid="statusbar-zoom-display" style={{ color: '#e0e0e0', fontWeight: 500 }}>{Math.round(editorState.zoom * 100)}%</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: '#666' }}>History:</span>
-            <span style={{ color: '#e0e0e0', fontWeight: 500 }}>5/10</span>
+            <span data-testid="statusbar-history-display" style={{ color: '#e0e0e0', fontWeight: 500 }}>{historyIndex + 1}/{history.length}</span>
           </div>
         </div>
       </footer>

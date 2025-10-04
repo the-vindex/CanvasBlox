@@ -94,10 +94,42 @@ e2e/                                    # End-to-end tests
 ```
 
 **TDD Workflow:**
-1. Write failing test first
+1. Write failing test first (BOTH unit AND e2e)
 2. Implement feature to make test pass
-3. Verify all tests pass
+3. Verify all tests pass (`npm test && npm run test:e2e`)
 4. Commit code + tests together
+
+**⚠️ IMPORTANT:** When implementing features, write E2E tests as you build, not after!
+
+**E2E Testing Quick Reference:**
+
+When writing Playwright tests, follow this selector priority:
+1. `getByRole()` - Buttons, headings, interactive elements
+2. `getByLabel()` - Form inputs
+3. `getByTestId()` - Dynamic content, custom components
+4. Avoid CSS/XPath selectors
+
+Adding test IDs to components:
+- ✅ ADD `data-testid` FOR: Dynamic values (zoom %, coordinates), status displays, custom components
+- ❌ DON'T ADD FOR: Buttons with text, headings, labeled inputs
+- Naming: Use kebab-case with semantic names: `data-testid="statusbar-zoom-display"`
+
+Common patterns:
+```typescript
+// Dynamic content
+const zoom = page.getByTestId('statusbar-zoom-display');
+await expect(zoom).toHaveText('100%');
+
+// Buttons (use role, not testid)
+await page.getByRole('button', { name: 'Save' }).click();
+
+// Canvas interaction
+const canvas = page.getByTestId('level-canvas');
+const box = await canvas.boundingBox();
+await page.mouse.move(box.x + 100, box.y + 100);
+```
+
+For more examples and patterns: `docs/E2E_TESTING.md`
 
 ## Database
 
