@@ -1,7 +1,7 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Chapter 1 - Completed, Awaiting Review
+**Current Chapter:** Chapter 3 - Completed, Reviewed ✓
 **Last Updated:** 2025-10-04
 
 ---
@@ -18,7 +18,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 1: Enhanced Header & Branding
 
-**Status:** ✅ Completed - Awaiting Review
+**Status:** ✅ Completed - Reviewed ✓
 **Files:** `client/src/pages/LevelEditor.tsx`, `client/src/index.css`
 **Priority:** High
 
@@ -61,7 +61,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 2: Modern Toolbar
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Completed - Reviewed ✓
 **Files:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/index.css`
 **Priority:** High
 
@@ -103,8 +103,8 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 3: Enhanced Canvas Experience
 
-**Status:** ⏸️ Not Started
-**Files:** `client/src/components/level-editor/Canvas.tsx`, `client/src/index.css`, `client/src/hooks/useCanvas.ts`
+**Status:** ✅ Completed - Reviewed ✓
+**Files:** `client/src/components/level-editor/Canvas.tsx`, `client/src/index.css`, `client/src/utils/levelSerializer.ts`, `client/src/utils/canvasRenderer.ts`
 **Priority:** High
 
 ### Tasks:
@@ -254,12 +254,27 @@ Work through chapters sequentially. After implementing each chapter:
 - **Trigger:** After updateCurrentLevel calls
 - **Animation:** Checkmark slides in, holds, fades out
 
-#### 7.6 Loading states: Skeleton screens
+#### 7.6 Remove auto-save toast notifications and use color-coded save icon
+- **Location:** `client/src/pages/LevelEditor.tsx` - Header status bar and auto-save logic
+- **Current:** Toast notifications appear on auto-save
+- **Change:**
+  - Remove toast notifications for auto-save events
+  - Save icon in status bar shows orange when there are unsaved changes
+  - Save icon turns green after successful save
+  - Use smooth color transitions for visual feedback
+- **Implementation:**
+  - Track "hasUnsavedChanges" state (set to true on edits, false after save)
+  - Remove toast trigger from auto-save logic
+  - Apply conditional color classes to save icon: `text-orange-500` (unsaved) / `text-green-500` (saved)
+- **CSS:** `transition-colors duration-300` for smooth color changes
+- **Note:** More subtle, less intrusive feedback than toast notifications
+
+#### 7.7 Loading states: Skeleton screens
 - **Location:** Initial render of LevelEditor
 - **Current:** "Loading..." text
 - **Change:** Animated skeleton layout matching UI structure
 
-**Dependencies:** Some tasks depend on Chapter 1
+**Dependencies:** Tasks 7.5 and 7.6 depend on Chapter 1 status bar
 **Notes:** Animations should feel snappy, not slow (200-400ms max)
 
 ---
@@ -420,9 +435,9 @@ Work through chapters sequentially. After implementing each chapter:
 
 | Chapter | Status | Approved | Notes |
 |---------|--------|----------|-------|
-| 1. Header & Branding | ✅ Completed | ⏳ Awaiting Review | Gradient header, dropdown menus, status badges, glow effects |
-| 2. Modern Toolbar | ⏸️ Not Started | ❌ | |
-| 3. Canvas Experience | ⏸️ Not Started | ❌ | |
+| 1. Header & Branding | ✅ Completed | ✓ Approved | Gradient header, dropdown menus, status badges, glow effects |
+| 2. Modern Toolbar | ✅ Completed | ✓ Approved | Labeled tool groups, glassmorphism, color-coded tools, animations |
+| 3. Canvas Experience | ✅ Completed | ✓ Approved | Solid Mario sky blue, canvas drop shadow, transparent canvas, default grass platform, custom scrollbars |
 | 4. Tile Palette | ⏸️ Not Started | ❌ | |
 | 5. Properties Panel | ⏸️ Not Started | ❌ | |
 | 6. Level Tabs | ⏸️ Not Started | ❌ | |
@@ -441,12 +456,16 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Next Steps
 
-1. Start with Chapter 1: Enhanced Header & Branding
-2. Implement all tasks in chapter
-3. User reviews
-4. Get approval
-5. Commit changes
-6. Move to Chapter 2
+1. ✅ Chapter 1: Enhanced Header & Branding - Completed & Approved
+2. ✅ Chapter 2: Modern Toolbar - Completed & Approved
+3. ✅ Chapter 3: Enhanced Canvas Experience - Completed & Approved
+   - Solid Mario sky blue background (#5C94FC)
+   - Canvas drop shadow for depth
+   - Transparent canvas background
+   - Default grass platform (10 blocks from bottom)
+   - Custom styled scrollbars
+4. **Next:** Chapter 4: Impressive Tile Palette
+5. Continue through remaining chapters sequentially
 
 ---
 

@@ -16,6 +16,7 @@ import {
 import { Position, LevelData } from '@/types/level';
 import { LevelSerializer } from '@/utils/levelSerializer';
 import { useToast } from '@/hooks/use-toast';
+import { TILE_SIZE, DEFAULT_GRASS_Y } from '@/constants/editor';
 
 export default function LevelEditor() {
   const { toast } = useToast();
@@ -85,9 +86,32 @@ export default function LevelEditor() {
   }, [toast]);
 
   const handleRotateRight = useCallback(() => {
-    // Implementation for rotating selected objects right  
+    // Implementation for rotating selected objects right
     toast({ title: "Rotate Right", description: "Feature coming soon!" });
   }, [toast]);
+
+  const handleZoomIn = useCallback(() => {
+    setEditorState(prev => ({ ...prev, zoom: Math.min(prev.zoom + 0.1, 3) }));
+  }, [setEditorState]);
+
+  const handleZoomOut = useCallback(() => {
+    const minZoom = 0.1;
+    const newZoom = Math.max(editorState.zoom - 0.1, minZoom);
+
+    if (editorState.zoom <= minZoom) {
+      toast({
+        title: "Maximum Zoom Out",
+        description: "Minimum zoom level reached"
+      });
+      return;
+    }
+
+    setEditorState(prev => ({ ...prev, zoom: newZoom }));
+  }, [setEditorState, editorState.zoom, toast]);
+
+  const handleZoomReset = useCallback(() => {
+    setEditorState(prev => ({ ...prev, zoom: 1 }));
+  }, [setEditorState]);
 
   const handleExportPNG = useCallback(() => {
     const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
@@ -115,9 +139,78 @@ export default function LevelEditor() {
 
   const handleLevelClose = useCallback((index: number) => {
     if (levels.length > 1) {
+      const level = levels[index];
+      const hasData = level.tiles.length > 0 ||
+                      level.objects.length > 0 ||
+                      level.spawnPoints.length > 0;
+
+      if (hasData) {
+        const confirmed = window.confirm(
+          `"${level.levelName}" contains ${level.tiles.length} tiles, ${level.objects.length} objects, and ${level.spawnPoints.length} spawn points.\n\nAre you sure you want to close and delete this level?`
+        );
+        if (!confirmed) return;
+      }
+
       deleteLevel(index);
     }
-  }, [levels.length, deleteLevel]);
+  }, [levels, deleteLevel]);
+
+  // Calculate initial zoom to ensure grass is visible on app load
+  useEffect(() => {
+    // Only set zoom once when levels are first loaded
+    if (!currentLevel) return;
+
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(() => {
+      // Calculate viewport height from window, subtracting all fixed-height UI elements
+      const header = document.querySelector('header');
+      const levelTabs = document.querySelector('[data-testid="level-tabs"], .level-tabs');
+      const toolbar = document.querySelector('[data-testid="toolbar"]');
+      const footer = document.querySelector('footer');
+
+      const headerHeight = header?.clientHeight || 56; // h-14 = 56px
+      const tabsHeight = levelTabs?.clientHeight || 40;
+      const toolbarHeight = toolbar?.clientHeight || 60;
+      const footerHeight = footer?.clientHeight || 32; // h-8 = 32px
+
+      const viewportHeight = window.innerHeight - headerHeight - tabsHeight - toolbarHeight - footerHeight;
+
+      if (viewportHeight <= 0) return; // Container not ready yet
+
+      // Calculate how many tiles are currently visible at 100% zoom
+      const currentlyVisibleTiles = viewportHeight / TILE_SIZE;
+
+      // We want to show grass (at DEFAULT_GRASS_Y) + 5 tiles below it
+      const targetVisibleTiles = DEFAULT_GRASS_Y + 5;
+
+      // Calculate zoom: if we need to show MORE tiles, zoom OUT (< 1)
+      const calculatedZoom = currentlyVisibleTiles / targetVisibleTiles;
+
+      // Clamp between 0.1 and 1 (don't zoom in beyond 100%)
+      const initialZoom = Math.min(Math.max(calculatedZoom, 0.1), 1);
+
+      console.log('Initial zoom calculation:', {
+        windowHeight: window.innerHeight,
+        headerHeight,
+        tabsHeight,
+        toolbarHeight,
+        footerHeight,
+        viewportHeight,
+        currentlyVisibleTiles,
+        targetVisibleTiles,
+        calculatedZoom,
+        finalZoom: initialZoom
+      });
+
+      setEditorState(prev => {
+        // Only set zoom if it's still at default (1.0)
+        if (prev.zoom === 1) {
+          return { ...prev, zoom: initialZoom };
+        }
+        return prev;
+      });
+    });
+  }, [currentLevel, setEditorState]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -330,9 +423,12 @@ export default function LevelEditor() {
             onStateChange={handleStateChange}
             onRotateLeft={handleRotateLeft}
             onRotateRight={handleRotateRight}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onZoomReset={handleZoomReset}
           />
           
-          <div 
+          <div
             className="flex-1 relative"
             style={{
               background: `

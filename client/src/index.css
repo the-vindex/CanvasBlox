@@ -76,15 +76,13 @@
 
 .canvas-wrapper {
   position: relative;
-  background: 
-    repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px),
-    repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px);
-  background-size: 20px 20px;
+  background: #5C94FC;
 }
 
 #levelCanvas {
   cursor: crosshair;
   image-rendering: pixelated;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
 .tile-item {

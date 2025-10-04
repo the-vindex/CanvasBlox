@@ -1,4 +1,5 @@
 import { LevelData, LevelMetadata } from '@/types/level';
+import { DEFAULT_GRASS_Y } from '@/constants/editor';
 
 export class LevelSerializer {
   static serialize(levelData: LevelData): string {
@@ -28,6 +29,25 @@ export class LevelSerializer {
   static createDefaultLevel(name: string = 'New Level'): LevelData {
     const now = new Date().toISOString();
 
+    // Create default grass platform (10 blocks from bottom)
+    const tiles = [];
+
+    // Create grass platform spanning full width (60 tiles)
+    for (let x = 0; x < 60; x += 6) {
+      tiles.push({
+        id: `tile-ground-${x}`,
+        type: 'platform-grass',
+        position: { x, y: DEFAULT_GRASS_Y },
+        dimensions: { width: 6, height: 1 },
+        rotation: 0 as 0,
+        layer: 0,
+        properties: {
+          collidable: true,
+          material: 'grass'
+        }
+      });
+    }
+
     return {
       levelName: name,
       metadata: {
@@ -36,9 +56,9 @@ export class LevelSerializer {
         author: 'Level Editor',
         description: '',
         dimensions: { width: 60, height: 30 }, // Level size in tiles
-        backgroundColor: '#1a1a1a'
+        backgroundColor: 'transparent'
       },
-      tiles: [],
+      tiles,
       objects: [],
       spawnPoints: []
     };

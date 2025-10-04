@@ -9,7 +9,7 @@ const AUTOSAVE_INTERVAL = 5000; // 5 seconds
 
 export function useLevelEditor() {
   const { toast } = useToast();
-  
+
   const [levels, setLevels] = useState<LevelData[]>([]);
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [editorState, setEditorState] = useState<EditorState>({

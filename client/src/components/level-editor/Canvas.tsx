@@ -33,58 +33,31 @@ export function Canvas({
   const canvasHeight = levelData.metadata.dimensions.height * TILE_SIZE;
 
   return (
-    <div className={cn("flex-1 relative overflow-auto", className)} style={{ minHeight: canvasHeight }}>
+    <div className={cn("flex-1 relative overflow-auto canvas-wrapper scrollbar-custom", className)} style={{ minHeight: canvasHeight }}>
       <canvas
         id="levelCanvas"
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
-        className="absolute top-0 left-0 cursor-crosshair"
+        className="absolute top-0 left-0 cursor-crosshair border-2 border-primary/30"
         style={{ imageRendering: 'pixelated' }}
         data-testid="level-canvas"
       />
       
       {/* Canvas Info Overlay */}
-      <div className="absolute top-4 left-4 bg-card/90 border border-border rounded px-3 py-2 text-xs space-y-1">
+      <div className="absolute top-4 left-4 bg-black/30 backdrop-blur-sm border border-white/20 rounded px-3 py-2 text-xs space-y-1 z-10 text-white">
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">Mouse:</span>
+          <span className="text-white/70">Mouse:</span>
           <span data-testid="mouse-position">
             X: {editorState.mousePosition.x}, Y: {editorState.mousePosition.y}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">Selected:</span>
+          <span className="text-white/70">Selected:</span>
           <span data-testid="selected-count">
             {editorState.selectedObjects.length} objects
           </span>
         </div>
-      </div>
-
-      {/* Zoom Controls */}
-      <div className="absolute bottom-4 right-4 bg-card border border-border rounded-lg shadow-lg p-2 flex flex-col gap-2">
-        <button 
-          className="px-3 py-2 rounded hover:bg-secondary transition-all duration-150"
-          data-testid="button-zoom-in"
-        >
-          <i className="fas fa-plus"></i>
-        </button>
-        <div className="text-center text-sm text-muted-foreground" data-testid="zoom-level">
-          {Math.round(editorState.zoom * 100)}%
-        </div>
-        <button 
-          className="px-3 py-2 rounded hover:bg-secondary transition-all duration-150"
-          data-testid="button-zoom-out"
-        >
-          <i className="fas fa-minus"></i>
-        </button>
-        <div className="w-full h-px bg-border my-1"></div>
-        <button 
-          className="px-3 py-2 rounded hover:bg-secondary transition-all duration-150"
-          title="Reset Zoom (0)"
-          data-testid="button-reset-zoom"
-        >
-          <i className="fas fa-compress"></i>
-        </button>
       </div>
     </div>
   );

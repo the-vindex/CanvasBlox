@@ -14,6 +14,9 @@ export class CanvasRenderer {
   }
 
   drawBackground(backgroundColor: string) {
+    if (backgroundColor === 'transparent') {
+      return; // Skip filling - let wrapper background show through
+    }
     this.ctx.fillStyle = backgroundColor;
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
