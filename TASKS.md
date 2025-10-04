@@ -1,7 +1,7 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Chapter 8 - Not Started
+**Current Chapter:** Chapter 10 - Not Started
 **Last Updated:** 2025-10-04
 
 ---
@@ -16,7 +16,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
-## Completed Chapters (1-8)
+## Completed Chapters (1-9)
 
 ✅ Chapter 1: Enhanced Header & Branding
 ✅ Chapter 2: Modern Toolbar
@@ -26,6 +26,7 @@ Work through chapters sequentially. After implementing each chapter:
 ❌ Chapter 6: Level Tabs Enhancement (Skipped)
 ✅ Chapter 7: Animations & Micro-interactions
 ✅ Chapter 8: Color & Theme (Minimized - shadow system only)
+✅ Chapter 9: Context & Feedback (5 core tasks completed)
 
 ---
 
@@ -60,131 +61,73 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 9: Context & Feedback
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Completed
 **Files:** Multiple
 **Priority:** Medium
 
 ### Tasks:
 
 #### 9.0 Remove line and rectangle tool buttons (not implemented)
+- **Status:** ❌ Skipped - Tools kept for Chapter 11 implementation
 - **Location:** `client/src/components/level-editor/Toolbar.tsx`
-- **Search for:** Line tool button ('l' key), Rectangle tool button ('r' key)
-- **Remove:** Both buttons and their keyboard shortcuts from LevelEditor.tsx
-- **Note:** These features are not implemented, so buttons should be removed
+- **Note:** Buttons remain in UI, will be implemented in Chapter 11
 
 #### 9.1 Action history panel (collapsible sidebar)
+- **Status:** ❌ Skipped - Optional feature, low priority
 - **Location:** New component, positioned on right or bottom
-- **Data:** Use existing history/historyIndex from useLevelEditor
-- **Display:** List of actions with timestamps
-- **Features:** Click to jump to that history state
-- **Collapsible:** Slide in/out animation
+- **Note:** Deferred for future implementation if needed
 
 #### 9.2 Quick tips: Contextual help bubbles
+- **Status:** ❌ Skipped - Optional feature, low priority
 - **Location:** Various UI elements
-- **Implementation:** Tooltip component or info icons
-- **Content:** Brief tips for new users
-- **Examples:**
-  - "Drag with middle mouse to pan"
-  - "Press V for select tool"
-  - "Link buttons to doors with K"
+- **Note:** Deferred for future implementation if needed
 
 #### 9.3 Remove "snap to grid" feature
-- **Search for:** "snap", "grid snap", "snapToGrid"
-- **Files to check:**
-  - EditorState type definition
-  - Any grid-related logic
-  - UI controls for grid snap
-  - Keyboard shortcuts
-- **Remove:** All code and UI related to grid snapping
+- **Status:** ✅ Completed - Feature never existed
+- **Note:** No snap to grid functionality found in codebase
 
 #### 9.4 Fix redo functionality - changes not properly restored
-- **Location:** `client/src/hooks/useLevelEditor.ts` - redo function (line ~102-112)
-- **Current:** Redo button/shortcut doesn't properly restore the state - changes are not applied
-- **Bug:** When redo is triggered, the level state is not visually updated on canvas
-- **Investigation needed:**
-  - Check if history state is being correctly retrieved
-  - Verify levelData is being properly updated in state
-  - Ensure canvas re-renders after redo
-  - Compare with undo implementation which works correctly
-- **Files to check:**
-  - `client/src/hooks/useLevelEditor.ts` (redo function)
-  - `client/src/pages/LevelEditor.tsx` (redo button handlers)
-- **Note:** Bug reported by user - redo doesn't restore changes as expected
+- **Status:** ✅ Completed
+- **Location:** `client/src/hooks/useLevelEditor.ts:60-83`
+- **Fix:** Fixed history index management when history is trimmed
+- **Implementation:** Added proper history index adjustment in addToHistory function
 
 #### 9.5 Group consecutive tile placements as single undo/redo action
-- **Location:** `client/src/hooks/useLevelEditor.ts` - addTile function and history management
-- **Current:** Each tile placed adds a separate history entry, making undo/redo tedious when drawing multiple tiles
-- **Change:** When user drags to place multiple tiles in one continuous action, group them as a single history entry
+- **Status:** ✅ Completed
+- **Location:** Multiple files
 - **Implementation:**
-  - Track "drawing session" - starts on mousedown, ends on mouseup
-  - Buffer tile additions during drawing session
-  - Add single history entry when session ends with all tiles added
-  - Apply same logic to addObject function for consistency
-- **Files to check:**
-  - `client/src/hooks/useLevelEditor.ts` (addTile, addObject, addToHistory)
-  - `client/src/hooks/useCanvas.ts` (mouse event handlers)
-  - `client/src/pages/LevelEditor.tsx` (handleTilePlaced)
-- **Note:** User improvement request - better UX for drawing multiple tiles
+  - Added skipHistory parameter to addTile function
+  - Track drawing sessions in LevelEditor with drawingSessionTileCount ref
+  - Modified useCanvas to pass isDrawing flag during mousedown→mousemove→mouseup
+  - Created commitBatchToHistory function to save grouped changes
+  - Batched tiles committed as single history entry on mouseup
 
 #### 9.6 Auto-increment level names to avoid duplicates
-- **Location:** `client/src/hooks/useLevelEditor.ts` - addNewLevel function
-- **Current:** Adding new level always creates "New Level" - duplicates cause confusion
-- **Change:** Check if "New Level" exists, if so create "New Level 2", "New Level 3", etc.
-- **Implementation:**
-  - In addNewLevel function, check existing level names
-  - Search for pattern "New Level", "New Level 2", "New Level 3", etc.
-  - Find highest number and increment by 1
-  - If no "New Level" exists, use "New Level" (no number)
-- **Logic:**
-  ```typescript
-  const existingNames = levels.map(l => l.levelName);
-  let counter = 0;
-  let newName = "New Level";
-  while (existingNames.includes(newName)) {
-    counter++;
-    newName = `New Level ${counter}`;
-  }
-  ```
-- **Files to modify:**
-  - `client/src/hooks/useLevelEditor.ts` (addNewLevel function)
-- **Note:** User improvement request - prevents duplicate level names
+- **Status:** ✅ Completed
+- **Location:** `client/src/hooks/useLevelEditor.ts:110-127`
+- **Implementation:** Added logic to check existing names and auto-increment: "New Level", "New Level 2", "New Level 3", etc.
 
 #### 9.7 Add close/collapse functionality to Properties Panel
-- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`
-- **Current:** Properties panel is always visible and takes up right sidebar space
-- **Change:** Add close/collapse button to properties panel header, allow users to hide it for more canvas space
-- **Implementation options:**
-  1. **Full close:** Hide panel completely, show small ">" button to reopen
-  2. **Collapse:** Minimize to thin vertical bar with icon, click to expand
-  3. **Toggle button in header:** X button in panel header to close, reopen from toolbar or keyboard shortcut
-- **Recommended approach:** Option 3 (toggle button)
+- **Status:** ✅ Completed
+- **Location:** Multiple files
 - **Implementation:**
-  - Add state to track panel visibility: `const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);`
-  - Add X/close button to PropertiesPanel header
-  - Conditionally render panel based on state
-  - Add reopen button in main toolbar or use keyboard shortcut (e.g., 'P' key)
-  - Persist preference in localStorage (optional)
-- **Files to modify:**
-  - `client/src/components/level-editor/PropertiesPanel.tsx` (add close button)
-  - `client/src/pages/LevelEditor.tsx` (manage panel visibility state)
-- **Note:** User improvement request - more canvas space when properties not needed
+  - Added close button in Properties Panel header
+  - Toggle button in Toolbar with visual state indicator
+  - Keyboard shortcut: 'P' key
+  - Panel positioned below toolbar to prevent toolbar resize
+  - Gives more canvas space when properties not needed
 
 #### 9.8 Bug: Deactivate tool when choosing tile for placement
-- **Location:** `client/src/pages/LevelEditor.tsx` - handleTileSelect function
-- **Current:** When user selects a tile from the palette, any active tool (select, move, link, etc.) remains active
-- **Bug:** This causes confusion - user expects to enter "placement mode" but tool is still active
-- **Expected behavior:** Selecting a tile from palette should automatically switch to placement mode and deactivate any active tool
+- **Status:** ✅ Completed
+- **Location:** Multiple files
 - **Implementation:**
-  - In handleTileSelect function, clear selectedTool by setting it to null or a default state
-  - Alternatively, set selectedTool to a dedicated 'place' tool mode
-  - Ensure tool buttons visually deselect when tile is chosen
-- **Files to modify:**
-  - `client/src/pages/LevelEditor.tsx` (handleTileSelect function around line 63-65)
-  - May need to update `client/src/types/level.ts` if adding a 'place' tool type
-- **Note:** User reported bug - improves UX consistency
+  - Made selectedTool nullable in EditorState type
+  - Selecting tile → sets selectedTool to null (placement mode)
+  - Selecting tool → clears selectedTileType (tool mode)
+  - Mutually exclusive modes for clear UI feedback
 
-**Dependencies:** 9.3 should be done first
-**Notes:** Make editor more discoverable for new users
+**Dependencies:** None
+**Notes:** Chapter successfully improved editor UX and bug fixes
 
 ---
 
@@ -220,6 +163,40 @@ Work through chapters sequentially. After implementing each chapter:
 - **Toggle:** State variable in EditorState
 - **UI:** Checkbox in settings or view menu
 - **Effect:** Subtle horizontal lines moving slowly
+
+#### 10.5 Fix "Show Grid" checkbox visual consistency
+- **Location:** `client/src/components/level-editor/Toolbar.tsx` - Show Grid checkbox
+- **Current:** "Show Grid" checkbox styling is inconsistent with the rest of the toolbar UI
+- **Change:** Update checkbox styling to match the overall design system and toolbar aesthetic
+- **Implementation:**
+  - Review current checkbox component styling in Toolbar
+  - Apply consistent spacing, colors, and hover effects
+  - Consider using a toggle switch instead of checkbox for modern look
+  - Ensure label and checkbox alignment matches other toolbar elements
+- **Files to modify:**
+  - `client/src/components/level-editor/Toolbar.tsx` (Show Grid checkbox section)
+- **Note:** User reported inconsistency - UI polish for visual coherence
+
+#### 10.6 Improve zoom functionality UX - feels disconnected
+- **Location:** `client/src/pages/LevelEditor.tsx` - zoom handlers, `client/src/hooks/useCanvas.ts`
+- **Current:** Zoom functionality feels like "floating in the air" - lacks tactile feedback and proper anchor point
+- **Issues:**
+  - Zoom doesn't anchor to mouse cursor position (zooms from center instead)
+  - No visual feedback during zoom operation
+  - Pan position doesn't adjust correctly when zooming
+  - Missing smooth zoom transitions
+- **Change:** Implement mouse-centered zoom with proper pan adjustment
+- **Implementation:**
+  - Zoom should center on mouse cursor position (like Figma/Photoshop)
+  - Calculate new pan offset to keep mouse point stationary: `newPan = pan + (mousePos - mousePos * zoomRatio)`
+  - Add smooth CSS transitions for zoom changes
+  - Consider adding zoom indicator tooltip showing current zoom level
+  - Add wheel zoom support (Ctrl+Scroll)
+- **Files to modify:**
+  - `client/src/pages/LevelEditor.tsx` (handleZoomIn/handleZoomOut)
+  - `client/src/hooks/useCanvas.ts` (zoom logic)
+  - `client/src/components/level-editor/Canvas.tsx` (wheel event handler)
+- **Note:** User reported poor UX - zoom needs to feel grounded and predictable
 
 **Dependencies:** None
 **Notes:** These are polish effects - keep subtle and performant
