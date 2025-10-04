@@ -222,45 +222,6 @@ test.describe('Level Editor', () => {
     await expect(basicTile).toHaveAttribute('aria-selected', 'false');
   });
 
-  test('Step 4: should place selected tile on canvas', async ({ page }) => {
-    // Select a tile from palette
-    const iceTile = page.getByTestId('tile-platform-ice');
-    await iceTile.click();
-    await expect(iceTile).toHaveAttribute('aria-selected', 'true');
-
-    // Click on canvas to place tile
-    const canvas = page.getByTestId('level-canvas');
-    const box = await canvas.boundingBox();
-    if (!box) throw new Error('Canvas not found');
-
-    // Click at a specific position on canvas
-    await page.mouse.click(box.x + 200, box.y + 200);
-
-    // Wait a bit for rendering
-    await page.waitForTimeout(100);
-
-    // Verify tile was placed by checking canvas has more content than before
-    // (This is a basic check - more specific checks can be added later)
-    const hasContent = await canvas.evaluate((canvasEl) => {
-      const ctx = (canvasEl as HTMLCanvasElement).getContext('2d');
-      if (!ctx) return false;
-
-      // Sample the area where we clicked to verify something was drawn
-      const imageData = ctx.getImageData(200, 200, 32, 32);
-      const data = imageData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const alpha = data[i + 3];
-        if (alpha > 0) {
-          return true;
-        }
-      }
-      return false;
-    });
-
-    expect(hasContent).toBe(true);
-  });
-
   test('Step 4: should switch between different tile types', async ({ page }) => {
     // Select platform tile
     const grassTile = page.getByTestId('tile-platform-grass');

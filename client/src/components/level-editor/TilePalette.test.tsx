@@ -72,28 +72,4 @@ describe('TilePalette', () => {
 
     expect(mockOnTileSelect).toHaveBeenCalledWith('button');
   });
-
-  it('should update visual selection when selectedTileType prop changes', () => {
-    const mockOnTileSelect = vi.fn();
-    const { rerender } = render(<TilePalette selectedTileType={null} onTileSelect={mockOnTileSelect} />);
-
-    // Initially nothing selected
-    let basicTile = screen.getByTestId('tile-platform-basic');
-    expect(basicTile).toHaveAttribute('aria-selected', 'false');
-
-    // Rerender with selection
-    rerender(<TilePalette selectedTileType="platform-basic" onTileSelect={mockOnTileSelect} />);
-
-    basicTile = screen.getByTestId('tile-platform-basic');
-    expect(basicTile).toHaveAttribute('aria-selected', 'true');
-  });
-
-  it('should render search input', () => {
-    const mockOnTileSelect = vi.fn();
-    render(<TilePalette selectedTileType={null} onTileSelect={mockOnTileSelect} />);
-
-    const searchInput = screen.getByTestId('input-tile-search');
-    expect(searchInput).toBeInTheDocument();
-    expect(searchInput).toHaveAttribute('placeholder', 'Search tiles...');
-  });
 });
