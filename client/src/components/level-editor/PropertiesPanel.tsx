@@ -11,13 +11,15 @@ interface PropertiesPanelProps {
   editorState: EditorState;
   onLevelUpdate: (updater: (level: LevelData) => LevelData, action?: string) => void;
   onDuplicateLevel: () => void;
+  onClose?: () => void;
 }
 
-export function PropertiesPanel({ 
-  levelData, 
-  editorState, 
+export function PropertiesPanel({
+  levelData,
+  editorState,
   onLevelUpdate,
-  onDuplicateLevel 
+  onDuplicateLevel,
+  onClose
 }: PropertiesPanelProps) {
   const selectedObjectId = editorState.selectedObjects[0];
   const selectedObject = selectedObjectId ? 
@@ -65,11 +67,23 @@ export function PropertiesPanel({
 
   return (
     <aside className="w-72 bg-card border-l border-border flex flex-col overflow-hidden" data-testid="properties-panel">
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="text-sm font-semibold flex items-center gap-2">
           <i className="fas fa-sliders-h"></i>
           Properties
         </h2>
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+            title="Close Properties Panel (P)"
+            data-testid="button-close-properties"
+          >
+            <i className="fas fa-times text-xs"></i>
+          </Button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-custom p-4 space-y-4">

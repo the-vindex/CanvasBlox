@@ -13,7 +13,7 @@ export function useLevelEditor() {
   const [levels, setLevels] = useState<LevelData[]>([]);
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [editorState, setEditorState] = useState<EditorState>({
-    selectedTool: 'select',
+    selectedTool: null,
     selectedObjects: [],
     clipboard: [],
     selectedTileType: null,
@@ -69,9 +69,17 @@ export function useLevelEditor() {
     setHistory(prev => {
       const newHistory = prev.slice(0, historyIndex + 1);
       newHistory.push(entry);
-      return newHistory.slice(-100); // Keep last 100 entries
+      const trimmedHistory = newHistory.slice(-100); // Keep last 100 entries
+
+      // Adjust history index if history was trimmed
+      if (trimmedHistory.length < newHistory.length) {
+        setHistoryIndex(trimmedHistory.length - 1);
+        return trimmedHistory;
+      }
+
+      setHistoryIndex(prev => prev + 1);
+      return trimmedHistory;
     });
-    setHistoryIndex(prev => prev + 1);
   }, [currentLevel, historyIndex]);
 
   const updateCurrentLevel = useCallback((updater: (level: LevelData) => LevelData, action: string = 'Level updated') => {
@@ -108,10 +116,23 @@ export function useLevelEditor() {
   }, [history, historyIndex, currentLevelIndex]);
 
   const createNewLevel = useCallback((name?: string) => {
-    const newLevel = LevelSerializer.createDefaultLevel(name);
+    // Auto-increment level names to avoid duplicates
+    let finalName = name;
+    if (!name) {
+      const existingNames = levels.map(l => l.levelName);
+      let counter = 0;
+      let newName = "New Level";
+      while (existingNames.includes(newName)) {
+        counter++;
+        newName = `New Level ${counter}`;
+      }
+      finalName = newName;
+    }
+
+    const newLevel = LevelSerializer.createDefaultLevel(finalName);
     setLevels(prev => [...prev, newLevel]);
     setCurrentLevelIndex(levels.length);
-  }, [levels.length]);
+  }, [levels]);
 
   const duplicateLevel = useCallback((index?: number) => {
     const sourceIndex = index ?? currentLevelIndex;
@@ -135,7 +156,7 @@ export function useLevelEditor() {
     }
   }, [levels.length, currentLevelIndex]);
 
-  const addTile = useCallback((position: Position, tileType: string) => {
+  const addTile = useCallback((position: Position, tileType: string, skipHistory = false) => {
     const newTile: Tile = {
       id: `tile_${Date.now()}_${Math.random()}`,
       type: tileType,
@@ -146,11 +167,23 @@ export function useLevelEditor() {
       properties: { collidable: true }
     };
 
-    updateCurrentLevel(level => ({
-      ...level,
-      tiles: [...level.tiles, newTile]
-    }), `Added ${tileType} tile`);
-  }, [updateCurrentLevel]);
+    if (skipHistory) {
+      // Update level without adding to history (for batched operations)
+      setLevels(prev => {
+        const newLevels = [...prev];
+        newLevels[currentLevelIndex] = {
+          ...newLevels[currentLevelIndex],
+          tiles: [...newLevels[currentLevelIndex].tiles, newTile]
+        };
+        return newLevels;
+      });
+    } else {
+      updateCurrentLevel(level => ({
+        ...level,
+        tiles: [...level.tiles, newTile]
+      }), `Added ${tileType} tile`);
+    }
+  }, [updateCurrentLevel, currentLevelIndex]);
 
   const addObject = useCallback((position: Position, objectType: string) => {
     let newObject: InteractableObject | SpawnPoint;
@@ -298,6 +331,11 @@ export function useLevelEditor() {
     });
   }, [editorState.clipboard, updateCurrentLevel, toast]);
 
+  const commitBatchToHistory = useCallback((action: string) => {
+    // Create a history entry for the current state (after batched changes)
+    addToHistory(action);
+  }, [addToHistory]);
+
   return {
     levels,
     currentLevel,
@@ -318,6 +356,7 @@ export function useLevelEditor() {
     copySelectedObjects,
     pasteObjects,
     undo,
-    redo
+    redo,
+    commitBatchToHistory
   };
 }

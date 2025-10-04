@@ -19,6 +19,8 @@ interface ToolbarProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
+  showPropertiesPanel?: boolean;
+  onTogglePropertiesPanel?: () => void;
 }
 
 export function Toolbar({
@@ -29,7 +31,9 @@ export function Toolbar({
   onRotateRight,
   onZoomIn,
   onZoomOut,
-  onZoomReset
+  onZoomReset,
+  showPropertiesPanel,
+  onTogglePropertiesPanel
 }: ToolbarProps) {
   // Define color scheme for tool groups
   const getToolGroupColor = (tool: EditorState['selectedTool']) => {
@@ -249,6 +253,21 @@ export function Toolbar({
             Show Grid
           </Label>
         </div>
+
+        {onTogglePropertiesPanel && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onTogglePropertiesPanel}
+            className={`px-3 py-2 transition-all duration-300 ease-out hover:scale-105 ${
+              showPropertiesPanel ? 'text-primary' : ''
+            }`}
+            title={showPropertiesPanel ? "Hide Properties Panel (P)" : "Show Properties Panel (P)"}
+            data-testid="button-toggle-properties"
+          >
+            <i className={`fas fa-sliders-h ${showPropertiesPanel ? '' : 'opacity-50'}`}></i>
+          </Button>
+        )}
       </div>
     </div>
   );

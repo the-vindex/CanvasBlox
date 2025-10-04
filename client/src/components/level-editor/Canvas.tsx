@@ -8,7 +8,8 @@ interface CanvasProps {
   editorState: EditorState;
   onMouseMove: (position: Position) => void;
   onCanvasClick: (position: Position, event: MouseEvent) => void;
-  onTilePlaced: (position: Position, tileType: string) => void;
+  onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
+  onDrawingSessionEnd?: () => void;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export function Canvas({
   onMouseMove,
   onCanvasClick,
   onTilePlaced,
+  onDrawingSessionEnd,
   className
 }: CanvasProps) {
   const { canvasRef } = useCanvas({
@@ -25,7 +27,8 @@ export function Canvas({
     editorState,
     onMouseMove,
     onCanvasClick,
-    onTilePlaced
+    onTilePlaced,
+    onDrawingSessionEnd
   });
 
   // Calculate canvas pixel size from tile dimensions

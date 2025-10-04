@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
 import { Canvas } from '@/components/level-editor/Canvas';
 import { TilePalette } from '@/components/level-editor/TilePalette';
@@ -24,6 +24,9 @@ export default function LevelEditor() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showUndoRedoFlash, setShowUndoRedoFlash] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
+  const [isDrawingSession, setIsDrawingSession] = useState(false);
+  const drawingSessionTileCount = useRef(0);
 
   const {
     levels,
@@ -45,7 +48,8 @@ export default function LevelEditor() {
     copySelectedObjects,
     pasteObjects,
     undo,
-    redo
+    redo,
+    commitBatchToHistory
   } = useLevelEditor();
 
   const handleMouseMove = useCallback((position: Position) => {
@@ -61,21 +65,47 @@ export default function LevelEditor() {
   }, [editorState.selectedTool, setEditorState]);
 
   const handleTileSelect = useCallback((tileType: string) => {
-    setEditorState(prev => ({ ...prev, selectedTileType: tileType }));
+    // When selecting a tile, enter placement mode (clear tool selection)
+    setEditorState(prev => ({
+      ...prev,
+      selectedTileType: tileType,
+      selectedTool: null
+    }));
   }, [setEditorState]);
 
-  const handleTilePlaced = useCallback((position: Position, tileType: string) => {
+  const handleTilePlaced = useCallback((position: Position, tileType: string, isDrawing = false) => {
     if (tileType.startsWith('spawn-')) {
+      // Spawn points are not batched (usually single placement)
       addObject(position, tileType);
     } else if (tileType.includes('platform')) {
-      addTile(position, tileType);
+      // For tiles, use batching if in drawing session
+      if (isDrawing) {
+        addTile(position, tileType, true); // Skip history
+        drawingSessionTileCount.current++;
+      } else {
+        addTile(position, tileType, false); // Normal history
+      }
     } else {
+      // Other objects are not batched
       addObject(position, tileType);
     }
   }, [addTile, addObject]);
 
+  const handleDrawingSessionEnd = useCallback(() => {
+    // When drawing session ends, commit all placed tiles as a single history entry
+    if (drawingSessionTileCount.current > 0) {
+      const count = drawingSessionTileCount.current;
+      commitBatchToHistory(`Placed ${count} tile${count > 1 ? 's' : ''}`);
+      drawingSessionTileCount.current = 0;
+    }
+  }, [commitBatchToHistory]);
+
   const handleToolChange = useCallback((tool: typeof editorState.selectedTool) => {
-    setEditorState(prev => ({ ...prev, selectedTool: tool }));
+    setEditorState(prev => ({
+      ...prev,
+      selectedTool: tool,
+      selectedTileType: null // Clear tile selection when activating a tool
+    }));
   }, [setEditorState]);
 
   const handleStateChange = useCallback((updates: Partial<typeof editorState>) => {
@@ -278,6 +308,9 @@ export default function LevelEditor() {
           case 'k':
             handleToolChange('link');
             break;
+          case 'p':
+            setShowPropertiesPanel(prev => !prev);
+            break;
         }
       }
     };
@@ -451,36 +484,44 @@ export default function LevelEditor() {
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
             onZoomReset={handleZoomReset}
+            showPropertiesPanel={showPropertiesPanel}
+            onTogglePropertiesPanel={() => setShowPropertiesPanel(prev => !prev)}
           />
-          
-          <div
-            className="flex-1 relative"
-            style={{
-              background: `
-                repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px),
-                repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px)
-              `,
-              backgroundSize: '20px 20px'
-            }}
-          >
-            <Canvas
-              levelData={currentLevel}
-              editorState={editorState}
-              onMouseMove={handleMouseMove}
-              onCanvasClick={handleCanvasClick}
-              onTilePlaced={handleTilePlaced}
-            />
-            {showUndoRedoFlash && <div className="undo-redo-flash" />}
+
+          <div className="flex-1 flex overflow-hidden">
+            <div
+              className="flex-1 relative"
+              style={{
+                background: `
+                  repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px),
+                  repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(0 0% 15%) 19px, hsl(0 0% 15%) 20px)
+                `,
+                backgroundSize: '20px 20px'
+              }}
+            >
+              <Canvas
+                levelData={currentLevel}
+                editorState={editorState}
+                onMouseMove={handleMouseMove}
+                onCanvasClick={handleCanvasClick}
+                onTilePlaced={handleTilePlaced}
+                onDrawingSessionEnd={handleDrawingSessionEnd}
+              />
+              {showUndoRedoFlash && <div className="undo-redo-flash" />}
+            </div>
+
+            {/* Properties Panel - below toolbar, right of canvas */}
+            {showPropertiesPanel && (
+              <PropertiesPanel
+                levelData={currentLevel}
+                editorState={editorState}
+                onLevelUpdate={updateCurrentLevel}
+                onDuplicateLevel={() => duplicateLevel()}
+                onClose={() => setShowPropertiesPanel(false)}
+              />
+            )}
           </div>
         </main>
-
-        {/* Right Sidebar - Properties Panel */}
-        <PropertiesPanel
-          levelData={currentLevel}
-          editorState={editorState}
-          onLevelUpdate={updateCurrentLevel}
-          onDuplicateLevel={() => duplicateLevel()}
-        />
       </div>
 
       {/* Status Bar */}

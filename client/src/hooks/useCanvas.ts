@@ -8,7 +8,8 @@ interface UseCanvasProps {
   editorState: EditorState;
   onMouseMove: (position: Position) => void;
   onCanvasClick: (position: Position, event: MouseEvent) => void;
-  onTilePlaced: (position: Position, tileType: string) => void;
+  onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
+  onDrawingSessionEnd?: () => void;
 }
 
 export function useCanvas({
@@ -16,7 +17,8 @@ export function useCanvas({
   editorState,
   onMouseMove,
   onCanvasClick,
-  onTilePlaced
+  onTilePlaced,
+  onDrawingSessionEnd
 }: UseCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<CanvasRenderer | null>(null);
@@ -63,7 +65,7 @@ export function useCanvas({
     onMouseMove(worldPos);
 
     if (isPaintingRef.current && editorState.selectedTileType) {
-      onTilePlaced(worldPos, editorState.selectedTileType);
+      onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
     }
   }, [getWorldPosition, onMouseMove, onTilePlaced, editorState.selectedTileType]);
 
@@ -72,15 +74,21 @@ export function useCanvas({
 
     if (editorState.selectedTileType) {
       isPaintingRef.current = true;
-      onTilePlaced(worldPos, editorState.selectedTileType);
+      onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
     } else {
       onCanvasClick(worldPos, e);
     }
   }, [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType]);
 
   const handleMouseUp = useCallback(() => {
-    isPaintingRef.current = false;
-  }, []);
+    if (isPaintingRef.current) {
+      isPaintingRef.current = false;
+      // End the drawing session
+      if (onDrawingSessionEnd) {
+        onDrawingSessionEnd();
+      }
+    }
+  }, [onDrawingSessionEnd]);
 
   const handleClick = useCallback((e: MouseEvent) => {
     const worldPos = getWorldPosition(e);
