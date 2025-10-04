@@ -4,6 +4,7 @@ import { Canvas } from '@/components/level-editor/Canvas';
 import { TilePalette } from '@/components/level-editor/TilePalette';
 import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
 import { Toolbar } from '@/components/level-editor/Toolbar';
+import { LevelTabs } from '@/components/level-editor/LevelTabs';
 import { Position, EditorState } from '@/types/level';
 
 export default function LevelEditor() {
@@ -142,6 +143,22 @@ export default function LevelEditor() {
     }));
   }, [setEditorState]);
 
+  const handleLevelClose = useCallback((index: number) => {
+    if (levels.length > 1) {
+      const level = levels[index];
+      const hasData = level.tiles.length > 0 ||
+                      level.objects.length > 0 ||
+                      level.spawnPoints.length > 0;
+
+      if (hasData) {
+        const confirmed = window.confirm(`Are you sure you want to close "${level.levelName}"? Any unsaved changes will be lost.`);
+        if (!confirmed) return;
+      }
+
+      deleteLevel(index);
+    }
+  }, [levels, deleteLevel]);
+
   // Don't render until we have a current level
   if (!currentLevel) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#fff' }}>Loading...</div>;
@@ -196,32 +213,13 @@ export default function LevelEditor() {
       </header>
 
       {/* LEVEL TABS BAR */}
-      <div
-        style={{
-          background: '#252525',
-          display: 'flex',
-          alignItems: 'center',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          borderBottom: '1px solid #333',
-          padding: '0 8px',
-          gap: '4px',
-        }}
-      >
-        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#1a1a1a', borderRadius: '6px 6px 0 0', fontSize: '13px', whiteSpace: 'nowrap', border: '1px solid #555', borderBottom: 'none', color: '#fff', cursor: 'pointer' }}>
-          <span>Level 1</span>
-          <span style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px', fontSize: '16px', lineHeight: 1 }}>×</span>
-        </button>
-        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#2a2a2a', borderRadius: '6px 6px 0 0', fontSize: '13px', whiteSpace: 'nowrap', border: '1px solid transparent', borderBottom: 'none', cursor: 'pointer', color: '#e0e0e0' }}>
-          <span>Level 2</span>
-          <span style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px', fontSize: '16px', lineHeight: 1 }}>×</span>
-        </button>
-        <button style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: '#2a2a2a', borderRadius: '6px 6px 0 0', fontSize: '13px', whiteSpace: 'nowrap', border: '1px solid transparent', borderBottom: 'none', cursor: 'pointer', color: '#e0e0e0' }}>
-          <span>Test Arena</span>
-          <span style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '3px', fontSize: '16px', lineHeight: 1 }}>×</span>
-        </button>
-        <button style={{ padding: '8px 16px', color: '#888', fontSize: '13px', cursor: 'pointer', border: 'none', background: 'none', flexShrink: 0 }}>+ New Level</button>
-      </div>
+      <LevelTabs
+        levels={levels}
+        currentLevelIndex={currentLevelIndex}
+        onLevelSelect={setCurrentLevelIndex}
+        onLevelClose={handleLevelClose}
+        onNewLevel={() => createNewLevel()}
+      />
 
       {/* MAIN CONTENT AREA (3 columns) */}
       <div

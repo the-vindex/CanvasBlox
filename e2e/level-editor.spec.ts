@@ -35,8 +35,12 @@ test.describe('Level Editor', () => {
   });
 
   test('should show level tabs', async ({ page }) => {
-    // Look for level tab text content
-    await expect(page.getByText('Level 1', { exact: true })).toBeVisible();
+    // Look for level tab with testid
+    const firstTab = page.getByTestId('tab-level-0');
+    await expect(firstTab).toBeVisible();
+
+    // Verify it contains the level name
+    await expect(firstTab).toContainText('New Level');
   });
 
   test('should have toolbar buttons', async ({ page }) => {
@@ -495,5 +499,135 @@ test.describe('Level Editor', () => {
 
     // Should be back to 100%
     await expect(zoomLevel).toHaveText('100%');
+  });
+
+  test('Step 7: should display LevelTabs component', async ({ page }) => {
+    const levelTabs = page.getByTestId('level-tabs');
+    await expect(levelTabs).toBeVisible();
+  });
+
+  test('Step 7: should display all level tabs from state', async ({ page }) => {
+    // Check that level tabs are rendered from actual state
+    // The first tab should show the current level name
+    const firstTab = page.getByTestId('tab-level-0');
+    await expect(firstTab).toBeVisible();
+
+    // Verify the tab has text content (level name)
+    const tabText = await firstTab.textContent();
+    expect(tabText).toBeTruthy();
+  });
+
+  test('Step 7: should highlight active level tab', async ({ page }) => {
+    const firstTab = page.getByTestId('tab-level-0');
+    await expect(firstTab).toBeVisible();
+
+    // Active tab should be marked as selected (verify via CSS class for visual distinction)
+    // Note: This tests the visual distinction rather than internal state
+    const classes = await firstTab.getAttribute('class');
+    expect(classes).toContain('border-primary');
+  });
+
+  test('Step 7: should switch between level tabs', async ({ page }) => {
+    // Create a second level first by clicking new level button
+    const newLevelButton = page.getByTestId('button-new-level');
+    await expect(newLevelButton).toBeVisible();
+    await newLevelButton.click();
+
+    // Wait for second tab to appear
+    const secondTab = page.getByTestId('tab-level-1');
+    await expect(secondTab).toBeVisible();
+
+    // Second tab should now be active (has visual distinction)
+    const secondTabClasses = await secondTab.getAttribute('class');
+    expect(secondTabClasses).toContain('border-primary');
+
+    // Click first tab to switch back
+    const firstTab = page.getByTestId('tab-level-0');
+    await firstTab.click();
+
+    // First tab should now be active (has visual distinction)
+    const firstTabClasses = await firstTab.getAttribute('class');
+    expect(firstTabClasses).toContain('border-primary');
+
+    // Second tab should no longer be active (visual distinction removed)
+    const secondTabClassesAfter = await secondTab.getAttribute('class');
+    expect(secondTabClassesAfter).not.toContain('border-primary');
+  });
+
+  test('Step 7: should create new level when new level button clicked', async ({ page }) => {
+    const newLevelButton = page.getByTestId('button-new-level');
+    await expect(newLevelButton).toBeVisible();
+
+    // Count existing tabs before creating new level
+    const tabsBeforeCount = await page.getByTestId(/tab-level-\d+/).count();
+
+    // Click new level button
+    await newLevelButton.click();
+
+    // Should have one more tab now
+    const tabsAfterCount = await page.getByTestId(/tab-level-\d+/).count();
+    expect(tabsAfterCount).toBe(tabsBeforeCount + 1);
+
+    // New tab should be active (has visual distinction)
+    const newTabIndex = tabsAfterCount - 1;
+    const newTab = page.getByTestId(`tab-level-${newTabIndex}`);
+    const classes = await newTab.getAttribute('class');
+    expect(classes).toContain('border-primary');
+  });
+
+  test('Step 7: should show close button on tabs when multiple levels exist', async ({ page }) => {
+    // Create a second level
+    const newLevelButton = page.getByTestId('button-new-level');
+    await newLevelButton.click();
+
+    // Close buttons should be visible on both tabs
+    const closeButton0 = page.getByTestId('button-close-level-0');
+    const closeButton1 = page.getByTestId('button-close-level-1');
+
+    await expect(closeButton0).toBeVisible();
+    await expect(closeButton1).toBeVisible();
+  });
+
+  test('Step 7: should close level when close button clicked', async ({ page }) => {
+    // Create a second level
+    const newLevelButton = page.getByTestId('button-new-level');
+    await newLevelButton.click();
+
+    // Count tabs
+    const tabsBeforeCount = await page.getByTestId(/tab-level-\d+/).count();
+    expect(tabsBeforeCount).toBe(2);
+
+    // Handle confirmation dialog
+    page.on('dialog', dialog => dialog.accept());
+
+    // Close the second level
+    const closeButton1 = page.getByTestId('button-close-level-1');
+    await closeButton1.click();
+
+    // Should have one less tab
+    const tabsAfterCount = await page.getByTestId(/tab-level-\d+/).count();
+    expect(tabsAfterCount).toBe(1);
+  });
+
+  test('Step 7: should not close last remaining level', async ({ page }) => {
+    // Start with one level - try to close it
+    const tabsCount = await page.getByTestId(/tab-level-\d+/).count();
+
+    if (tabsCount === 1) {
+      // Close button should not be visible on single tab
+      const closeButton = page.getByTestId('button-close-level-0');
+      await expect(closeButton).not.toBeVisible();
+    } else {
+      // If multiple levels exist, close all but one
+      for (let i = tabsCount - 1; i > 0; i--) {
+        page.on('dialog', dialog => dialog.accept());
+        const closeButton = page.getByTestId(`button-close-level-${i}`);
+        await closeButton.click();
+      }
+
+      // Last tab should not have close button
+      const lastCloseButton = page.getByTestId('button-close-level-0');
+      await expect(lastCloseButton).not.toBeVisible();
+    }
   });
 });
