@@ -16,6 +16,7 @@ export function useLevelEditor() {
     selectedTool: 'select',
     selectedObjects: [],
     clipboard: [],
+    selectedTileType: null,
     zoom: 1,
     pan: { x: 0, y: 0 },
     showGrid: true,

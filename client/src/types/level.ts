@@ -76,6 +76,7 @@ export interface EditorState {
   selectedTool: 'select' | 'multiselect' | 'move' | 'line' | 'rectangle' | 'link';
   selectedObjects: string[];
   clipboard: (Tile | InteractableObject | SpawnPoint)[];
+  selectedTileType: string | null;
   zoom: number;
   pan: Position;
   showGrid: boolean;
