@@ -113,19 +113,19 @@ This app is vibe coded - built for fun and creativity - but still follows best p
 - **Modular Architecture** - Clean code organization with hooks and utilities
 - **Code Quality** - Type checking with `npm run check`
 
-## Key Learnings
+## Development Principles
 
-**Playwright Setup:**
-- Exclude from Vite bundling: Add to `vite.config.ts` → `optimizeDeps.exclude`
-- Don't serve HTML reports automatically - use `reporter: 'list'`
-- Always verify actual port (was 3000, not 5000)
+**Test Infrastructure as Product:**
+- Testing tools are part of the stack - configure them properly from day one
+- Automation should run silently; humans review failures, not successes
+- Test output must be actionable (screenshots > logs)
 
-**Test Organization:**
-- Colocate tests with source (modern): `file.ts` + `file.test.ts` in same folder
-- NOT in separate `__tests__/` folders (outdated pattern)
-- Configure Vitest to exclude e2e: `exclude: ['**/e2e/**']`
+**Code Locality:**
+- Keep related things together - tests live next to source
+- Modern patterns over legacy conventions
+- Make the codebase easy to navigate
 
-**Vibing with Best Practices:**
-- You're the one who reads test screenshots and fixes issues
-- Verify localStorage integration with temporary E2E tests (mark for deletion)
-- App name matters: "Roblox Level Designer" not generic "Level Editor"
+**Quality Ownership:**
+- Claude owns test quality - reads failures, analyzes screenshots, fixes issues
+- Temporary tests are acceptable when they prove integration (mark for cleanup)
+- User-facing details matter: correct app names, real data display
