@@ -35,8 +35,18 @@ export function Canvas({
   const canvasWidth = levelData.metadata.dimensions.width * TILE_SIZE;
   const canvasHeight = levelData.metadata.dimensions.height * TILE_SIZE;
 
+  // Calculate parallax background position (moves at 50% speed of pan)
+  const parallaxX = editorState.pan.x * 0.5;
+  const parallaxY = editorState.pan.y * 0.5;
+
   return (
-    <div className={cn("flex-1 relative overflow-auto canvas-wrapper scrollbar-custom", className)} style={{ minHeight: canvasHeight }}>
+    <div
+      className={cn("flex-1 relative overflow-auto canvas-wrapper scrollbar-custom", className)}
+      style={{
+        minHeight: canvasHeight,
+        backgroundPosition: `${parallaxX}px ${parallaxY}px`
+      }}
+    >
       <canvas
         id="levelCanvas"
         ref={canvasRef}
@@ -46,7 +56,12 @@ export function Canvas({
         style={{ imageRendering: 'pixelated' }}
         data-testid="level-canvas"
       />
-      
+
+      {/* Scanlines Overlay */}
+      {editorState.showScanlines && (
+        <div className="scanlines-overlay" />
+      )}
+
       {/* Canvas Info Overlay */}
       <div className="absolute top-4 left-4 bg-black/30 backdrop-blur-sm border border-white/20 rounded px-3 py-2 text-xs space-y-1 z-10 text-white">
         <div className="flex items-center gap-2">

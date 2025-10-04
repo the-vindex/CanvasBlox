@@ -80,6 +80,7 @@ export interface EditorState {
   zoom: number;
   pan: Position;
   showGrid: boolean;
+  showScanlines: boolean;
   mousePosition: Position;
   deletingObjects: string[];
 }

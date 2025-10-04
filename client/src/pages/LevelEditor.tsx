@@ -255,6 +255,12 @@ export default function LevelEditor() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input/textarea fields
+      const target = e.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' ||
+                          target.tagName === 'TEXTAREA' ||
+                          target.isContentEditable;
+
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
           case 'z':
@@ -273,15 +279,24 @@ export default function LevelEditor() {
             triggerUndoRedoFlash();
             break;
           case 'c':
-            e.preventDefault();
-            copySelectedObjects();
+            // Allow Ctrl+C in input fields
+            if (!isInputField) {
+              e.preventDefault();
+              copySelectedObjects();
+            }
             break;
           case 'v':
-            e.preventDefault();
-            pasteObjects();
+            // Allow Ctrl+V in input fields
+            if (!isInputField) {
+              e.preventDefault();
+              pasteObjects();
+            }
             break;
         }
       } else {
+        // Don't process single-key shortcuts when typing in input fields
+        if (isInputField) return;
+
         switch (e.key) {
           case 'Escape':
             setEditorState(prev => ({ ...prev, selectedTileType: null }));

@@ -240,11 +240,25 @@ export class CanvasRenderer {
         this.drawPlatformBasic(width, height);
     }
 
-    // Draw selection outline
+    // Draw selection outline with pulsing glow
     if (isSelected) {
+      // Pulsing glow effect
+      const time = Date.now() / 1000;
+      const glowOpacity = 0.6 + 0.4 * Math.sin(time * Math.PI); // Oscillates between 0.6 and 1.0
+
+      this.ctx.shadowColor = '#3b82f6';
+      this.ctx.shadowBlur = 15;
+      this.ctx.shadowOffsetX = 0;
+      this.ctx.shadowOffsetY = 0;
+      this.ctx.globalAlpha = glowOpacity;
+
       this.ctx.strokeStyle = '#3b82f6';
       this.ctx.lineWidth = 2;
       this.ctx.strokeRect(-2, -2, width + 4, height + 4);
+
+      // Reset shadow and alpha
+      this.ctx.shadowBlur = 0;
+      this.ctx.globalAlpha = 1;
     }
 
     this.ctx.restore();
@@ -610,11 +624,25 @@ export class CanvasRenderer {
         break;
     }
 
-    // Draw selection outline
+    // Draw selection outline with pulsing glow
     if (isSelected) {
+      // Pulsing glow effect
+      const time = Date.now() / 1000;
+      const glowOpacity = 0.6 + 0.4 * Math.sin(time * Math.PI); // Oscillates between 0.6 and 1.0
+
+      this.ctx.shadowColor = '#3b82f6';
+      this.ctx.shadowBlur = 15;
+      this.ctx.shadowOffsetX = 0;
+      this.ctx.shadowOffsetY = 0;
+      this.ctx.globalAlpha = glowOpacity;
+
       this.ctx.strokeStyle = '#3b82f6';
       this.ctx.lineWidth = 2;
       this.ctx.strokeRect(-width / 2 - 2, -height / 2 - 2, width + 4, height + 4);
+
+      // Reset shadow and alpha
+      this.ctx.shadowBlur = 0;
+      this.ctx.globalAlpha = 1;
     }
 
     this.ctx.restore();
@@ -833,11 +861,25 @@ export class CanvasRenderer {
       this.drawEnemyCharacter(size, spawn.facingDirection);
     }
 
-    // Draw selection outline
+    // Draw selection outline with pulsing glow
     if (isSelected) {
+      // Pulsing glow effect
+      const time = Date.now() / 1000;
+      const glowOpacity = 0.6 + 0.4 * Math.sin(time * Math.PI); // Oscillates between 0.6 and 1.0
+
+      this.ctx.shadowColor = '#3b82f6';
+      this.ctx.shadowBlur = 15;
+      this.ctx.shadowOffsetX = 0;
+      this.ctx.shadowOffsetY = 0;
+      this.ctx.globalAlpha = glowOpacity;
+
       this.ctx.strokeStyle = '#3b82f6';
       this.ctx.lineWidth = 2;
       this.ctx.strokeRect(-size / 2 - 2, -size / 2 - 2, size + 4, size + 4);
+
+      // Reset shadow and alpha
+      this.ctx.shadowBlur = 0;
+      this.ctx.globalAlpha = 1;
     }
 
     this.ctx.restore();

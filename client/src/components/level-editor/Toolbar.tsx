@@ -1,6 +1,6 @@
 import { EditorState } from '@/types/level';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import SelectIcon from '@/assets/icons/select.svg?react';
@@ -243,14 +243,26 @@ export function Toolbar({
       {/* View Options */}
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center space-x-2">
-          <Checkbox
+          <Switch
             id="showGrid"
             checked={editorState.showGrid}
-            onCheckedChange={(checked) => onStateChange({ showGrid: !!checked })}
-            data-testid="checkbox-show-grid"
+            onCheckedChange={(checked) => onStateChange({ showGrid: checked })}
+            data-testid="switch-show-grid"
           />
-          <Label htmlFor="showGrid" className="text-muted-foreground cursor-pointer">
+          <Label htmlFor="showGrid" className="text-sm text-muted-foreground cursor-pointer">
             Show Grid
+          </Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="showScanlines"
+            checked={editorState.showScanlines}
+            onCheckedChange={(checked) => onStateChange({ showScanlines: checked })}
+            data-testid="switch-show-scanlines"
+          />
+          <Label htmlFor="showScanlines" className="text-sm text-muted-foreground cursor-pointer">
+            Scanlines
           </Label>
         </div>
 

@@ -20,6 +20,7 @@ export function useLevelEditor() {
     zoom: 1,
     pan: { x: 0, y: 0 },
     showGrid: true,
+    showScanlines: false,
     mousePosition: { x: 0, y: 0 },
     deletingObjects: []
   });
