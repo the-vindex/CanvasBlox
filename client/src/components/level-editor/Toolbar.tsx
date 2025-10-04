@@ -3,6 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import SelectIcon from '@/assets/icons/select.svg?react';
+import MultiselectIcon from '@/assets/icons/multiselect.svg?react';
+import MoveIcon from '@/assets/icons/move.svg?react';
+import LineIcon from '@/assets/icons/line.svg?react';
+import RectangleIcon from '@/assets/icons/rectangle.svg?react';
+import LinkIcon from '@/assets/icons/link.svg?react';
 
 interface ToolbarProps {
   editorState: EditorState;
@@ -12,21 +18,21 @@ interface ToolbarProps {
   onRotateRight: () => void;
 }
 
-export function Toolbar({ 
-  editorState, 
-  onToolChange, 
+export function Toolbar({
+  editorState,
+  onToolChange,
   onStateChange,
   onRotateLeft,
-  onRotateRight 
+  onRotateRight
 }: ToolbarProps) {
-  const ToolButton = ({ 
-    tool, 
-    icon, 
-    title, 
-    testId 
-  }: { 
-    tool: EditorState['selectedTool']; 
-    icon: string; 
+  const ToolButton = ({
+    tool,
+    icon: Icon,
+    title,
+    testId
+  }: {
+    tool: EditorState['selectedTool'];
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     title: string;
     testId: string;
   }) => (
@@ -41,23 +47,23 @@ export function Toolbar({
       title={title}
       data-testid={testId}
     >
-      <i className={icon}></i>
+      <Icon className="w-4 h-4" />
     </Button>
   );
 
   return (
     <div className="bg-card border-b border-border p-2 flex items-center gap-2" data-testid="toolbar">
       <div className="flex items-center gap-1">
-        <ToolButton tool="select" icon="fas fa-mouse-pointer" title="Select Tool (V)" testId="tool-select" />
-        <ToolButton tool="multiselect" icon="fas fa-object-group" title="Multi-Select (M)" testId="tool-multiselect" />
-        <ToolButton tool="move" icon="fas fa-arrows-alt" title="Move Tool (H)" testId="tool-move" />
+        <ToolButton tool="select" icon={SelectIcon} title="Select Tool (V)" testId="tool-select" />
+        <ToolButton tool="multiselect" icon={MultiselectIcon} title="Multi-Select (M)" testId="tool-multiselect" />
+        <ToolButton tool="move" icon={MoveIcon} title="Move Tool (H)" testId="tool-move" />
       </div>
 
       <div className="w-px h-6 bg-border"></div>
 
       <div className="flex items-center gap-1">
-        <ToolButton tool="line" icon="fas fa-minus" title="Line Tool (L)" testId="tool-line" />
-        <ToolButton tool="rectangle" icon="fas fa-square" title="Rectangle Tool (R)" testId="tool-rectangle" />
+        <ToolButton tool="line" icon={LineIcon} title="Line Tool (L)" testId="tool-line" />
+        <ToolButton tool="rectangle" icon={RectangleIcon} title="Rectangle Tool (R)" testId="tool-rectangle" />
       </div>
 
       <div className="w-px h-6 bg-border"></div>
@@ -71,7 +77,10 @@ export function Toolbar({
           className="px-3 py-2"
           data-testid="button-rotate-left"
         >
-          <i className="fas fa-undo"></i>
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
         </Button>
         <Button
           variant="ghost"
@@ -81,7 +90,10 @@ export function Toolbar({
           className="px-3 py-2"
           data-testid="button-rotate-right"
         >
-          <i className="fas fa-redo"></i>
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+            <path d="M21 3v5h-5" />
+          </svg>
         </Button>
         <span className="text-xs text-muted-foreground ml-1" data-testid="rotation-display">
           0°
@@ -91,7 +103,7 @@ export function Toolbar({
       <div className="w-px h-6 bg-border"></div>
 
       <div className="flex items-center gap-1">
-        <ToolButton tool="link" icon="fas fa-link" title="Link Objects (K)" testId="tool-link" />
+        <ToolButton tool="link" icon={LinkIcon} title="Link Objects (K)" testId="tool-link" />
         <Button
           variant="ghost"
           size="sm"
@@ -99,7 +111,14 @@ export function Toolbar({
           className="px-3 py-2"
           data-testid="button-clear-links"
         >
-          <i className="fas fa-unlink"></i>
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18.84 12.25l1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71" />
+            <path d="M5.17 11.75l-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71" />
+            <line x1="8" y1="2" x2="8" y2="5" />
+            <line x1="2" y1="8" x2="5" y2="8" />
+            <line x1="16" y1="19" x2="16" y2="22" />
+            <line x1="19" y1="16" x2="22" y2="16" />
+          </svg>
         </Button>
       </div>
 
