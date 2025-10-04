@@ -52,10 +52,16 @@ export default function LevelEditor() {
   }, [editorState.selectedTool, setEditorState]);
 
   const handleTileSelect = useCallback((tileType: string) => {
-    setEditorState(prev => ({ ...prev, selectedTileType: tileType }));
+    console.log('handleTileSelect called with:', tileType);
+    setEditorState(prev => {
+      const newState = { ...prev, selectedTileType: tileType };
+      console.log('New editor state:', newState);
+      return newState;
+    });
   }, [setEditorState]);
 
   const handleTilePlaced = useCallback((position: Position, tileType: string) => {
+    console.log('handleTilePlaced called:', { position, tileType });
     if (tileType.startsWith('spawn-')) {
       addObject(position, tileType);
     } else if (tileType.includes('platform')) {

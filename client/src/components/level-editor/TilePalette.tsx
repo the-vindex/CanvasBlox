@@ -19,8 +19,12 @@ function TileItem({ type, label, color, icon, isSelected, onSelect }: TileItemPr
         isSelected && "ring-2 ring-primary shadow-lg"
       )}
       data-tile-type={type}
-      onClick={() => onSelect(type)}
+      onClick={() => {
+        console.log('TileItem clicked:', type);
+        onSelect(type);
+      }}
       data-testid={`tile-${type}`}
+      aria-selected={isSelected}
     >
       <div className={cn("w-full h-12 rounded mb-1 flex items-center justify-center", color)}>
         {icon ? <i className={`${icon} text-2xl`}></i> : null}

@@ -30,6 +30,7 @@ export function Canvas({
   return (
     <div className={cn("flex-1 relative overflow-hidden", className)}>
       <canvas
+        id="levelCanvas"
         ref={canvasRef}
         width={1920}
         height={1080}
