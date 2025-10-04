@@ -1,8 +1,34 @@
 import { useRef, useEffect, useState } from 'react';
+import { useLevelEditor } from '@/hooks/useLevelEditor';
 
 export default function LevelEditor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [propertiesPanelCollapsed, setPropertiesPanelCollapsed] = useState(false);
+
+  // Integrate useLevelEditor hook
+  const {
+    levels,
+    currentLevel,
+    currentLevelIndex,
+    editorState,
+    history,
+    historyIndex,
+    setCurrentLevelIndex,
+    setEditorState,
+    updateCurrentLevel,
+    createNewLevel,
+    duplicateLevel,
+    deleteLevel,
+    addTile,
+    addObject,
+    selectObject,
+    deleteSelectedObjects,
+    copySelectedObjects,
+    pasteObjects,
+    undo,
+    redo,
+    commitBatchToHistory
+  } = useLevelEditor();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -61,7 +87,12 @@ export default function LevelEditor() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px', fontWeight: 'bold', color: 'white', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
           <span>🎮</span>
-          <span>Level Editor</span>
+          <span>Roblox Level Designer</span>
+          {currentLevel && (
+            <span style={{ fontSize: '14px', opacity: 0.8, fontWeight: 'normal' }}>
+              - {currentLevel.levelName}
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>

@@ -1,8 +1,20 @@
-# Level Editor Application
+# CanvasBlox - Level Editor for Young Game Designers
 
 ## Overview
 
-This is a browser-based level editor application built with React and Express. It allows users to create, edit, and manage game levels with a visual canvas interface. The application features a tile-based editor with support for placing tiles, interactive objects, and spawn points. Levels can be saved locally, imported/exported as JSON, and include features like undo/redo, multi-level support, and a comprehensive properties panel.
+CanvasBlox is a fun, creative level editor designed to help kids plan out their game levels before building them in Roblox. It's a browser-based visual canvas tool where young game designers can place tiles, objects, and spawn points, then export their designs.
+
+Vibe coded with good engineering practices - we use tests, TypeScript, and clean architecture because even fun projects deserve quality code!
+
+**Key Features:**
+- Tile-based visual editor (drag, place, design!)
+- Interactive objects (buttons, doors, levers) that can link together
+- Spawn points for players and enemies
+- Multiple levels with tabs (design your whole game!)
+- Undo/redo (mistakes happen, no worries!)
+- Auto-save to localStorage (won't lose your work)
+- Export to JSON (take your designs to Roblox!)
+- Properties panel to customize everything
 
 ## User Preferences
 
@@ -53,8 +65,9 @@ Preferred communication style: Simple, everyday language.
 **Development Setup**
 - Vite dev server runs in middleware mode alongside Express
 - Custom error overlay plugin for development
-- Replit-specific plugins for enhanced development experience
 - Separate build output for client (dist/public) and server (dist)
+- Vitest for unit and integration testing
+- TypeScript strict mode for maximum type safety
 
 ### Data Storage Solutions
 
@@ -103,9 +116,12 @@ Preferred communication style: Simple, everyday language.
 
 **Development Tools**
 - **TypeScript** - Type safety across stack
-- **Vite** - Build tool with plugins for Replit integration
+- **Vite** - Build tool with HMR and fast builds
 - **tsx** - TypeScript execution for development server
 - **esbuild** - Fast bundler for production server build
+- **Vitest** - Fast unit test runner with Vite integration
+- **React Testing Library** - Component testing utilities
+- **Playwright** - End-to-end browser testing framework
 
 **Database**
 - **Neon Database** - Serverless PostgreSQL
@@ -138,3 +154,41 @@ Preferred communication style: Simple, everyday language.
 - Focus on client-side editor functionality
 - Storage abstraction allows easy backend expansion
 - Database ready but not yet connected to routes
+
+## Testing Strategy
+
+**Why Tests for a Fun Project?**
+Because even vibe-coded apps benefit from good practices! Tests help us:
+- Catch bugs before kids find them
+- Refactor with confidence
+- Document how things work
+
+**Test-Driven Development (TDD)**
+- Write tests first, then make them pass
+- Red-Green-Refactor cycle
+- Focus on critical features (undo/redo, save/load, etc.)
+
+**Test Organization**
+Tests live next to the code they test (modern convention):
+```
+client/src/
+  ├── hooks/
+  │   ├── useLevelEditor.ts
+  │   └── useLevelEditor.test.ts        # ← Test next to source
+  ├── utils/
+  │   ├── canvasRenderer.ts
+  │   └── canvasRenderer.test.ts        # ← Test next to source
+  └── components/
+      ├── TilePalette.tsx
+      └── TilePalette.test.tsx          # ← Test next to source
+
+e2e/                                    # End-to-end tests
+  └── level-editor.spec.ts              # Main editor workflows
+```
+
+**Testing Tools**
+- **Vitest** - Unit test runner
+- **React Testing Library** - Component testing
+- **Playwright** - E2E browser testing
+- **jsdom** - DOM environment for unit tests
+- **Vi mocking** - Mock utilities for localStorage, etc.
