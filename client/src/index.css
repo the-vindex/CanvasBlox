@@ -108,11 +108,13 @@
 
 .tool-btn:hover {
   background-color: hsl(0 0% 23%);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
 }
 
 .tool-btn.active {
   background-color: hsl(217 91% 60%);
   color: white;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
 }
 
 .tool-btn.active::after {
@@ -237,4 +239,28 @@
   stroke-width: 2;
   stroke-dasharray: 5, 5;
   fill: none;
+}
+
+/* Roblox-inspired gradient */
+.bg-roblox-gradient {
+  background: linear-gradient(135deg, #E4261F 0%, #9333EA 50%, #3B82F6 100%);
+}
+
+/* Icon hover animation */
+@keyframes iconHover {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(-10deg) scale(1.1); }
+}
+
+.icon-hover:hover {
+  animation: iconHover 0.5s ease-in-out;
+}
+
+/* Glow effects for active elements */
+.active-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+.active-glow-red {
+  box-shadow: 0 0 20px rgba(228, 38, 31, 0.4);
 }

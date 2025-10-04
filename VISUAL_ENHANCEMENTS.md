@@ -1,7 +1,7 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Not Started
+**Current Chapter:** Chapter 1 - Completed, Awaiting Review
 **Last Updated:** 2025-10-04
 
 ---
@@ -18,7 +18,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 1: Enhanced Header & Branding
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Completed - Awaiting Review
 **Files:** `client/src/pages/LevelEditor.tsx`, `client/src/index.css`
 **Priority:** High
 
@@ -309,6 +309,12 @@ Work through chapters sequentially. After implementing each chapter:
 
 ### Tasks:
 
+#### 9.0 Remove line and rectangle tool buttons (not implemented)
+- **Location:** `client/src/components/level-editor/Toolbar.tsx`
+- **Search for:** Line tool button ('l' key), Rectangle tool button ('r' key)
+- **Remove:** Both buttons and their keyboard shortcuts from LevelEditor.tsx
+- **Note:** These features are not implemented, so buttons should be removed
+
 #### 9.1 Action history panel (collapsible sidebar)
 - **Location:** New component, positioned on right or bottom
 - **Data:** Use existing history/historyIndex from useLevelEditor
@@ -414,7 +420,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 | Chapter | Status | Approved | Notes |
 |---------|--------|----------|-------|
-| 1. Header & Branding | ⏸️ Not Started | ❌ | |
+| 1. Header & Branding | ✅ Completed | ⏳ Awaiting Review | Gradient header, dropdown menus, status badges, glow effects |
 | 2. Modern Toolbar | ⏸️ Not Started | ❌ | |
 | 3. Canvas Experience | ⏸️ Not Started | ❌ | |
 | 4. Tile Palette | ⏸️ Not Started | ❌ | |

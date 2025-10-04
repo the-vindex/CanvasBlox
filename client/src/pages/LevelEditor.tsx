@@ -7,6 +7,12 @@ import { Toolbar } from '@/components/level-editor/Toolbar';
 import { LevelTabs } from '@/components/level-editor/LevelTabs';
 import { ImportModal, ExportModal } from '@/components/level-editor/ImportExportModals';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Position, LevelData } from '@/types/level';
 import { LevelSerializer } from '@/utils/levelSerializer';
 import { useToast } from '@/hooks/use-toast';
@@ -181,65 +187,57 @@ export default function LevelEditor() {
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
       {/* Top Toolbar */}
-      <header className="bg-card border-b border-border flex items-center justify-between px-4 py-2 h-14">
+      <header className="bg-roblox-gradient border-b border-border flex items-center justify-between px-4 py-2 h-14 shadow-lg">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-            <i className="fas fa-cube"></i>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+            <i className="fas fa-cube icon-hover"></i>
             Roblox Level Designer
           </h1>
-          
+
           {/* File Operations */}
-          <div className="flex items-center gap-1 border-l border-border pl-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => createNewLevel()}
-              className="flex items-center gap-2"
-              data-testid="button-new-level"
-            >
-              <i className="fas fa-file"></i>
-              New
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setShowImportModal(true)}
-              className="flex items-center gap-2"
-              data-testid="button-import-json"
-            >
-              <i className="fas fa-folder-open"></i>
-              Import JSON
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setShowExportModal(true)}
-              className="flex items-center gap-2"
-              data-testid="button-export-json"
-            >
-              <i className="fas fa-download"></i>
-              Export JSON
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleExportPNG}
-              className="flex items-center gap-2"
-              data-testid="button-export-png"
-            >
-              <i className="fas fa-image"></i>
-              Export PNG
-            </Button>
+          <div className="flex items-center gap-1 border-l border-white/20 pl-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2 text-white hover:bg-white/10"
+                >
+                  <i className="fas fa-file"></i>
+                  File
+                  <i className="fas fa-chevron-down text-xs"></i>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => createNewLevel()} data-testid="button-new-level">
+                  <i className="fas fa-file w-4"></i>
+                  New Level
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowImportModal(true)} data-testid="button-import-json">
+                  <i className="fas fa-folder-open w-4"></i>
+                  Import JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowExportModal(true)} data-testid="button-export-json">
+                  <i className="fas fa-download w-4"></i>
+                  Export JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportPNG} data-testid="button-export-png">
+                  <i className="fas fa-image w-4"></i>
+                  Export PNG
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Undo/Redo */}
-          <div className="flex items-center gap-1 border-l border-border pl-4">
+          <div className="flex items-center gap-1 border-l border-white/20 pl-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={undo}
               disabled={historyIndex <= 0}
               title="Undo (Ctrl+Z)"
+              className="text-white hover:bg-white/10 disabled:opacity-50 disabled:text-white/50"
               data-testid="button-undo"
             >
               <i className="fas fa-undo"></i>
@@ -250,6 +248,7 @@ export default function LevelEditor() {
               onClick={redo}
               disabled={historyIndex >= history.length - 1}
               title="Redo (Ctrl+Y)"
+              className="text-white hover:bg-white/10 disabled:opacity-50 disabled:text-white/50"
               data-testid="button-redo"
             >
               <i className="fas fa-redo"></i>
@@ -257,12 +256,13 @@ export default function LevelEditor() {
           </div>
 
           {/* Edit Tools */}
-          <div className="flex items-center gap-1 border-l border-border pl-4">
+          <div className="flex items-center gap-1 border-l border-white/20 pl-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={copySelectedObjects}
               title="Copy (Ctrl+C)"
+              className="text-white hover:bg-white/10"
               data-testid="button-copy"
             >
               <i className="fas fa-copy"></i>
@@ -272,6 +272,7 @@ export default function LevelEditor() {
               size="sm"
               onClick={pasteObjects}
               title="Paste (Ctrl+V)"
+              className="text-white hover:bg-white/10"
               data-testid="button-paste"
             >
               <i className="fas fa-paste"></i>
@@ -281,6 +282,7 @@ export default function LevelEditor() {
               size="sm"
               onClick={deleteSelectedObjects}
               title="Delete (Del)"
+              className="text-white hover:bg-white/10"
               data-testid="button-delete"
             >
               <i className="fas fa-trash"></i>
@@ -288,12 +290,18 @@ export default function LevelEditor() {
           </div>
         </div>
 
-        {/* Auto-save Status */}
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-muted-foreground flex items-center gap-2">
-            <span className="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
-            Auto-saved
-          </span>
+        {/* Status Bar */}
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+            <span className="text-white font-medium">Auto-saved</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
+            <i className="fas fa-cubes text-blue-400"></i>
+            <span className="text-white">
+              {currentLevel.tiles.length + currentLevel.objects.length + currentLevel.spawnPoints.length} objects
+            </span>
+          </div>
         </div>
       </header>
 
