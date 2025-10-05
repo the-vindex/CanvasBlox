@@ -5,7 +5,7 @@ test.describe('Visual Effects', () => {
         await page.goto('/');
     });
 
-    test('Step 16: scanlines toggle should show/hide overlay', async ({ page }) => {
+    test('scanlines toggle should show/hide overlay', async ({ page }) => {
         const scanlinesToggle = page.getByTestId('switch-show-scanlines');
         const scanlinesOverlay = page.locator('.scanlines-overlay');
 
@@ -22,7 +22,7 @@ test.describe('Visual Effects', () => {
         await expect(scanlinesOverlay).not.toBeVisible();
     });
 
-    test('Step 16: scanlines overlay should not block mouse interactions', async ({ page }) => {
+    test('scanlines overlay should not block mouse interactions', async ({ page }) => {
         const scanlinesToggle = page.getByTestId('switch-show-scanlines');
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
@@ -48,7 +48,7 @@ test.describe('Visual Effects', () => {
         expect(newObjectCount).not.toBe(initialObjectCount);
     });
 
-    test('Step 17: grid toggle should be visible and interactive', async ({ page }) => {
+    test('grid toggle should be visible and interactive', async ({ page }) => {
         const gridToggle = page.getByTestId('switch-show-grid');
 
         // Grid toggle should be visible
@@ -71,7 +71,7 @@ test.describe('Visual Effects', () => {
         expect(onState).toBe('checked');
     });
 
-    test('Step 17: grid toggle should not affect canvas interactions', async ({ page }) => {
+    test('grid toggle should not affect canvas interactions', async ({ page }) => {
         const gridToggle = page.getByTestId('switch-show-grid');
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
@@ -98,7 +98,7 @@ test.describe('Visual Effects', () => {
         expect(newObjectCount).not.toBe(initialObjectCount);
     });
 
-    test('Step 18: selected tiles should have visual selection feedback', async ({ page }) => {
+    test('selected tiles should have visual selection feedback', async ({ page }) => {
         // First, place a tile to select
         const canvas = page.getByTestId('level-canvas');
         const box = await canvas.boundingBox();
@@ -138,7 +138,7 @@ test.describe('Visual Effects', () => {
         expect(hasContent).toBe(true);
     });
 
-    test('Step 18: selection should work for different object types', async ({ page }) => {
+    test('selection should work for different object types', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
@@ -199,7 +199,7 @@ test.describe('Visual Effects', () => {
         expect(countText).toMatch(/Selected: [1-9]\d* object/);
     });
 
-    test('Step 18: multiple selected objects should all show selection state', async ({ page }) => {
+    test('multiple selected objects should all show selection state', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
@@ -243,7 +243,7 @@ test.describe('Visual Effects', () => {
         expect(hasContent).toBe(true);
     });
 
-    test('Step 18: pulsing glow should not interfere with tile placement', async ({ page }) => {
+    test('pulsing glow should not interfere with tile placement', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
@@ -291,7 +291,7 @@ test.describe('Visual Effects', () => {
     });
 });
 
-test.describe('Step 19: Delete Animations', () => {
+test.describe('Delete Animations', () => {
     test('deleted objects should animate (shrink) before disappearing', async ({ page }) => {
         await page.goto('/');
         await page.waitForLoadState('networkidle');

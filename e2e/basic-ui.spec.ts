@@ -31,7 +31,7 @@ test.describe('Basic UI', () => {
         await expect(firstTab).toContainText('New Level');
     });
 
-    test('Step 2: should track mouse position over canvas', async ({ page }) => {
+    test('should track mouse position over canvas', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         await expect(canvas).toBeVisible();
 
@@ -51,7 +51,7 @@ test.describe('Basic UI', () => {
         expect(positionText).toMatch(/Mouse: \(\d+, \d+\)/);
     });
 
-    test('Step 2: should show correct selection count', async ({ page }) => {
+    test('should show correct selection count', async ({ page }) => {
         // The overlay should show selection count
         const selectionCount = page.getByTestId('selection-count');
         await expect(selectionCount).toBeVisible();
@@ -60,7 +60,7 @@ test.describe('Basic UI', () => {
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
-    test('Step 3: Canvas component should render with CanvasRenderer', async ({ page }) => {
+    test('Canvas component should render with CanvasRenderer', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         await expect(canvas).toBeVisible();
 
@@ -80,7 +80,7 @@ test.describe('Basic UI', () => {
         }
     });
 
-    test('Step 3: CanvasRenderer should draw to canvas', async ({ page }) => {
+    test('CanvasRenderer should draw to canvas', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         await expect(canvas).toBeVisible();
 
@@ -122,7 +122,7 @@ test.describe('Basic UI', () => {
         expect(hasContent).toBe(true);
     });
 
-    test('Step 4: should select tile from palette', async ({ page }) => {
+    test('should select tile from palette', async ({ page }) => {
         // Click on a platform tile (grass platform)
         const grassTile = page.getByTestId('tile-platform-grass');
         await expect(grassTile).toBeVisible();
@@ -136,7 +136,7 @@ test.describe('Basic UI', () => {
         await expect(basicTile).toHaveAttribute('aria-pressed', 'false');
     });
 
-    test('Step 4: should switch between different tile types', async ({ page }) => {
+    test('should switch between different tile types', async ({ page }) => {
         // Select platform tile
         const grassTile = page.getByTestId('tile-platform-grass');
         await grassTile.click();
@@ -157,7 +157,7 @@ test.describe('Basic UI', () => {
         await expect(playerSpawn).toHaveAttribute('aria-pressed', 'false');
     });
 
-    test('Step 4: tile palette should be scrollable', async ({ page }) => {
+    test('tile palette should be scrollable', async ({ page }) => {
         // Get the tile palette container
         const tilePalette = page.getByTestId('tile-palette');
         await expect(tilePalette).toBeVisible();
@@ -198,7 +198,7 @@ test.describe('Basic UI', () => {
         expect(backToTop).toBe(0);
     });
 
-    test('Step 5: should display properties panel', async ({ page }) => {
+    test('should display properties panel', async ({ page }) => {
         const propertiesPanel = page.getByTestId('properties-panel');
         await expect(propertiesPanel).toBeVisible();
 
@@ -214,7 +214,7 @@ test.describe('Basic UI', () => {
         expect(levelName).toBeTruthy();
     });
 
-    test('Step 5: should update level name via properties panel', async ({ page }) => {
+    test('should update level name via properties panel', async ({ page }) => {
         const levelNameInput = page.getByTestId('input-level-name');
         await expect(levelNameInput).toBeVisible();
 
@@ -225,7 +225,7 @@ test.describe('Basic UI', () => {
         await expect(levelNameInput).toHaveValue('My Custom Level');
     });
 
-    test('Step 5: should collapse and expand properties panel', async ({ page }) => {
+    test('should collapse and expand properties panel', async ({ page }) => {
         const propertiesPanel = page.getByTestId('properties-panel');
         await expect(propertiesPanel).toBeVisible();
 
@@ -246,13 +246,13 @@ test.describe('Basic UI', () => {
         await expect(propertiesPanel).toBeVisible();
     });
 
-    test('Step 5: should show duplicate level button', async ({ page }) => {
+    test('should show duplicate level button', async ({ page }) => {
         const duplicateButton = page.getByTestId('button-duplicate-level');
         await expect(duplicateButton).toBeVisible();
         await expect(duplicateButton).toHaveText(/Duplicate Level/);
     });
 
-    test('Step 5: should update background color', async ({ page }) => {
+    test('should update background color', async ({ page }) => {
         // Use the text input for background color, not the color picker
         const colorTextInput = page.getByTestId('input-background-color-text');
         await expect(colorTextInput).toBeVisible();
@@ -268,12 +268,12 @@ test.describe('Basic UI', () => {
         await expect(colorTextInput).toHaveValue('#FF5733');
     });
 
-    test('Step 7: should display LevelTabs component', async ({ page }) => {
+    test('should display LevelTabs component', async ({ page }) => {
         const levelTabs = page.getByTestId('level-tabs');
         await expect(levelTabs).toBeVisible();
     });
 
-    test('Step 7: should display all level tabs from state', async ({ page }) => {
+    test('should display all level tabs from state', async ({ page }) => {
         // Check that level tabs are rendered from actual state
         // The first tab should show the current level name
         const firstTab = page.getByTestId('tab-level-0');
@@ -284,7 +284,7 @@ test.describe('Basic UI', () => {
         expect(tabText).toBeTruthy();
     });
 
-    test('Step 7: should highlight active level tab', async ({ page }) => {
+    test('should highlight active level tab', async ({ page }) => {
         const firstTab = page.getByTestId('tab-level-0');
         await expect(firstTab).toBeVisible();
 
@@ -294,7 +294,7 @@ test.describe('Basic UI', () => {
         expect(classes).toContain('border-primary');
     });
 
-    test('Step 7: should switch between level tabs', async ({ page }) => {
+    test('should switch between level tabs', async ({ page }) => {
         // Create a second level first by clicking new level button
         const newLevelButton = page.getByTestId('button-new-level');
         await expect(newLevelButton).toBeVisible();
@@ -321,7 +321,7 @@ test.describe('Basic UI', () => {
         expect(secondTabClassesAfter).not.toContain('border-primary');
     });
 
-    test('Step 7: should create new level when new level button clicked', async ({ page }) => {
+    test('should create new level when new level button clicked', async ({ page }) => {
         // Count existing tabs before creating new level
         const tabsBeforeCount = await page.getByTestId(/tab-level-\d+/).count();
 
@@ -346,7 +346,7 @@ test.describe('Basic UI', () => {
         expect(classes).toContain('border-primary');
     });
 
-    test('Step 7: should show close button on tabs when multiple levels exist', async ({ page }) => {
+    test('should show close button on tabs when multiple levels exist', async ({ page }) => {
         // Create a second level
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -361,7 +361,7 @@ test.describe('Basic UI', () => {
         await expect(closeButton1).toBeVisible();
     });
 
-    test('Step 7: should close level when close button clicked', async ({ page }) => {
+    test('should close level when close button clicked', async ({ page }) => {
         // Create a second level
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -384,7 +384,7 @@ test.describe('Basic UI', () => {
         expect(tabsAfterCount).toBe(1);
     });
 
-    test('Step 7: should not close last remaining level', async ({ page }) => {
+    test('should not close last remaining level', async ({ page }) => {
         // Start with one level - try to close it
         const tabsCount = await page.getByTestId(/tab-level-\d+/).count();
 
@@ -406,9 +406,7 @@ test.describe('Basic UI', () => {
         }
     });
 
-    test('Step 23: Update Status Bar with Live Data - status bar should display live canvas dimensions', async ({
-        page,
-    }) => {
+    test('status bar should display live canvas dimensions', async ({ page }) => {
         await page.waitForTimeout(500);
 
         // Get canvas dimensions display
@@ -425,9 +423,7 @@ test.describe('Basic UI', () => {
         expect(dimensionsText).toBe('1920 × 960 px');
     });
 
-    test('Step 23: Update Status Bar with Live Data - status bar should display live grid dimensions', async ({
-        page,
-    }) => {
+    test('status bar should display live grid dimensions', async ({ page }) => {
         await page.waitForTimeout(500);
 
         // Get grid dimensions display
@@ -444,7 +440,7 @@ test.describe('Basic UI', () => {
         expect(dimensionsText).toBe('60 × 30 tiles');
     });
 
-    test('Step 23: Update Status Bar with Live Data - all status bar values should be live data', async ({ page }) => {
+    test('all status bar values should be live data', async ({ page }) => {
         await page.waitForTimeout(500);
 
         // Verify all status bar elements are present and show live data

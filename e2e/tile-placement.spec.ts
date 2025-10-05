@@ -6,7 +6,7 @@ test.describe('Tile Placement', () => {
         await page.goto('/');
     });
 
-    test('Step 10: should place single platform tile with click', async ({ page }) => {
+    test('should place single platform tile with click', async ({ page }) => {
         const grassTile = page.getByTestId('tile-platform-grass');
 
         // Get initial object count
@@ -25,7 +25,7 @@ test.describe('Tile Placement', () => {
         expect(finalCount).toBeGreaterThanOrEqual(initialCount + 1);
     });
 
-    test('Step 10: should place multiple platform tiles with drag (painting mode)', async ({ page }) => {
+    test('should place multiple platform tiles with drag (painting mode)', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const objectCount = page.getByTestId('statusbar-object-count');
@@ -59,7 +59,7 @@ test.describe('Tile Placement', () => {
         expect(finalCount).toBeGreaterThan(initialCount + 1);
     });
 
-    test('Step 10: should place spawn point object', async ({ page }) => {
+    test('should place spawn point object', async ({ page }) => {
         const playerSpawn = page.getByTestId('tile-spawn-player');
 
         // Get initial object count
@@ -78,7 +78,7 @@ test.describe('Tile Placement', () => {
         expect(finalCount).toBeGreaterThanOrEqual(initialCount + 1);
     });
 
-    test('Step 10: should place interactable object (button)', async ({ page }) => {
+    test('should place interactable object (button)', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const objectCount = page.getByTestId('statusbar-object-count');
@@ -103,7 +103,7 @@ test.describe('Tile Placement', () => {
         expect(finalCount).toBeGreaterThanOrEqual(initialCount + 1);
     });
 
-    test('Step 10: painting mode should create batched undo entry', async ({ page }) => {
+    test('painting mode should create batched undo entry', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const historyDisplay = page.getByTestId('statusbar-history');
@@ -139,7 +139,7 @@ test.describe('Tile Placement', () => {
         expect(finalIndex).toBe(initialIndex + 1);
     });
 
-    test('Step 10: single click tile placement should create individual undo entry', async ({ page }) => {
+    test('single click tile placement should create individual undo entry', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const historyDisplay = page.getByTestId('statusbar-history');

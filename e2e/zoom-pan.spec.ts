@@ -6,7 +6,7 @@ test.describe('Zoom and Pan', () => {
         await page.goto('/');
     });
 
-    test('Step 9: should zoom in at viewport center when zoom in button clicked', async ({ page }) => {
+    test('should zoom in at viewport center when zoom in button clicked', async ({ page }) => {
         // Wait for UI to be ready
         await expect(page.getByTestId('toolbar')).toBeVisible();
 
@@ -36,7 +36,7 @@ test.describe('Zoom and Pan', () => {
         expect(statusZoomValue).toBe(toolbarZoomValue); // Both should match
     });
 
-    test('Step 9: should zoom out at viewport center when zoom out button clicked', async ({ page }) => {
+    test('should zoom out at viewport center when zoom out button clicked', async ({ page }) => {
         // Wait for UI to be ready
         await expect(page.getByTestId('toolbar')).toBeVisible();
 
@@ -62,7 +62,7 @@ test.describe('Zoom and Pan', () => {
     });
 
     // Feature needs rework - zoom reset should calculate correct zoom to fit all placed content
-    test.skip('Step 9: should reset zoom to 100% when reset button clicked', async ({ page }) => {
+    test.skip('should reset zoom to 100% when reset button clicked', async ({ page }) => {
         // Wait for UI to be ready
         await expect(page.getByTestId('toolbar')).toBeVisible();
 
@@ -94,7 +94,7 @@ test.describe('Zoom and Pan', () => {
         await expect(statusBarZoom).toHaveText('100%');
     });
 
-    test('Step 9: should enforce minimum zoom of 10%', async ({ page }) => {
+    test('should enforce minimum zoom of 10%', async ({ page }) => {
         const zoomOutButton = page.getByTestId('button-zoom-out');
 
         // Try to zoom out many times (should hit minimum at 10%)
@@ -109,7 +109,7 @@ test.describe('Zoom and Pan', () => {
         expect(zoomValue).toBeGreaterThanOrEqual(10);
     });
 
-    test('Step 9: should enforce maximum zoom of 500%', async ({ page }) => {
+    test('should enforce maximum zoom of 500%', async ({ page }) => {
         const zoomInButton = page.getByTestId('button-zoom-in');
         const statusBarZoom = page.getByTestId('statusbar-zoom-display');
 
@@ -126,7 +126,7 @@ test.describe('Zoom and Pan', () => {
         expect(zoomValue).toBeLessThanOrEqual(500);
     });
 
-    test('Step 9: toolbar and status bar zoom should always match', async ({ page }) => {
+    test('toolbar and status bar zoom should always match', async ({ page }) => {
         const zoomInButton = page.getByTestId('button-zoom-in');
         const toolbarZoom = page.getByTestId('zoom-level');
         const statusBarZoom = page.getByTestId('statusbar-zoom-display');
@@ -143,7 +143,7 @@ test.describe('Zoom and Pan', () => {
         }
     });
 
-    test('Step 9: should pan canvas with middle mouse button drag', async ({ page }) => {
+    test('should pan canvas with middle mouse button drag', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         await expect(canvas).toBeVisible();
 
@@ -196,7 +196,7 @@ test.describe('Zoom and Pan', () => {
         expect(finalScrollTop).toBeLessThan(initialScrollTop);
     });
 
-    test('Step 9: middle mouse drag should not interfere with left click drawing', async ({ page }) => {
+    test('middle mouse drag should not interfere with left click drawing', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
 

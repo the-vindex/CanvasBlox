@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Step 22: Update Header with Dropdown Menu', () => {
+test.describe('Update Header with Dropdown Menu', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
         await page.waitForLoadState('networkidle');

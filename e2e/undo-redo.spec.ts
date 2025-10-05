@@ -5,17 +5,17 @@ test.describe('Undo/Redo', () => {
         await page.goto('/');
     });
 
-    test('Step 12: should have undo button in header', async ({ page }) => {
+    test('should have undo button in header', async ({ page }) => {
         const undoButton = page.getByRole('button', { name: /Undo/ });
         await expect(undoButton).toBeVisible();
     });
 
-    test('Step 12: should have redo button in header', async ({ page }) => {
+    test('should have redo button in header', async ({ page }) => {
         const redoButton = page.getByRole('button', { name: /Redo/ });
         await expect(redoButton).toBeVisible();
     });
 
-    test('Step 12: should undo with Ctrl+Z and button', async ({ page }) => {
+    test('should undo with Ctrl+Z and button', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const objectCount = page.getByTestId('statusbar-object-count');
@@ -57,7 +57,7 @@ test.describe('Undo/Redo', () => {
         expect(afterButtonUndoCount).toBeLessThan(afterPlaceCount);
     });
 
-    test('Step 12: should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
+    test('should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const objectCount = page.getByTestId('statusbar-object-count');
@@ -105,7 +105,7 @@ test.describe('Undo/Redo', () => {
         expect(buttonCount).toBe(expectedCount);
     });
 
-    test('Step 12: should update history display in status bar', async ({ page }) => {
+    test('should update history display in status bar', async ({ page }) => {
         // Create a fresh level for this test
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -156,7 +156,7 @@ test.describe('Undo/Redo', () => {
         expect(afterRedoIndex).toBe(initialIndex + 1);
     });
 
-    test('Step 12: should disable undo button when at start of history', async ({ page }) => {
+    test('should disable undo button when at start of history', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const undoButton = page.getByRole('button', { name: /Undo/ });
@@ -177,7 +177,7 @@ test.describe('Undo/Redo', () => {
         await expect(undoButton).toBeDisabled();
     });
 
-    test('Step 12: should disable redo button when at end of history', async ({ page }) => {
+    test('should disable redo button when at end of history', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const redoButton = page.getByRole('button', { name: /Redo/ });
@@ -193,7 +193,7 @@ test.describe('Undo/Redo', () => {
         await expect(redoButton).toBeVisible();
     });
 
-    test('Step 12: should show visual flash feedback on undo/redo', async ({ page }) => {
+    test('should show visual flash feedback on undo/redo', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
 
@@ -216,7 +216,7 @@ test.describe('Undo/Redo', () => {
         expect(flashCount).toBeGreaterThanOrEqual(0); // May or may not be in DOM depending on timing
     });
 
-    test('Step 12: should undo multiple actions in sequence', async ({ page }) => {
+    test('should undo multiple actions in sequence', async ({ page }) => {
         // Create a fresh level for this test
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -258,7 +258,7 @@ test.describe('Undo/Redo', () => {
         expect(finalCount).toBe(initialCount);
     });
 
-    test('Step 12: should redo multiple actions in sequence', async ({ page }) => {
+    test('should redo multiple actions in sequence', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const objectCount = page.getByTestId('statusbar-object-count');

@@ -5,7 +5,7 @@ test.describe('Keyboard Shortcuts', () => {
         await page.goto('/');
     });
 
-    test('Step 8: should select tool with V shortcut', async ({ page }) => {
+    test('should select tool with V shortcut', async ({ page }) => {
         const selectTool = page.getByTestId('tool-select');
         await expect(selectTool).toBeVisible();
 
@@ -16,7 +16,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: should select multi-select tool with M shortcut', async ({ page }) => {
+    test('should select multi-select tool with M shortcut', async ({ page }) => {
         const multiSelectTool = page.getByTestId('tool-multiselect');
         await expect(multiSelectTool).toBeVisible();
 
@@ -27,7 +27,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(multiSelectTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: should select move tool with H shortcut', async ({ page }) => {
+    test('should select move tool with H shortcut', async ({ page }) => {
         const moveTool = page.getByTestId('tool-move');
         await expect(moveTool).toBeVisible();
 
@@ -38,7 +38,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(moveTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: should select line tool with L shortcut', async ({ page }) => {
+    test('should select line tool with L shortcut', async ({ page }) => {
         const lineTool = page.getByTestId('tool-line');
         await expect(lineTool).toBeVisible();
 
@@ -49,7 +49,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(lineTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: should select rectangle tool with R shortcut', async ({ page }) => {
+    test('should select rectangle tool with R shortcut', async ({ page }) => {
         const rectangleTool = page.getByTestId('tool-rectangle');
         await expect(rectangleTool).toBeVisible();
 
@@ -60,7 +60,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(rectangleTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: should select link tool with K shortcut', async ({ page }) => {
+    test('should select link tool with K shortcut', async ({ page }) => {
         const linkTool = page.getByTestId('tool-link');
         await expect(linkTool).toBeVisible();
 
@@ -71,7 +71,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(linkTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: should select pen tool with B shortcut', async ({ page }) => {
+    test('should select pen tool with B shortcut', async ({ page }) => {
         const penTool = page.getByTestId('tool-pen');
         await expect(penTool).toBeVisible();
 
@@ -82,9 +82,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(penTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: Drawing Mode Tools - should auto-select pen and preserve tile when switching tools', async ({
-        page,
-    }) => {
+    test('Drawing Mode Tools - should auto-select pen and preserve tile when switching tools', async ({ page }) => {
         const grassTile = page.getByTestId('tile-platform-grass');
         const penTool = page.getByTestId('tool-pen');
         const lineTool = page.getByTestId('tool-line');
@@ -100,7 +98,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('Step 8: Drawing Mode Tools - should clear tile when switching to non-drawing tool', async ({ page }) => {
+    test('Drawing Mode Tools - should clear tile when switching to non-drawing tool', async ({ page }) => {
         const grassTile = page.getByTestId('tile-platform-grass');
         const penTool = page.getByTestId('tool-pen');
         const selectTool = page.getByTestId('tool-select');
@@ -116,7 +114,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(grassTile).toHaveAttribute('aria-pressed', 'false');
     });
 
-    test('Step 8: Drawing Mode Tools - Escape should clear both tool and tile', async ({ page }) => {
+    test('Drawing Mode Tools - Escape should clear both tool and tile', async ({ page }) => {
         const grassTile = page.getByTestId('tile-platform-grass');
         const lineTool = page.getByTestId('tool-line');
 
@@ -134,7 +132,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(grassTile).toHaveAttribute('aria-pressed', 'false');
     });
 
-    test('Step 8: should toggle properties panel with P shortcut', async ({ page }) => {
+    test('should toggle properties panel with P shortcut', async ({ page }) => {
         const propertiesPanel = page.getByTestId('properties-panel');
 
         // Initially visible
@@ -149,7 +147,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(propertiesPanel).toBeVisible();
     });
 
-    test('Step 8: should not trigger shortcuts when typing in input fields', async ({ page }) => {
+    test('should not trigger shortcuts when typing in input fields', async ({ page }) => {
         const levelNameInput = page.getByTestId('input-level-name');
         const selectTool = page.getByTestId('tool-select');
 
@@ -167,7 +165,7 @@ test.describe('Keyboard Shortcuts', () => {
         expect(inputValue).toContain('v');
     });
 
-    test('Step 8: should clear selection with Escape key', async ({ page }) => {
+    test('should clear selection with Escape key', async ({ page }) => {
         // First select a tool
         const selectTool = page.getByTestId('tool-select');
         await page.keyboard.press('v');
@@ -180,7 +178,7 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'false');
     });
 
-    test('Step 8: should clear palette selection with Escape key', async ({ page }) => {
+    test('should clear palette selection with Escape key', async ({ page }) => {
         // Select a palette tile
         const grassTile = page.getByTestId('tile-platform-grass');
         await grassTile.click();

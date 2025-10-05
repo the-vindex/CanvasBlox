@@ -5,7 +5,7 @@ test.describe('Auto-Save', () => {
         await page.goto('/');
     });
 
-    test('Step 15: should show unsaved indicator when changes are made', async ({ page }) => {
+    test('should show unsaved indicator when changes are made', async ({ page }) => {
         // Get save indicator
         const saveIndicator = page.getByTestId('save-indicator');
 
@@ -29,7 +29,7 @@ test.describe('Auto-Save', () => {
         await expect(saveIndicator).toContainText('Unsaved');
     });
 
-    test('Step 15: should auto-save after 5 seconds', async ({ page }) => {
+    test('should auto-save after 5 seconds', async ({ page }) => {
         // Get save indicator
         const saveIndicator = page.getByTestId('save-indicator');
 
@@ -53,7 +53,7 @@ test.describe('Auto-Save', () => {
         await expect(saveIndicator).toContainText('Saved');
     });
 
-    test('Step 15: should change icon color based on save state', async ({ page }) => {
+    test('should change icon color based on save state', async ({ page }) => {
         // Get save indicator icon
         const saveIcon = page.locator('[data-testid="save-indicator"] i.fa-save').first();
 

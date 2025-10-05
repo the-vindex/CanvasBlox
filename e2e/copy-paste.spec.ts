@@ -5,7 +5,7 @@ test.describe('Copy/Paste', () => {
         await page.goto('/');
     });
 
-    test('Step 13: should copy with Ctrl+C and copy button', async ({ page }) => {
+    test('should copy with Ctrl+C and copy button', async ({ page }) => {
         // Both keyboard shortcut and button call the same copy function - test both methods
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
@@ -44,7 +44,7 @@ test.describe('Copy/Paste', () => {
         await expect(buttonToast).toBeVisible();
     });
 
-    test.skip('Step 13: should paste with Ctrl+V and paste button', async ({ page }) => {
+    test.skip('should paste with Ctrl+V and paste button', async ({ page }) => {
         // Both keyboard shortcut and button call the same paste function - test both methods
         // Note: This test verifies paste operation works (count increases, toast appears).
         // Offset positioning is tested separately in other tests.
@@ -96,7 +96,7 @@ test.describe('Copy/Paste', () => {
         await expect(buttonToast).toBeVisible();
     });
 
-    test.skip('Step 13: should copy multiple selected objects', async ({ page }) => {
+    test.skip('should copy multiple selected objects', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const multiSelectTool = page.getByTestId('tool-multiselect');
@@ -144,14 +144,14 @@ test.describe('Copy/Paste', () => {
         await expect(pasteToast).toBeVisible();
     });
 
-    test('Step 13: copy button should be disabled with nothing selected', async ({ page }) => {
+    test('copy button should be disabled with nothing selected', async ({ page }) => {
         const copyButton = page.getByRole('button', { name: /Copy/ });
 
         // Copy button should be disabled when nothing is selected
         await expect(copyButton).toBeDisabled();
     });
 
-    test.skip('Step 13: paste button should be disabled with empty clipboard', async ({ page }) => {
+    test.skip('paste button should be disabled with empty clipboard', async ({ page }) => {
         const pasteButton = page.getByRole('button', { name: /Paste/ });
 
         // Paste button should be disabled when clipboard is empty

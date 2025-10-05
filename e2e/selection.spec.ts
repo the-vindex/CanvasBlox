@@ -5,7 +5,7 @@ test.describe('Selection', () => {
         await page.goto('/');
     });
 
-    test('Step 11: should select single object with select tool', async ({ page }) => {
+    test('should select single object with select tool', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
@@ -30,7 +30,7 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 1 object(s)');
     });
 
-    test('Step 11: should clear selection when clicking empty space with select tool', async ({ page }) => {
+    test('should clear selection when clicking empty space with select tool', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
@@ -58,7 +58,7 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
-    test('Step 11: should select multiple objects with multi-select drag box', async ({ page }) => {
+    test('should select multiple objects with multi-select drag box', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const multiSelectTool = page.getByTestId('tool-multiselect');
@@ -99,7 +99,7 @@ test.describe('Selection', () => {
         expect(count).toBeGreaterThanOrEqual(2);
     });
 
-    test('Step 11: should show visual highlight on selected objects', async ({ page }) => {
+    test('should show visual highlight on selected objects', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
@@ -133,7 +133,7 @@ test.describe('Selection', () => {
         expect(hasContent).toBe(true);
     });
 
-    test('Step 11: should update selection count correctly', async ({ page }) => {
+    test('should update selection count correctly', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
@@ -163,7 +163,7 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
-    test('Step 11: should render multi-select drag box while dragging', async ({ page }) => {
+    test('should render multi-select drag box while dragging', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const multiSelectTool = page.getByTestId('tool-multiselect');
 
@@ -197,7 +197,7 @@ test.describe('Selection', () => {
         await page.mouse.up();
     });
 
-    test('Step 11B: should move selected objects with move tool', async ({ page }) => {
+    test('should move selected objects with move tool', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
@@ -231,7 +231,7 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 1 object(s)');
     });
 
-    test('Step 11B: should move multiple selected objects together', async ({ page }) => {
+    test('should move multiple selected objects together', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const multiSelectTool = page.getByTestId('tool-multiselect');
@@ -279,7 +279,7 @@ test.describe('Selection', () => {
         expect(finalCount).toBeGreaterThanOrEqual(3);
     });
 
-    test('Step 11B: should not move when no objects selected', async ({ page }) => {
+    test('should not move when no objects selected', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const moveTool = page.getByTestId('tool-move');
 
@@ -301,7 +301,7 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
-    test('Step 11B: should show ghost preview while dragging with move tool', async ({ page }) => {
+    test('should show ghost preview while dragging with move tool', async ({ page }) => {
         // Create a fresh level for this test
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -364,7 +364,7 @@ test.describe('Selection', () => {
         expect(finalCount).toBe(count);
     });
 
-    test('Step 11C: should draw line with line tool', async ({ page }) => {
+    test('should draw line with line tool', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const lineTool = page.getByTestId('tool-line');
@@ -400,7 +400,7 @@ test.describe('Selection', () => {
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 
-    test('Step 11C: should draw diagonal line correctly', async ({ page }) => {
+    test('should draw diagonal line correctly', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const lineTool = page.getByTestId('tool-line');
@@ -430,7 +430,7 @@ test.describe('Selection', () => {
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 
-    test('Step 11C: should place tiles of selected type when drawing line', async ({ page }) => {
+    test('should place tiles of selected type when drawing line', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const stoneTile = page.getByTestId('tile-platform-stone');
         const lineTool = page.getByTestId('tool-line');
@@ -464,7 +464,7 @@ test.describe('Selection', () => {
         // The behavioral contract is: "line tool places the selected tile type"
     });
 
-    test('Step 11C: should cancel line drawing when ESC is pressed', async ({ page }) => {
+    test('should cancel line drawing when ESC is pressed', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const lineTool = page.getByTestId('tool-line');

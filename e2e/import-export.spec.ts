@@ -5,7 +5,7 @@ test.describe('Import/Export', () => {
         await page.goto('/');
     });
 
-    test('Step 14: should open import modal when import button clicked', async ({ page }) => {
+    test('should open import modal when import button clicked', async ({ page }) => {
         // Look for File menu or Import button
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -22,7 +22,7 @@ test.describe('Import/Export', () => {
         await expect(importModal).toContainText('Import Level');
     });
 
-    test('Step 14: should close import modal when cancel clicked', async ({ page }) => {
+    test('should close import modal when cancel clicked', async ({ page }) => {
         // Open import modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -40,7 +40,7 @@ test.describe('Import/Export', () => {
         await expect(importModal).not.toBeVisible();
     });
 
-    test('Step 14: should import valid JSON level data using new level mode', async ({ page }) => {
+    test('should import valid JSON level data using new level mode', async ({ page }) => {
         // Create valid level JSON
         const validLevelJson = JSON.stringify({
             levelName: 'Imported Level',
@@ -107,7 +107,7 @@ test.describe('Import/Export', () => {
         await expect(levelNameInput).toHaveValue('Imported Level');
     });
 
-    test('Step 14: should show error for invalid JSON', async ({ page }) => {
+    test('should show error for invalid JSON', async ({ page }) => {
         // Open import modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -132,7 +132,7 @@ test.describe('Import/Export', () => {
         await expect(page.getByText(/Invalid JSON/i).first()).toBeVisible();
     });
 
-    test('Step 14: should open export modal when export JSON clicked', async ({ page }) => {
+    test('should open export modal when export JSON clicked', async ({ page }) => {
         // Open File menu
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -149,7 +149,7 @@ test.describe('Import/Export', () => {
         await expect(exportModal).toContainText('Export Level');
     });
 
-    test('Step 14: should close export modal when close clicked', async ({ page }) => {
+    test('should close export modal when close clicked', async ({ page }) => {
         // Open export modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -167,7 +167,7 @@ test.describe('Import/Export', () => {
         await expect(exportModal).not.toBeVisible();
     });
 
-    test('Step 14: should display current level JSON in export modal', async ({ page }) => {
+    test('should display current level JSON in export modal', async ({ page }) => {
         // Open export modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -186,7 +186,7 @@ test.describe('Import/Export', () => {
         expect(() => JSON.parse(jsonContent)).not.toThrow();
     });
 
-    test('Step 14: should export PNG when export PNG clicked', async ({ page }) => {
+    test('should export PNG when export PNG clicked', async ({ page }) => {
         // Open File menu
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
@@ -204,7 +204,7 @@ test.describe('Import/Export', () => {
         await expect(page.getByText('Level exported as PNG!').first()).toBeVisible();
     });
 
-    test('Step 14: should import as new level by default', async ({ page }) => {
+    test('should import as new level by default', async ({ page }) => {
         // Create level JSON
         const importedLevelJson = JSON.stringify({
             levelName: 'Imported Level',
@@ -273,7 +273,7 @@ test.describe('Import/Export', () => {
         expect(count).toBe(1);
     });
 
-    test('Step 14: should overwrite current level when overwrite mode selected', async ({ page }) => {
+    test('should overwrite current level when overwrite mode selected', async ({ page }) => {
         // Set current level name first
         const levelNameInput = page.getByTestId('input-level-name');
         await levelNameInput.fill('Original Level');
@@ -353,7 +353,7 @@ test.describe('Import/Export', () => {
         expect(count).toBe(2);
     });
 
-    test('Step 14: should validate single player spawn on import (new level mode)', async ({ page }) => {
+    test('should validate single player spawn on import (new level mode)', async ({ page }) => {
         // Create level JSON with multiple player spawns
         const multiplePlayerSpawnsJson = JSON.stringify({
             levelName: 'Invalid Level',
@@ -410,7 +410,7 @@ test.describe('Import/Export', () => {
         expect(count).toBe(2);
     });
 
-    test('Step 14: should preserve level data after export and import', async ({ page }) => {
+    test('should preserve level data after export and import', async ({ page }) => {
         // Create a fresh level with specific data
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();

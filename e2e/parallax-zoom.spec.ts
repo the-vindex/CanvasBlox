@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Step 20: Initial Zoom Calculation', () => {
+test.describe('Initial Zoom Calculation', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
     });
@@ -60,7 +60,7 @@ test.describe('Step 20: Initial Zoom Calculation', () => {
     });
 });
 
-test.describe('Step 21: Parallax Background', () => {
+test.describe('Parallax Background', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/');
         await page.waitForLoadState('networkidle');
