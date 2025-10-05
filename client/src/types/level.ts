@@ -89,6 +89,11 @@ export interface EditorState {
         end: Position;
     };
     moveDelta?: Position;
+    linePreview?: {
+        start: Position;
+        end: Position;
+        tileType: string;
+    };
 }
 
 export interface HistoryEntry {

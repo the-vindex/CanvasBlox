@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { TILE_SIZE } from '@/constants/editor';
 import type { EditorState, LevelData, Position } from '@/types/level';
 import { CanvasRenderer } from '@/utils/canvasRenderer';
+import { getLinePositions } from '@/utils/lineDrawing';
 
 interface UseCanvasProps {
     levelData: LevelData;
@@ -13,6 +14,7 @@ interface UseCanvasProps {
     onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
     onMultiSelectComplete?: (start: Position, end: Position) => void;
     onMoveObjectsComplete?: (delta: Position) => void;
+    onLineComplete?: (positions: Position[], tileType: string) => void;
 }
 
 export function useCanvas({
@@ -25,6 +27,7 @@ export function useCanvas({
     onZoom,
     onMultiSelectComplete,
     onMoveObjectsComplete,
+    onLineComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -39,6 +42,9 @@ export function useCanvas({
     const isMovingObjectsRef = useRef(false);
     const moveStartPositionRef = useRef<Position | null>(null);
     const moveDeltaRef = useRef<Position>({ x: 0, y: 0 });
+    const isDrawingLineRef = useRef(false);
+    const lineStartRef = useRef<Position | null>(null);
+    const lineEndRef = useRef<Position | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -96,6 +102,28 @@ export function useCanvas({
 
             const worldPos = getWorldPosition(e);
             onMouseMove(worldPos);
+
+            // Handle line tool preview
+            if (
+                isDrawingLineRef.current &&
+                editorState.selectedTool === 'line' &&
+                lineStartRef.current &&
+                editorState.selectedTileType
+            ) {
+                lineEndRef.current = worldPos;
+                // Re-render to show line preview
+                if (rendererRef.current) {
+                    rendererRef.current.render(levelData, {
+                        ...editorState,
+                        linePreview: {
+                            start: lineStartRef.current,
+                            end: worldPos,
+                            tileType: editorState.selectedTileType,
+                        },
+                    });
+                }
+                return;
+            }
 
             // Handle move tool dragging
             if (isMovingObjectsRef.current && editorState.selectedTool === 'move' && moveStartPositionRef.current) {
@@ -159,6 +187,14 @@ export function useCanvas({
             // Left mouse button for drawing/clicking
             const worldPos = getWorldPosition(e);
 
+            // Handle line tool - start drawing line
+            if (editorState.selectedTool === 'line' && editorState.selectedTileType) {
+                isDrawingLineRef.current = true;
+                lineStartRef.current = worldPos;
+                lineEndRef.current = worldPos;
+                return;
+            }
+
             // Handle move tool - start dragging selected objects
             if (editorState.selectedTool === 'move' && editorState.selectedObjects.length > 0) {
                 isMovingObjectsRef.current = true;
@@ -193,6 +229,21 @@ export function useCanvas({
             isPanningRef.current = false;
             if (wrapper) {
                 wrapper.style.cursor = '';
+            }
+        }
+
+        // End line drawing
+        if (isDrawingLineRef.current && lineStartRef.current && lineEndRef.current && editorState.selectedTileType) {
+            isDrawingLineRef.current = false;
+            const positions = getLinePositions(lineStartRef.current, lineEndRef.current);
+            if (onLineComplete) {
+                onLineComplete(positions, editorState.selectedTileType);
+            }
+            lineStartRef.current = null;
+            lineEndRef.current = null;
+            // Re-render without preview
+            if (rendererRef.current) {
+                rendererRef.current.render(levelData, editorState);
             }
         }
 
@@ -232,7 +283,7 @@ export function useCanvas({
                 onDrawingSessionEnd();
             }
         }
-    }, [onDrawingSessionEnd, onMultiSelectComplete, onMoveObjectsComplete, levelData, editorState]);
+    }, [onDrawingSessionEnd, onMultiSelectComplete, onMoveObjectsComplete, onLineComplete, levelData, editorState]);
 
     const handleClick = useCallback(
         (e: MouseEvent) => {

@@ -1333,6 +1333,144 @@ test.describe('Level Editor', () => {
         expect(finalCount).toBe(count);
     });
 
+    test('Step 11C: should draw line with line tool', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const basicTile = page.getByTestId('tile-platform-basic');
+        const lineTool = page.getByTestId('tool-line');
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Select tile type and switch to line tool
+        await basicTile.click();
+        await lineTool.click();
+        await expect(lineTool).toHaveAttribute('aria-pressed', 'true');
+
+        // Draw a line by dragging
+        const startX = box.x + 200;
+        const startY = box.y + 200;
+        const endX = box.x + 360;
+        const endY = box.y + 200;
+
+        await page.mouse.move(startX, startY);
+        await page.mouse.down();
+        await page.mouse.move(endX, endY, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify tiles were placed along the line
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThan(initialCount);
+    });
+
+    test('Step 11C: should draw diagonal line correctly', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const lineTool = page.getByTestId('tool-line');
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Select tile and tool
+        await grassTile.click();
+        await lineTool.click();
+
+        // Draw diagonal line from top-left to bottom-right
+        await page.mouse.move(box.x + 150, box.y + 150);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 400, box.y + 350, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify tiles were placed
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThan(initialCount);
+    });
+
+    test('Step 11C: should place tiles of selected type when drawing line', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const stoneTile = page.getByTestId('tile-platform-stone');
+        const lineTool = page.getByTestId('tool-line');
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Select stone tile and line tool
+        await stoneTile.click();
+        await lineTool.click();
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Draw a horizontal line
+        await page.mouse.move(box.x + 200, box.y + 300);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 350, box.y + 300, { steps: 3 });
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify tiles were placed
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThan(initialCount);
+
+        // Note: We verify tiles were placed. Actual tile type verification would require
+        // canvas pixel inspection or exposing internal state, which is implementation detail.
+        // The behavioral contract is: "line tool places the selected tile type"
+    });
+
+    test('Step 11C: should cancel line drawing when ESC is pressed', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const basicTile = page.getByTestId('tile-platform-basic');
+        const lineTool = page.getByTestId('tool-line');
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Select tile and line tool
+        await basicTile.click();
+        await lineTool.click();
+
+        // Start dragging a line
+        await page.mouse.move(box.x + 200, box.y + 200);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 400, box.y + 400, { steps: 5 });
+
+        // Press ESC while dragging (before mouseup)
+        await page.keyboard.press('Escape');
+
+        // Release mouse
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify NO tiles were placed (count should not change)
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBe(initialCount);
+
+        // Line tool and tile selection should be cleared
+        await expect(lineTool).toHaveAttribute('aria-pressed', 'false');
+    });
+
     test('Step 12: should have undo button in header', async ({ page }) => {
         const undoButton = page.getByRole('button', { name: /Undo/ });
         await expect(undoButton).toBeVisible();

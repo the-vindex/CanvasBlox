@@ -37,15 +37,22 @@ export function useSelectionState() {
 
     /**
      * Select a tool from the toolbar
-     * Clears tile selection (mutual exclusion) but preserves object selection
+     * - Line and rectangle tools preserve tile selection (they need both tool + tile)
+     * - Other tools clear tile selection (mutual exclusion)
+     * - Object selection is always preserved for multi-step workflows
      * @param tool - The tool to select
      * @returns Partial EditorState for tool selection
      */
-    const selectTool = (tool: EditorState['selectedTool']): Partial<EditorState> => ({
-        selectedTool: tool,
-        selectedTileType: null, // Clear tile (mutually exclusive)
-        // selectedObjects preserved for multi-step workflows
-    });
+    const selectTool = (tool: EditorState['selectedTool']): Partial<EditorState> => {
+        // Line and rectangle tools need tile selection to know what to draw
+        const preserveTileSelection = tool === 'line' || tool === 'rectangle';
+
+        return {
+            selectedTool: tool,
+            ...(preserveTileSelection ? {} : { selectedTileType: null }), // Only clear tile for other tools
+            // selectedObjects preserved for multi-step workflows
+        };
+    };
 
     /**
      * Clear only object selection (used when clicking empty space)

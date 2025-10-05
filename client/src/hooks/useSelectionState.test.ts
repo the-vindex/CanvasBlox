@@ -58,10 +58,19 @@ describe('useSelectionState', () => {
                 selectedTool: 'move',
                 selectedTileType: null,
             });
+        });
 
+        it('should preserve tile selection for line and rectangle tools', () => {
+            const { result } = renderHook(() => useSelectionState());
+
+            // Line tool should NOT clear tile (it needs both)
             expect(result.current.selectTool('line')).toEqual({
                 selectedTool: 'line',
-                selectedTileType: null,
+            });
+
+            // Rectangle tool should NOT clear tile (it needs both)
+            expect(result.current.selectTool('rectangle')).toEqual({
+                selectedTool: 'rectangle',
             });
         });
 
@@ -111,12 +120,24 @@ describe('useSelectionState', () => {
             expect(tileState.selectedTileType).toBe('platform-grass');
         });
 
-        it('should ensure tool selection clears tile', () => {
+        it('should ensure most tool selections clear tile', () => {
             const { result } = renderHook(() => useSelectionState());
             const toolState = result.current.selectTool('select');
 
             expect(toolState.selectedTileType).toBeNull();
             expect(toolState.selectedTool).toBe('select');
+        });
+
+        it('should preserve tile for line and rectangle tools', () => {
+            const { result } = renderHook(() => useSelectionState());
+
+            const lineState = result.current.selectTool('line');
+            expect(lineState.selectedTool).toBe('line');
+            expect(lineState).not.toHaveProperty('selectedTileType'); // Not cleared, preserved
+
+            const rectState = result.current.selectTool('rectangle');
+            expect(rectState.selectedTool).toBe('rectangle');
+            expect(rectState).not.toHaveProperty('selectedTileType'); // Not cleared, preserved
         });
     });
 

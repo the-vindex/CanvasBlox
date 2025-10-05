@@ -118,6 +118,22 @@ export default function LevelEditor() {
         }
     }, [commitBatchToHistory]);
 
+    const handleLineComplete = useCallback(
+        (positions: Position[], tileType: string) => {
+            // Place tiles along the line
+            for (const position of positions) {
+                if (tileType.includes('platform')) {
+                    addTile(position, tileType, true); // Skip history for each individual tile
+                } else {
+                    addObject(position, tileType);
+                }
+            }
+            // Commit all tiles as a single history entry
+            commitBatchToHistory(`Drew line with ${positions.length} tile${positions.length > 1 ? 's' : ''}`);
+        },
+        [addTile, addObject, commitBatchToHistory]
+    );
+
     const handleWheelZoom = useCallback(
         (delta: number, _mouseX: number, _mouseY: number) => {
             setEditorState((prev) => {
@@ -729,6 +745,7 @@ export default function LevelEditor() {
                             onZoom={handleWheelZoom}
                             onMultiSelectComplete={handleMultiSelectComplete}
                             onMoveObjectsComplete={handleMoveObjectsComplete}
+                            onLineComplete={handleLineComplete}
                         />
 
                         {/* Undo/Redo Flash Overlay */}
