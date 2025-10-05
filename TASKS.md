@@ -221,7 +221,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 **Phase 1 Total:** -4 tests, -92 lines, improved pass rate from 88.1% to 90.2%
 
-### Phase 2: Consolidate Interaction Tests (Medium Priority) - 2/4 Complete
+### Phase 2: Consolidate Interaction Tests (Medium Priority) - 4/7 Complete
 
 #### 13.3 Merge undo keyboard and button tests ✅ COMPLETE
 - **Status:** ✅ COMPLETE
@@ -317,35 +317,19 @@ Work through chapters sequentially. After implementing each chapter:
 - **Files to modify:** `e2e/level-editor.spec.ts`
 - **Impact:** Improve test organization, reduce complexity
 
-#### 13.9 Document E2E consolidation pattern
-- **Location:** Create/update `docs/E2E_TESTING.md`
-- **Purpose:** Document the pattern established by commits 6d9a118 (redo) and 38864db (copy)
-- **Content to add:**
-  ```markdown
-  ## Test Consolidation Pattern
-
-  When keyboard shortcut and UI button call the same function, test both in ONE test:
-
-  **Pattern:**
-  1. Setup: Create minimal test data
-  2. Test keyboard shortcut: Verify outcome
-  3. Reset state (undo or deselect)
-  4. Test UI button: Verify same outcome
-  5. Comment: "Both call same function - test both methods"
-
-  **Examples:**
-  - Undo: Ctrl+Z + button (commit 6d9a118)
-  - Redo: Ctrl+Y, Ctrl+Shift+Z + button (commit 6d9a118)
-  - Copy: Ctrl+C + button (commit 38864db)
-  - Paste: Ctrl+V + button (task 13.6)
-
-  **Benefits:**
-  - Reduces test count and duplication
-  - Makes it clear both inputs produce same result
-  - Easier to maintain (one place to update)
-  ```
-- **Files to modify:** `docs/E2E_TESTING.md`
-- **Impact:** Better documentation, clearer patterns for future tests
+#### 13.9 Document E2E consolidation pattern ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **Location:** `docs/E2E_TESTING.md`
+- **What was done:**
+  - Added "Test Consolidation Pattern" section to E2E_TESTING.md
+  - Documented pattern for testing keyboard shortcuts + UI buttons together
+  - Included benefits, examples, and real test code showing the pattern
+  - Skipped paste-related tests (paste functionality being reworked per user request)
+- **Files modified:**
+  - `docs/E2E_TESTING.md` - Added consolidation pattern section
+  - `e2e/level-editor.spec.ts` - Skipped 3 paste tests (will be reworked)
+- **Impact:** Improved documentation, clearer testing patterns for future development
+- **Commit:** 739ec9b
 
 ### Phase 3: Extract Helper Functions (Low Priority)
 
