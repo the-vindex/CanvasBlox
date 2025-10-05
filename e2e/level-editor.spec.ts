@@ -2406,4 +2406,54 @@ test.describe('Level Editor', () => {
         const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
         expect(newObjectCount).not.toBe(initialObjectCount);
     });
+
+    test('Step 17: grid toggle should be visible and interactive', async ({ page }) => {
+        const gridToggle = page.getByTestId('switch-show-grid');
+
+        // Grid toggle should be visible
+        await expect(gridToggle).toBeVisible();
+
+        // Initially grid should be on (default state)
+        const initialState = await gridToggle.getAttribute('data-state');
+        expect(initialState).toBe('checked');
+
+        // Click to turn off grid
+        await gridToggle.click();
+        await page.waitForTimeout(100);
+        const offState = await gridToggle.getAttribute('data-state');
+        expect(offState).toBe('unchecked');
+
+        // Click to turn grid back on
+        await gridToggle.click();
+        await page.waitForTimeout(100);
+        const onState = await gridToggle.getAttribute('data-state');
+        expect(onState).toBe('checked');
+    });
+
+    test('Step 17: grid toggle should not affect canvas interactions', async ({ page }) => {
+        const gridToggle = page.getByTestId('switch-show-grid');
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+
+        // Turn off grid
+        await gridToggle.click();
+        await page.waitForTimeout(100);
+
+        // Verify grid is off
+        const gridState = await gridToggle.getAttribute('data-state');
+        expect(gridState).toBe('unchecked');
+
+        // Try to place a tile - should work even with grid off
+        await grassTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        const initialObjectCount = await page.getByTestId('statusbar-object-count').textContent();
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Verify tile was placed (object count should increase)
+        const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
+        expect(newObjectCount).not.toBe(initialObjectCount);
+    });
 });

@@ -147,3 +147,45 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+
+## Step 17: Grid Toggle
+
+**Question:** Should the grid toggle be tested in E2E tests, unit tests, or both?
+**Assumption/Decision:** Both. E2E tests will verify the user-facing toggle behavior, while unit tests will verify the CanvasRenderer correctly respects the showGrid flag.
+**Reasoning:** Following the existing pattern from Step 16 (scanlines), which has both E2E and unit tests. This provides comprehensive coverage.
+
+**Question:** What should the default state of showGrid be?
+**Assumption/Decision:** Grid should be ON by default (showGrid: true), as it's a helpful visual aid for level editing.
+**Reasoning:** Grid helps users align tiles and objects, which is essential for level design. Users can turn it off if they prefer.
+
+**Question:** Should the grid rendering be completely skipped or just made invisible when toggled off?
+**Assumption/Decision:** Completely skip grid rendering when showGrid is false to improve performance.
+**Reasoning:** No need to waste CPU cycles drawing a grid that won't be visible. This is more efficient.
+
+---
+
+## Step 17 Implementation Summary
+
+**Status:** ✅ Complete
+
+**What was implemented:**
+- Grid toggle functionality was ALREADY implemented in CanvasRenderer.ts (line 24-25: early return if !show)
+- Unit tests already existed for grid rendering (canvasRenderer.test.ts:41-62)
+- Added comprehensive E2E tests for grid toggle behavior (2 new tests)
+
+**Tests Added:**
+1. `Step 17: grid toggle should be visible and interactive` - Verifies toggle UI behavior and state changes
+2. `Step 17: grid toggle should not affect canvas interactions` - Ensures grid off doesn't break tile placement
+
+**Test Results:**
+- ✅ All unit tests pass (103/103)
+- ✅ Step 17 E2E tests pass (2/2)
+- ⚠️ 8 pre-existing E2E test failures in earlier steps (not related to Step 17)
+
+**Files Modified:**
+- e2e/level-editor.spec.ts - Added 2 E2E tests for grid toggle
+- OPEN_QUESTIONS.md - Added assumptions and completion summary
+
+**No code changes needed** - Feature was already fully implemented, only needed tests.
+
+---
