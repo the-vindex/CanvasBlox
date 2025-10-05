@@ -595,6 +595,19 @@ test.describe('Level Editor', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'false');
     });
 
+    test('Step 8: should clear palette selection with Escape key', async ({ page }) => {
+        // Select a palette tile
+        const grassTile = page.getByTestId('tile-platform-grass');
+        await grassTile.click();
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
+
+        // Press Escape to clear palette selection
+        await page.keyboard.press('Escape');
+
+        // Palette tile should be deselected
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'false');
+    });
+
     test('Step 9: should zoom in at viewport center when zoom in button clicked', async ({ page }) => {
         const zoomInButton = page.getByTestId('button-zoom-in');
         const statusBarZoom = page.getByTestId('statusbar-zoom-display');

@@ -337,6 +337,7 @@ export default function LevelEditor() {
                     ...prev,
                     selectedTool: null,
                     selectedObjects: [],
+                    selectedTileType: null,
                 }));
                 return true;
             }
