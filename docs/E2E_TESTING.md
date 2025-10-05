@@ -55,6 +55,59 @@ data-testid="ZoomDisplay"    // Not kebab-case
 
 ---
 
+## Test Consolidation Pattern
+
+When keyboard shortcut and UI button call the same function, test both in ONE test:
+
+**Pattern:**
+1. Setup: Create minimal test data
+2. Test keyboard shortcut: Verify outcome
+3. Reset state (undo or deselect)
+4. Test UI button: Verify same outcome
+5. Comment: "Both call same function - test both methods"
+
+**Examples:**
+- Undo: Ctrl+Z + button (commit 6d9a118)
+- Redo: Ctrl+Y, Ctrl+Shift+Z + button (commit 6d9a118)
+- Copy: Ctrl+C + button (commit 38864db)
+- Paste: Ctrl+V + button (task 13.6)
+
+**Benefits:**
+- Reduces test count and duplication
+- Makes it clear both inputs produce same result
+- Easier to maintain (one place to update)
+
+**Example Test:**
+```typescript
+test('should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
+    // Both shortcuts and button call the same redo function - test all methods
+
+    // Setup: Place tile, undo it
+    await placeTile();
+    await page.keyboard.press('Control+z');
+
+    // Test Ctrl+Y
+    await page.keyboard.press('Control+y');
+    expect(tileCount).toBe(1);
+
+    // Reset
+    await page.keyboard.press('Control+z');
+
+    // Test Ctrl+Shift+Z
+    await page.keyboard.press('Control+Shift+z');
+    expect(tileCount).toBe(1);
+
+    // Reset
+    await page.keyboard.press('Control+z');
+
+    // Test button
+    await redoButton.click();
+    expect(tileCount).toBe(1);
+});
+```
+
+---
+
 ## Common Patterns
 
 ### Test Dynamic Content
