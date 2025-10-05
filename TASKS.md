@@ -22,8 +22,8 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 11: Drawing Tools Implementation
 
-**Status:** 🔄 In Progress (5/12 tasks complete, 7 remaining)
-**Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`
+**Status:** 🔄 In Progress (Interaction model refactor needed)
+**Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/components/level-editor/Toolbar.tsx`
 **Priority:** High
 
 ### Completed Tasks:
@@ -33,47 +33,130 @@ Work through chapters sequentially. After implementing each chapter:
 ✅ **11.X** Multi-select tool - Drag box selection (bonus feature)
 ✅ **11.11** Fix ESC key not cancelling palette tool - Critical bug fixed
 
+---
+
+### 🎨 Drawing Mode Tools Concept
+
+**Industry Pattern** (Photoshop, GIMP, Tiled):
+- **Tool first, material second** - Select drawing tool, then choose what to draw with
+- Switching materials (tiles) keeps the tool active
+- Drawing tools are visually grouped and work together
+
+**Our Drawing Mode Tools:**
+```
+┌─── Drawing Mode Tools ──────┐  ┌─── Other Tools ─────┐
+│ [Pen] [Line] [Rectangle]    │  │ [Select] [Move] ... │
+└─────────────────────────────┘  └─────────────────────┘
+     ↕ Enable/disable based on tile selection
+```
+
+**State Transition Rules:**
+```
+User Action                    → selectedTool    | selectedTileType
+─────────────────────────────────────────────────────────────────
+Select tile (no tool active)   → 'pen'           | 'platform-basic'
+Select tile (line tool active) → 'line'          | 'platform-basic'  ✅ keeps tool
+Select line tool (tile active) → 'line'          | (preserved)        ✅
+Select different tile          → 'pen'/'line'    | 'platform-grass'   ✅ keeps tool
+Select non-drawing tool        → 'select'        | null               ❌ clears tile
+Press ESC                      → null            | null               ❌ clears both
+```
+
+**Key Behaviors:**
+- Drawing mode tools (`pen`, `line`, `rectangle`) work ONLY when tile selected
+- Switching between drawing mode tools preserves tile selection
+- Switching tiles preserves active drawing mode tool
+- Non-drawing tools (`select`, `move`, `multiselect`, `link`) are mutually exclusive with tiles
+- ESC clears both tool and tile
+
+---
+
 ### Remaining Tasks:
 
-#### 11.1 Implement line drawing tool ✅ 🧪 Ready for User Testing
-- **Status:** Complete - Awaiting manual testing
-- **Commit:** 2f0247e
-- **Implementation:**
-  - ✅ Created `lineDrawing.ts` with Bresenham's algorithm
-  - ✅ Added `drawPreviewLine()` to canvasRenderer
-  - ✅ Implemented mouse handlers in useCanvas
-  - ✅ Real-time preview while dragging
-  - ✅ Batch placement with single undo/redo entry
-  - ✅ ESC key cancels line drawing
-  - ✅ Preserves tile selection when switching tools
-- **Tests:**
-  - ✅ 4 E2E tests (basic, diagonal, palette, ESC cancel)
-  - ✅ 10 unit tests (all Bresenham edge cases)
-  - All passing
-- **Manual Test:**
-  1. Select a tile type from palette
-  2. Click line tool ('L' key) - verify tile stays selected
-  3. Click and drag on canvas - verify preview line appears
-  4. Release mouse - verify tiles placed along line
-  5. Try diagonal, horizontal, vertical lines
-  6. Press ESC during drag - verify line cancels
-  7. Undo - verify all tiles removed as single action
+#### 11.0 Implement Pen tool and refactor interaction model ⏸️ Not Started
+- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/components/level-editor/Toolbar.tsx`
+- **Purpose:** Create explicit "pen" tool and implement Drawing Mode Tools interaction pattern
+- **Current:** Painting is implicit when tile selected - no explicit tool, confusing state management
+- **Changes Needed:**
+  1. **Add 'pen' tool to EditorState** (`client/src/types/level.ts`)
+     - Update `selectedTool` type: add `'pen'`
+     - Default to 'pen' when tile selected
+  2. **Extract pen tool logic** (`client/src/hooks/useCanvas.ts`)
+     - Current implicit painting → explicit `selectedTool === 'pen'` mode
+     - Similar to line tool implementation
+  3. **Refactor state transitions** (`client/src/hooks/useSelectionState.ts`)
+     - Define drawing mode tools: `const DRAWING_TOOLS = ['pen', 'line', 'rectangle']`
+     - `selectTile()`: If no drawing tool active → default to 'pen'
+     - `selectTile()`: If drawing tool active → keep that tool
+     - `selectTool()`: If drawing tool selected → preserve tile
+     - `selectTool()`: If non-drawing tool → clear tile
+  4. **Visual grouping in toolbar** (`client/src/components/level-editor/Toolbar.tsx`)
+     - Group pen/line/rectangle tools visually (border, background, or separator)
+     - Conditional styling: enabled when tile selected, dimmed when no tile
+     - Add tooltip: "Select a tile first" when disabled
+  5. **Update keyboard shortcuts** (`client/src/pages/LevelEditor.tsx`)
+     - Add 'B' or 'P' key for pen tool (B for Brush is common)
+     - Update ESC handler to clear both tool and tile
+- **Files to modify:**
+  - `client/src/types/level.ts` (add 'pen' to EditorState)
+  - `client/src/hooks/useCanvas.ts` (add pen tool mode)
+  - `client/src/hooks/useSelectionState.ts` (drawing mode tools logic)
+  - `client/src/components/level-editor/Toolbar.tsx` (visual grouping)
+  - `client/src/pages/LevelEditor.tsx` (keyboard shortcuts)
+- **Tests to add:**
+  - E2E: Select tile → verify pen tool auto-selected
+  - E2E: Switch tiles → verify pen tool stays active
+  - E2E: Switch from pen to line → verify tile preserved
+  - E2E: Press ESC → verify both tool and tile cleared
+  - Unit: useSelectionState drawing mode tools transitions
+- **Dependencies:** Must be completed before 11.1 and 11.2 are truly complete
+- **Note:** This is the foundation for the entire drawing tools UX
 
-#### 11.2 Implement rectangle drawing tool
+#### 11.1 Implement line drawing tool ⚠️ Algorithm Complete, Needs Interaction Model Integration
+- **Status:** Partially complete - Algorithm done, needs Task 11.0 refactor
+- **Commit:** 2f0247e (algorithm implementation)
+- **What's Working:**
+  - ✅ Bresenham's line algorithm (`lineDrawing.ts`)
+  - ✅ Line preview rendering (`drawPreviewLine()` in canvasRenderer)
+  - ✅ Mouse handlers for line drawing
+  - ✅ Real-time preview while dragging
+  - ✅ Batch tile placement with single undo/redo
+  - ✅ ESC cancellation during drag
+  - ✅ Tests: 4 E2E + 10 unit (all passing)
+- **What Needs Refactoring** (blocked by Task 11.0):
+  - ⚠️ Interaction model - currently uses old mutual exclusion logic
+  - ⚠️ Should be part of drawing mode tools group
+  - ⚠️ Should preserve tile when switching to/from line tool
+  - ⚠️ Current `useSelectionState` logic needs updating
+- **After Task 11.0 Complete:**
+  - Update tests to reflect new interaction model
+  - Verify line tool works in drawing mode tools group
+  - Mark as complete after manual testing
+
+#### 11.2 Implement rectangle drawing tool ⏸️ Not Started
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
 - **Current:** Rectangle tool button exists in toolbar ('r' key) but does nothing when activated
+- **Dependencies:** Requires Task 11.0 (drawing mode tools interaction model) to be complete first
 - **Implementation:**
+  - Similar to line tool (Task 11.1), but draw rectangle instead of line
   - On mousedown: Record start corner position
   - On mousemove: Show preview rectangle from start to current position
-  - On mouseup: Place tiles to form rectangle outline or filled area (user preference?)
-  - Clear preview and return to normal mode
-- **Options to consider:**
-  - Outline only vs filled rectangle
-  - Could add modifier key (Shift) to toggle fill mode
+  - On mouseup: Place tiles to form rectangle (outline or filled)
+  - Works as part of drawing mode tools group (preserves tile selection)
+- **Rectangle Fill Options:**
+  - **Default:** Outline only (consistent with line tool)
+  - **Optional:** Shift key to toggle filled mode
+  - **Future:** Add toggle button to toolbar for persistent fill preference
 - **Files to modify:**
   - `client/src/hooks/useCanvas.ts` (add rectangle drawing logic)
   - `client/src/utils/canvasRenderer.ts` (add drawPreviewRectangle method)
-  - `client/src/hooks/useLevelEditor.ts` (may need batch tile placement method)
+  - `client/src/utils/rectangleDrawing.ts` (new file - rectangle calculation utility)
+- **Tests to add:**
+  - E2E: Draw outline rectangle
+  - E2E: Draw filled rectangle (if implemented)
+  - E2E: Rectangle with different tile types
+  - Unit: Rectangle position calculation
+- **Note:** Part of drawing mode tools group - must follow same interaction patterns as pen and line tools
 
 #### 11.5 Implement linking tool for interactable objects
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
