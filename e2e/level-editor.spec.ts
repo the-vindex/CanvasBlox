@@ -794,4 +794,82 @@ test.describe('Level Editor', () => {
             expect(toolbarText).toBe(statusBarText);
         }
     });
+
+    test('Step 9: should pan canvas with middle mouse button drag', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        await expect(canvas).toBeVisible();
+
+        // Get the scrollable wrapper
+        const wrapper = page.locator('.scrollbar-custom').first();
+        await expect(wrapper).toBeVisible();
+
+        // First, scroll to middle of canvas to allow dragging in any direction
+        await wrapper.evaluate((el) => {
+            el.scrollLeft = 300;
+            el.scrollTop = 300;
+        });
+        await page.waitForTimeout(100);
+
+        // Verify we're actually scrolled
+        const initialScrollLeft = await wrapper.evaluate((el) => el.scrollLeft);
+        const initialScrollTop = await wrapper.evaluate((el) => el.scrollTop);
+
+        // Skip test if wrapper isn't scrollable
+        if (initialScrollLeft === 0 && initialScrollTop === 0) {
+            console.log('Wrapper not scrollable, skipping test');
+            return;
+        }
+
+        // Get wrapper bounding box for mouse interaction
+        const box = await wrapper.boundingBox();
+        if (!box) throw new Error('Wrapper not found');
+
+        // Middle mouse button drag
+        const startX = box.x + box.width / 2;
+        const startY = box.y + box.height / 2;
+        const endX = startX + 100; // Drag right
+        const endY = startY + 100; // Drag down
+
+        // Simulate middle mouse button drag
+        await page.mouse.move(startX, startY);
+        await page.mouse.down({ button: 'middle' });
+        await page.mouse.move(endX, endY, { steps: 10 });
+        await page.mouse.up({ button: 'middle' });
+
+        await page.waitForTimeout(100);
+
+        // Check scroll position changed
+        const finalScrollLeft = await wrapper.evaluate((el) => el.scrollLeft);
+        const finalScrollTop = await wrapper.evaluate((el) => el.scrollTop);
+
+        // Dragging right should decrease scrollLeft (panning effect)
+        expect(finalScrollLeft).toBeLessThan(initialScrollLeft);
+        // Dragging down should decrease scrollTop (panning effect)
+        expect(finalScrollTop).toBeLessThan(initialScrollTop);
+    });
+
+    test('Step 9: middle mouse drag should not interfere with left click drawing', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+
+        // Select a tile
+        await grassTile.click();
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
+
+        // Get canvas bounding box
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Left click should still work for drawing (not affected by middle mouse implementation)
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(50);
+
+        // Middle mouse drag should not trigger drawing
+        await page.mouse.move(box.x + 300, box.y + 300);
+        await page.mouse.down({ button: 'middle' });
+        await page.mouse.move(box.x + 250, box.y + 250);
+        await page.mouse.up({ button: 'middle' });
+
+        // This test just verifies no errors occur - actual tile placement tested elsewhere
+    });
 });

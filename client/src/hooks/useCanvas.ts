@@ -26,6 +26,9 @@ export function useCanvas({
     const wrapperRef = useRef<HTMLDivElement>(null);
     const rendererRef = useRef<CanvasRenderer | null>(null);
     const isPaintingRef = useRef(false);
+    const isPanningRef = useRef(false);
+    const panStartRef = useRef({ x: 0, y: 0 });
+    const scrollStartRef = useRef({ left: 0, top: 0 });
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -68,6 +71,19 @@ export function useCanvas({
 
     const handleMouseMove = useCallback(
         (e: MouseEvent) => {
+            // Handle middle mouse panning
+            if (isPanningRef.current) {
+                const wrapper = wrapperRef.current;
+                if (!wrapper) return;
+
+                const deltaX = e.clientX - panStartRef.current.x;
+                const deltaY = e.clientY - panStartRef.current.y;
+
+                wrapper.scrollLeft = scrollStartRef.current.left - deltaX;
+                wrapper.scrollTop = scrollStartRef.current.top - deltaY;
+                return;
+            }
+
             const worldPos = getWorldPosition(e);
             onMouseMove(worldPos);
 
@@ -80,6 +96,24 @@ export function useCanvas({
 
     const handleMouseDown = useCallback(
         (e: MouseEvent) => {
+            // Middle mouse button (button === 1) for panning
+            if (e.button === 1) {
+                e.preventDefault();
+                const wrapper = wrapperRef.current;
+                if (!wrapper) return;
+
+                isPanningRef.current = true;
+                panStartRef.current = { x: e.clientX, y: e.clientY };
+                scrollStartRef.current = {
+                    left: wrapper.scrollLeft,
+                    top: wrapper.scrollTop,
+                };
+                // Change cursor to grabbing
+                wrapper.style.cursor = 'grabbing';
+                return;
+            }
+
+            // Left mouse button for drawing/clicking
             const worldPos = getWorldPosition(e);
 
             if (editorState.selectedTileType) {
@@ -93,6 +127,17 @@ export function useCanvas({
     );
 
     const handleMouseUp = useCallback(() => {
+        const wrapper = wrapperRef.current;
+
+        // End panning
+        if (isPanningRef.current) {
+            isPanningRef.current = false;
+            if (wrapper) {
+                wrapper.style.cursor = '';
+            }
+        }
+
+        // End painting
         if (isPaintingRef.current) {
             isPaintingRef.current = false;
             // End the drawing session
@@ -140,6 +185,13 @@ export function useCanvas({
         [onZoom]
     );
 
+    const handleContextMenu = useCallback((e: MouseEvent) => {
+        // Prevent context menu when middle mouse button is used for panning
+        if (isPanningRef.current) {
+            e.preventDefault();
+        }
+    }, []);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const wrapper = wrapperRef.current;
@@ -150,6 +202,12 @@ export function useCanvas({
         canvas.addEventListener('mouseup', handleMouseUp);
         canvas.addEventListener('mouseleave', handleMouseUp);
         canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('contextmenu', handleContextMenu);
+
+        // Also attach mouse events to wrapper for middle button panning
+        wrapper.addEventListener('mousedown', handleMouseDown);
+        wrapper.addEventListener('mousemove', handleMouseMove);
+        wrapper.addEventListener('mouseup', handleMouseUp);
 
         // Attach wheel event to wrapper div instead of canvas
         wrapper.addEventListener('wheel', handleWheel as any, { passive: false });
@@ -160,9 +218,14 @@ export function useCanvas({
             canvas.removeEventListener('mouseup', handleMouseUp);
             canvas.removeEventListener('mouseleave', handleMouseUp);
             canvas.removeEventListener('click', handleClick);
+            canvas.removeEventListener('contextmenu', handleContextMenu);
+
+            wrapper.removeEventListener('mousedown', handleMouseDown);
+            wrapper.removeEventListener('mousemove', handleMouseMove);
+            wrapper.removeEventListener('mouseup', handleMouseUp);
             wrapper.removeEventListener('wheel', handleWheel as any);
         };
-    }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick, handleWheel]);
+    }, [handleMouseMove, handleMouseDown, handleMouseUp, handleClick, handleWheel, handleContextMenu]);
 
     return { canvasRef, wrapperRef, renderer: rendererRef.current };
 }
