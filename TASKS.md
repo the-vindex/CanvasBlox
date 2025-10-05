@@ -572,32 +572,25 @@ Press ESC                      → null            | null               ❌ clea
 
 ### Phase 4: Add Missing Coverage (Low Priority)
 
-#### 13.12 Add error handling and edge case tests
-- **Location:** `e2e/level-editor.spec.ts` (new tests to add)
-- **Missing Coverage:**
-  1. **Network Errors:**
-     - Import JSON with network failure
-     - Corrupt localStorage recovery
-     - Invalid tile data handling
-  2. **Edge Cases:**
-     - Copy/paste with 0 objects selected
-     - Zoom during active drag operation
-     - Pan beyond canvas boundaries
-     - Undo/redo across level switches
-  3. **Keyboard Shortcuts:**
-     - Delete key (only animation tested currently)
-     - Ctrl+A (select all) - not implemented or tested
-     - Arrow keys for object movement
-  4. **Cross-Level Operations:**
-     - Copy from one level, paste to another
-     - Undo/redo state preservation across level switches
-  5. **Performance:**
-     - Large canvas with 1000+ objects
-     - Rapid tool switching
-     - Memory leaks on level close
-- **Implementation:** Add 8-12 new targeted tests
-- **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** +12 tests, +300 lines (but filling critical gaps)
+#### 13.12 Add error handling and edge case tests ✅ PARTIAL COMPLETE
+- **Status:** ✅ PARTIAL - Implemented 2 critical edge cases, deferred others
+- **Location:** `e2e/keyboard-shortcuts.spec.ts`, `e2e/undo-redo.spec.ts`, `e2e/zoom-pan.spec.ts`
+- **Implemented:**
+  1. ✅ **Ctrl+A select all** - Keyboard shortcut + "Select All" button (e2e/keyboard-shortcuts.spec.ts:195)
+  2. ✅ **Zoom during drag** - Verifies no errors during concurrent operations (e2e/zoom-pan.spec.ts:224)
+  3. ⏸️ **Cross-level undo/redo** - Skipped test documents bug for Chapter 19 (e2e/undo-redo.spec.ts:275)
+- **Deferred to other chapters:**
+  1. Copy/paste edge cases → Chapter 18 (Enhanced Copy/Paste)
+  2. Delete key → Already tested in visual-effects.spec.ts
+  3. Network errors, performance → Future chapters as needed
+- **Implementation:** Added 3 tests (+60 lines), 2 passing, 1 skipped (documents bug)
+- **Files modified:**
+  - `client/src/hooks/useLevelEditor.ts` (added selectAllObjects)
+  - `client/src/pages/LevelEditor.tsx` (added Ctrl+A handler, Select All button)
+  - `e2e/keyboard-shortcuts.spec.ts` (Ctrl+A test)
+  - `e2e/zoom-pan.spec.ts` (zoom during drag test)
+  - `e2e/undo-redo.spec.ts` (cross-level test - skipped, bug documented)
+- **Impact:** Feature complete (Ctrl+A), 125/126 E2E tests passing, 1 new chapter created (Chapter 19)
 
 **Dependencies:** Phase 3 (helpers) should be completed before Phase 4 to avoid more boilerplate
 **Notes:**
@@ -946,48 +939,40 @@ Press ESC                      → null            | null               ❌ clea
 
 ## Next Steps
 
-**Current:** Chapter 11 - Drawing Tools Implementation (5/12 complete, 7 remaining)
+**Recommended Priority Order:**
 
-**✅ Completed (5):**
-- ✅ Selection tool (single select)
-- ✅ Move tool (ghost preview)
-- ✅ Multi-select tool (drag box)
-- ✅ Clear brush on tool change
-- ✅ ESC key bug fix - Now cancels palette selection
+1. **Chapter 19: Undo/Redo History Preservation** ⚠️ **HIGH PRIORITY**
+   - Fix per-level history bug (1 failing E2E test)
+   - Critical UX issue for multi-level workflows
 
-**❌ Chapter 11 Remaining (Priority Order):**
-1. 🔧 **11.10** Tile overlap logic - newest tile wins (HIGH PRIORITY)
-2. 🔗 **11.5** Linking tool for interactable objects
-3. ✂️ **11.6** Unlinking tool (Properties Panel)
-4. 📏 **11.1** Line drawing tool
-5. 📐 **11.2** Rectangle drawing tool
-6. 🔢 **11.9** Button numbering system
-7. 🔄 **11.7** Rotation tool - decision needed
+2. **Chapter 11: Drawing Tools** (5/12 complete, 7 remaining)
+   - Core feature implementation
+   - Tasks: Tile overlap, Link/Unlink, Line/Rectangle, Button numbering, Rotation
 
-**Alternative Focus:** Chapter 13 - E2E Test Simplification (Phase 1 & 2 COMPLETE, Phase 3 PARTIAL)
-- **Phase 1 (Complete):** ✅ Deleted 4 redundant zoom tests (-92 lines)
-- **Phase 2 (Complete - 7/7 done):**
-  - ✅ 13.3: Merge undo tests (consolidated + fixed bug)
-  - ✅ 13.4: Merge redo tests (-2 tests, -60 lines)
-  - ✅ 13.5: Merge copy tests (-1 test, -25 lines)
-  - ✅ 13.6: Merge paste tests (-2 tests, -69 lines)
-  - ✅ 13.7: Fix/remove redundant offset tests (already complete from 13.5/13.6)
-  - ✅ 13.8: Refactor multi-select copy test (skipped - paste rework in Ch 15)
-  - ✅ 13.9: Document consolidation pattern
-- **Phase 3 (Partial - 1/2 done):**
-  - ✅ 13.10: Helper utilities created (`e2e/helpers.ts`)
-  - ⏸️ 13.11: Refactor tests to use helpers - **LARGER than expected** (171 patterns found via ast-grep, -250 to -350 lines potential)
-- **Phase 4 (Not Started):** Add error/edge case coverage
+3. **Chapter 15: Code Quality**
+   - Fix linter warnings (complexity issues in useCanvas.ts, LevelEditor.tsx)
+   - Refactor for maintainability
 
-**New Chapters (Queued):**
-- **Chapter 16:** Bug Fixes - **HIGH PRIORITY** - Fix import/export bugs blocking E2E tests
-- **Chapter 15:** Code Quality & Refactoring - Reduce linter warnings, refactor complex functions
-- **Chapter 14:** E2E Test Organization - Split monolithic test file
-- **Chapter 15:** Enhanced Copy/Paste - Ghost preview workflow (renumber to Ch 17)
+4. **Chapter 18: Enhanced Copy/Paste**
+   - Ghost preview paste workflow
+   - Improved UX
 
-**Future:** Chapter 12 - Documentation (low priority)
+5. **Chapter 17: E2E Test Optimization Phase 3**
+   - Minor: Merge auto-save tests, remove redundant test
 
-**Recommended Next:** `/next chapter 16` - Fix critical P2 bugs discovered in E2E test session
+6. **Chapter 12: Documentation** (Low priority)
+   - Consolidate project documentation
+
+**Current E2E Status:**
+- ✅ 125/126 tests passing (96.2% pass rate)
+- ❌ 1 failing test: Undo/redo history preservation (Chapter 19)
+- ⏸️ 4 skipped tests: Copy/paste (intentionally deferred to Chapter 18)
+
+**Completed Chapters:**
+- ✅ Chapter 8-10: Visual enhancements
+- ✅ Chapter 13: E2E test simplification (-9 tests, -527 lines, helper functions)
+- ✅ Chapter 14: E2E test organization (13 focused files)
+- ✅ Chapter 16: Bug fixes (import/export/toast selector)
 
 ---
 
