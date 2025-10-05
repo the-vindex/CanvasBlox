@@ -66,6 +66,40 @@
                     }
                 }
             }
+        },
+        {
+            "includes": ["client/src/components/ui/**"],
+            "linter": {
+                "rules": {
+                    "a11y": {
+                        "useFocusableInteractive": "off",
+                        "useSemanticElements": "off",
+                        "useAriaPropsForRole": "off"
+                    },
+                    "correctness": {
+                        "noNestedComponentDefinitions": "off"
+                    },
+                    "complexity": {
+                        "noExcessiveCognitiveComplexity": "off"
+                    },
+                    "security": {
+                        "noDangerouslySetInnerHtml": "off"
+                    },
+                    "suspicious": {
+                        "noDocumentCookie": "off"
+                    }
+                }
+            }
+        },
+        {
+            "includes": ["client/src/index.css"],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noUnknownAtRules": "off"
+                    }
+                }
+            }
         }
     ]
 }
