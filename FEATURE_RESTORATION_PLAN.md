@@ -878,39 +878,35 @@ test('should load levels from localStorage', () => {
 ## Section 5: Final Polish
 
 ### Step 22: Update Header with Dropdown Menu
-**Status**: ⬜ Not Started
-**Current State**: Inline buttons
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: File dropdown menu fully implemented with shadcn/ui DropdownMenu
 **Goal**: Use shadcn DropdownMenu for File menu
 **Dependencies**: Step 14 (import/export)
 
 **Implementation**:
-1. Import DropdownMenu components
-2. Replace File buttons with dropdown:
-   ```tsx
-   <DropdownMenu>
-     <DropdownMenuTrigger asChild>
-       <Button variant="ghost" size="sm" className="text-white">
-         <i className="fas fa-file"></i>
-         File
-         <i className="fas fa-chevron-down text-xs"></i>
-       </Button>
-     </DropdownMenuTrigger>
-     <DropdownMenuContent align="start">
-       <DropdownMenuItem onClick={() => createNewLevel()}>
-         <i className="fas fa-file w-4"></i>
-         New Level
-       </DropdownMenuItem>
-       {/* ... */}
-     </DropdownMenuContent>
-   </DropdownMenu>
-   ```
+1. ✅ DropdownMenu components already imported (LevelEditor.tsx lines 10-14)
+2. ✅ File dropdown menu already implemented (lines 527-561):
+   - DropdownMenuTrigger with File button
+   - DropdownMenuContent with 4 menu items:
+     - New Level → createNewLevel()
+     - Import JSON → setShowImportModal(true)
+     - Export JSON → setShowExportModal(true)
+     - Export PNG → handleExportPNG()
+3. ✅ All handlers properly wired
 
-**Files to modify**:
-- `client/src/pages/LevelEditor.tsx`
+**Files modified**:
+- `e2e/level-editor.spec.ts` - Added 5 E2E tests
 
-**Test**:
-- Dropdown should open/close
-- All menu items should work
+**Tests Added**:
+1. File dropdown menu should be visible and clickable
+2. File menu items should trigger correct actions
+3. Import JSON menu item should open import modal
+4. Export JSON menu item should open export modal
+5. File dropdown should close when clicking outside
+
+**Test Results**:
+- ✅ All unit tests pass (110/110)
+- ✅ All Step 22 E2E tests pass (5/5)
 
 ---
 

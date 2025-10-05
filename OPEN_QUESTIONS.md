@@ -634,4 +634,52 @@ Apply as: `backgroundPosition: \`\${parallaxX}px \${parallaxY}px\``
 
 **No code changes needed** - Feature was already fully implemented in Step 14. Only needs test coverage verification.
 
+**Tests Added:**
+1. **E2E Tests (5):** All pass ✅
+   - "File dropdown menu should be visible and clickable" - Verifies button, chevron, menu items
+   - "File menu items should trigger correct actions" - Tests New Level action
+   - "Import JSON menu item should open import modal" - Verifies modal opens
+   - "Export JSON menu item should open export modal" - Verifies modal opens
+   - "File dropdown should close when clicking outside" - Tests dropdown close behavior
+
+**Test Results:**
+- ✅ All unit tests pass (110/110)
+- ✅ All Step 22 E2E tests pass (5/5)
+
+**Files Modified:**
+- `e2e/level-editor.spec.ts` - Added 5 E2E tests in new "Step 22" describe block
+- `OPEN_QUESTIONS.md` - Documented assumptions and completion
+- `FEATURE_RESTORATION_PLAN.md` - Updated status to ✅ Complete (auto-accepted)
+
+---
+
+## AUTO-IMPLEMENTATION SESSION COMPLETE
+
+**Step Completed:** Step 22 - Update Header with Dropdown Menu
+**Session Status:** ✅ SUCCESS
+
+**What Changed:**
+- Added comprehensive E2E test coverage for File dropdown menu
+- All 5 tests pass successfully
+- No implementation changes needed - feature was already complete
+
+**Key Findings:**
+- File dropdown menu was already implemented in Step 14 (Import/Export Modals)
+- Implementation uses shadcn/ui DropdownMenu component correctly
+- All menu items properly wired with click handlers
+- Only missing piece was dedicated test coverage for Step 22
+
+**Work Completed:**
+- Verified implementation is complete and correct
+- Added 5 E2E tests for dropdown menu functionality
+- Fixed one flaky test (click outside behavior)
+- All tests pass (110 unit, 5 Step 22 E2E)
+- Updated feature plan with completion status
+- Documented all assumptions and decisions
+
+**Commits Made:**
+1. `ea19d25` - Step 22: Add comprehensive E2E tests for File dropdown menu
+
+**Next Step:** Step 23 - Update Status Bar with Live Data
+
 ---
