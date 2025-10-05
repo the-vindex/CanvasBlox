@@ -4,7 +4,8 @@
             "Bash(npm run lint:*)",
             "Bash(npm run lint)",
             "Bash(npm test)",
-            "Bash(npm run test:*)",
+            "Bash(npm test:*)",
+            "Bash(npm run test:e2e:*)",
             "Bash(npm run check)",
             "Bash(git status)",
             "Bash(git diff:*)",
@@ -13,11 +14,16 @@
             "Bash(git commit:*)",
             "Bash(git push:*)",
             "Bash(git push)",
-            "Bash(npm run test:e2e:*)",
             "Bash(npm run lint:fix:*)",
-            "Edit(TASKS*.md:*)",
-            "Write(TASKS*.md:*)",
-            "Read(TASKS*.md:*)"
+            "Bash(npm run lint:*)",
+            "Edit(**/TASKS*.md)",
+            "Write(**/TASKS*.md)",
+            "Read(**/TASKS*.md)",
+            "Bash(npm run lint:*)",
+            "Bash(npm run format:*)",
+            "Bash(npm run format:check:*)",
+            "Bash(npm run format:*)"
+
         ],
         "deny": [],
         "ask": []

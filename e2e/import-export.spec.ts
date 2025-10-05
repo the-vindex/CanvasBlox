@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getObjectCount } from './helpers';
 
 test.describe('Import/Export', () => {
     test.beforeEach(async ({ page }) => {
@@ -267,9 +268,7 @@ test.describe('Import/Export', () => {
         await expect(levelNameInput).toHaveValue('Imported Level');
 
         // Should have 1 tile from import
-        const objectCount = page.getByTestId('statusbar-object-count');
-        const countText = await objectCount.textContent();
-        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        const count = await getObjectCount(page);
         expect(count).toBe(1);
     });
 
@@ -347,9 +346,7 @@ test.describe('Import/Export', () => {
         await expect(levelNameInput).toHaveValue('Overwritten Level');
 
         // Should have 2 tiles from import
-        const objectCount = page.getByTestId('statusbar-object-count');
-        const countText = await objectCount.textContent();
-        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        const count = await getObjectCount(page);
         expect(count).toBe(2);
     });
 
@@ -402,9 +399,7 @@ test.describe('Import/Export', () => {
         await expect(levelNameInput).toHaveValue('Invalid Level');
 
         // Object count should reflect only 1 player spawn + 1 enemy spawn (3rd player spawn removed)
-        const objectCount = page.getByTestId('statusbar-object-count');
-        const countText = await objectCount.textContent();
-        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        const count = await getObjectCount(page);
 
         // Should have 2 spawn points (1 player + 1 enemy), not 3
         expect(count).toBe(2);
@@ -427,13 +422,10 @@ test.describe('Import/Export', () => {
         await page.waitForTimeout(100);
 
         // Place some tiles and objects
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         await grassTile.click();
-        await page.mouse.click(box.x + 100, box.y + 100);
+        await clickCanvas(page, 100, 100);
         await page.waitForTimeout(100);
 
         // Export to JSON

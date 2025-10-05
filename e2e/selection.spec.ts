@@ -196,14 +196,12 @@ test.describe('Selection', () => {
 
         // Place a button
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
 
         // Select the button
         await selectTool.click();
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
 
         // Switch to move tool
@@ -211,6 +209,8 @@ test.describe('Selection', () => {
         await expect(moveTool).toHaveAttribute('aria-pressed', 'true');
 
         // Drag the button to a new position (2 tiles right, 1 tile down)
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 200, box.y + 200);
         await page.mouse.down();
         await page.mouse.move(box.x + 264, box.y + 232, { steps: 5 }); // 64px = 2 tiles, 32px = 1 tile
@@ -231,18 +231,17 @@ test.describe('Selection', () => {
 
         // Place 3 buttons
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 264, box.y + 200);
+        await clickCanvas(page, 264, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 328, box.y + 200);
+        await clickCanvas(page, 328, 200);
         await page.waitForTimeout(100);
 
         // Multi-select all 3
         await multiSelectTool.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 180, box.y + 180);
         await page.mouse.down();
         await page.mouse.move(box.x + 360, box.y + 240, { steps: 5 });
@@ -305,17 +304,16 @@ test.describe('Selection', () => {
         const multiSelectTool = page.getByTestId('tool-multiselect');
         const moveTool = page.getByTestId('tool-move');
 
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-
         // Place a few tiles
         await basicTile.click();
-        await page.mouse.click(box.x + 200, box.y + 200);
-        await page.mouse.click(box.x + 232, box.y + 200);
-        await page.mouse.click(box.x + 264, box.y + 200);
+        await clickCanvas(page, 200, 200);
+        await clickCanvas(page, 232, 200);
+        await clickCanvas(page, 264, 200);
 
         // Multi-select all tiles
         await multiSelectTool.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 180, box.y + 180);
         await page.mouse.down();
         await page.mouse.move(box.x + 300, box.y + 220);
@@ -359,14 +357,9 @@ test.describe('Selection', () => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const lineTool = page.getByTestId('tool-line');
-        const objectCount = page.getByTestId('statusbar-object-count');
-
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Get initial count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Select tile type and switch to line tool
         await basicTile.click();
@@ -374,6 +367,8 @@ test.describe('Selection', () => {
         await expect(lineTool).toHaveAttribute('aria-pressed', 'true');
 
         // Draw a line by dragging
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         const startX = box.x + 200;
         const startY = box.y + 200;
         const endX = box.x + 360;
@@ -386,8 +381,7 @@ test.describe('Selection', () => {
         await page.waitForTimeout(100);
 
         // Verify tiles were placed along the line
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 
@@ -395,20 +389,17 @@ test.describe('Selection', () => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const lineTool = page.getByTestId('tool-line');
-        const objectCount = page.getByTestId('statusbar-object-count');
-
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Get initial count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Select tile and tool
         await grassTile.click();
         await lineTool.click();
 
         // Draw diagonal line from top-left to bottom-right
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 150, box.y + 150);
         await page.mouse.down();
         await page.mouse.move(box.x + 400, box.y + 350, { steps: 5 });
@@ -416,8 +407,7 @@ test.describe('Selection', () => {
         await page.waitForTimeout(100);
 
         // Verify tiles were placed
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 
@@ -425,20 +415,17 @@ test.describe('Selection', () => {
         const canvas = page.getByTestId('level-canvas');
         const stoneTile = page.getByTestId('tile-platform-stone');
         const lineTool = page.getByTestId('tool-line');
-        const objectCount = page.getByTestId('statusbar-object-count');
-
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Select stone tile and line tool
         await stoneTile.click();
         await lineTool.click();
 
         // Get initial count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Draw a horizontal line
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 200, box.y + 300);
         await page.mouse.down();
         await page.mouse.move(box.x + 350, box.y + 300, { steps: 3 });
@@ -446,8 +433,7 @@ test.describe('Selection', () => {
         await page.waitForTimeout(100);
 
         // Verify tiles were placed
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeGreaterThan(initialCount);
 
         // Note: We verify tiles were placed. Actual tile type verification would require
@@ -459,20 +445,17 @@ test.describe('Selection', () => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const lineTool = page.getByTestId('tool-line');
-        const objectCount = page.getByTestId('statusbar-object-count');
-
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Get initial count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Select tile and line tool
         await basicTile.click();
         await lineTool.click();
 
         // Start dragging a line
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 200, box.y + 200);
         await page.mouse.down();
         await page.mouse.move(box.x + 400, box.y + 400, { steps: 5 });
@@ -485,8 +468,7 @@ test.describe('Selection', () => {
         await page.waitForTimeout(100);
 
         // Verify NO tiles were placed (count should not change)
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBe(initialCount);
 
         // Line tool and tile selection should be cleared

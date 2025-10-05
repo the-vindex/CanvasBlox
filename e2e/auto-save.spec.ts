@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas } from './helpers';
 
 test.describe('Auto-Save', () => {
     test.beforeEach(async ({ page }) => {
@@ -16,13 +17,10 @@ test.describe('Auto-Save', () => {
         await expect(saveIndicator).toContainText('Saved');
 
         // Make a change - place a tile
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         await grassTile.click();
-        await page.mouse.click(box.x + 100, box.y + 100);
+        await clickCanvas(page, 100, 100);
         await page.waitForTimeout(100);
 
         // Should now show "Unsaved"
@@ -34,13 +32,10 @@ test.describe('Auto-Save', () => {
         const saveIndicator = page.getByTestId('save-indicator');
 
         // Make a change
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         await grassTile.click();
-        await page.mouse.click(box.x + 150, box.y + 150);
+        await clickCanvas(page, 150, 150);
         await page.waitForTimeout(100);
 
         // Should show "Unsaved"
@@ -58,13 +53,10 @@ test.describe('Auto-Save', () => {
         const saveIcon = page.locator('[data-testid="save-indicator"] i.fa-save').first();
 
         // Make a change
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         await grassTile.click();
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
 
         // Icon should have orange color class for unsaved

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getObjectCount } from './helpers';
 
 test.describe('Undo/Redo', () => {
     test.beforeEach(async ({ page }) => {
@@ -22,8 +23,7 @@ test.describe('Undo/Redo', () => {
         const undoButton = page.getByRole('button', { name: /Undo/ });
 
         // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Place a tile
         await grassTile.click();
@@ -34,15 +34,13 @@ test.describe('Undo/Redo', () => {
         await expect(undoButton).toBeEnabled();
 
         // Verify tile was placed
-        const afterPlaceText = await objectCount.textContent();
-        const afterPlaceCount = parseInt(afterPlaceText?.match(/\d+/)?.[0] || '0', 10);
+        const afterPlaceCount = await getObjectCount(page);
         expect(afterPlaceCount).toBeGreaterThan(initialCount);
 
         // Test keyboard shortcut (Ctrl+Z)
         await page.keyboard.press('Control+z');
         await page.waitForTimeout(200);
-        const afterKeyboardUndo = await objectCount.textContent();
-        const afterKeyboardUndoCount = parseInt(afterKeyboardUndo?.match(/\d+/)?.[0] || '0', 10);
+        const afterKeyboardUndoCount = await getObjectCount(page);
         expect(afterKeyboardUndoCount).toBeLessThan(afterPlaceCount);
 
         // Redo to restore
@@ -52,8 +50,7 @@ test.describe('Undo/Redo', () => {
         // Test button
         await undoButton.click();
         await page.waitForTimeout(200);
-        const afterButtonUndo = await objectCount.textContent();
-        const afterButtonUndoCount = parseInt(afterButtonUndo?.match(/\d+/)?.[0] || '0', 10);
+        const afterButtonUndoCount = await getObjectCount(page);
         expect(afterButtonUndoCount).toBeLessThan(afterPlaceCount);
     });
 
@@ -65,13 +62,10 @@ test.describe('Undo/Redo', () => {
 
         // Place a tile and record the expected count after redo
         await basicTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 250, box.y + 250);
+        await clickCanvas(page, 250, 250);
         await page.waitForTimeout(100);
 
-        const afterPlaceText = await objectCount.textContent();
-        const expectedCount = parseInt(afterPlaceText?.match(/\d+/)?.[0] || '0', 10);
+        const expectedCount = await getObjectCount(page);
 
         // Undo once to create a redo opportunity
         await page.keyboard.press('Control+z');
@@ -82,8 +76,7 @@ test.describe('Undo/Redo', () => {
         // Test Ctrl+Y
         await page.keyboard.press('Control+y');
         await page.waitForTimeout(100);
-        const afterCtrlY = await objectCount.textContent();
-        const ctrlYCount = parseInt(afterCtrlY?.match(/\d+/)?.[0] || '0', 10);
+        const ctrlYCount = await getObjectCount(page);
         expect(ctrlYCount).toBe(expectedCount);
         await page.keyboard.press('Control+z'); // Reset for next test
         await page.waitForTimeout(100);
@@ -91,8 +84,7 @@ test.describe('Undo/Redo', () => {
         // Test Ctrl+Shift+Z
         await page.keyboard.press('Control+Shift+Z');
         await page.waitForTimeout(100);
-        const afterCtrlShiftZ = await objectCount.textContent();
-        const ctrlShiftZCount = parseInt(afterCtrlShiftZ?.match(/\d+/)?.[0] || '0', 10);
+        const ctrlShiftZCount = await getObjectCount(page);
         expect(ctrlShiftZCount).toBe(expectedCount);
         await page.keyboard.press('Control+z'); // Reset for next test
         await page.waitForTimeout(100);
@@ -100,8 +92,7 @@ test.describe('Undo/Redo', () => {
         // Test button
         await redoButton.click();
         await page.waitForTimeout(100);
-        const afterButton = await objectCount.textContent();
-        const buttonCount = parseInt(afterButton?.match(/\d+/)?.[0] || '0', 10);
+        const buttonCount = await getObjectCount(page);
         expect(buttonCount).toBe(expectedCount);
     });
 
@@ -124,9 +115,7 @@ test.describe('Undo/Redo', () => {
 
         // Place a tile
         await grassTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 220, box.y + 220);
+        await clickCanvas(page, 220, 220);
         await page.waitForTimeout(100);
 
         // History should increase
@@ -184,9 +173,7 @@ test.describe('Undo/Redo', () => {
 
         // Place a tile and redo should be disabled (at end of history)
         await grassTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 240, box.y + 240);
+        await clickCanvas(page, 240, 240);
         await page.waitForTimeout(100);
 
         // At end of history, redo should be disabled/ineffective
@@ -199,9 +186,7 @@ test.describe('Undo/Redo', () => {
 
         // Place a tile
         await basicTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 260, box.y + 260);
+        await clickCanvas(page, 260, 260);
         await page.waitForTimeout(100);
 
         // Undo and check for flash overlay
@@ -229,19 +214,16 @@ test.describe('Undo/Redo', () => {
         const objectCount = page.getByTestId('statusbar-object-count');
 
         // Get initial object count (should be 0 for fresh level)
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Place 3 tiles
         await grassTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
-        await page.mouse.click(box.x + 150, box.y + 150);
+        await clickCanvas(page, 150, 150);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 182, box.y + 150);
+        await clickCanvas(page, 182, 150);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 214, box.y + 150);
+        await clickCanvas(page, 214, 150);
         await page.waitForTimeout(100);
 
         // Undo all 3 actions
@@ -253,8 +235,7 @@ test.describe('Undo/Redo', () => {
         await page.waitForTimeout(200);
 
         // Should be back to initial count
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBe(initialCount);
     });
 
@@ -264,17 +245,14 @@ test.describe('Undo/Redo', () => {
         const objectCount = page.getByTestId('statusbar-object-count');
 
         // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Place 2 tiles
         await basicTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
-        await page.mouse.click(box.x + 170, box.y + 170);
+        await clickCanvas(page, 170, 170);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 202, box.y + 170);
+        await clickCanvas(page, 202, 170);
         await page.waitForTimeout(100);
 
         // Undo both
@@ -290,8 +268,7 @@ test.describe('Undo/Redo', () => {
         await page.waitForTimeout(100);
 
         // Should be back to having both tiles placed
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 });

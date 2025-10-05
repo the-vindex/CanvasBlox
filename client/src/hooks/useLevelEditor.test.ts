@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
 import type { LevelData } from '@/types/level';
@@ -465,6 +465,7 @@ describe('useLevelEditor', () => {
         });
 
         it('should delete selected objects with animation delay', async () => {
+            vi.useFakeTimers();
             const { result } = renderHook(() => useLevelEditor());
 
             const initialTileCount = result.current.currentLevel.tiles.length;
@@ -488,16 +489,17 @@ describe('useLevelEditor', () => {
             // Should mark as deleting immediately
             expect(result.current.editorState.deletingObjects).toContain(tileId);
 
-            // Wait for animation to complete
-            await waitFor(
-                () => {
-                    expect(result.current.currentLevel.tiles).toHaveLength(initialTileCount);
-                },
-                { timeout: 300 }
-            );
+            // Advance timers past the 250ms animation delay
+            await act(async () => {
+                await vi.advanceTimersByTimeAsync(250);
+            });
 
+            // Tile should be deleted after animation
+            expect(result.current.currentLevel.tiles).toHaveLength(initialTileCount);
             expect(result.current.editorState.selectedObjects).toHaveLength(0);
             expect(result.current.editorState.deletingObjects).toHaveLength(0);
+
+            vi.useRealTimers();
         });
     });
 

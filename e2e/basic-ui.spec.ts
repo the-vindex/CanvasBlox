@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getCanvasBounds } from './helpers';
 
 test.describe('Basic UI', () => {
     test.beforeEach(async ({ page }) => {
@@ -35,9 +36,8 @@ test.describe('Basic UI', () => {
         const canvas = page.getByTestId('level-canvas');
         await expect(canvas).toBeVisible();
 
-        // Get the canvas bounding box
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
+        // Get canvas bounds for mouse movement
+        const box = await getCanvasBounds(page);
 
         // Move mouse to a specific position on canvas
         await page.mouse.move(box.x + 160, box.y + 160);
@@ -72,12 +72,10 @@ test.describe('Basic UI', () => {
 
         // Canvas should be rendered (check it has content by checking it's not blank)
         // We can verify this by checking the canvas has a non-zero dimension
-        const box = await canvas.boundingBox();
+        const box = await getCanvasBounds(page);
         expect(box).toBeTruthy();
-        if (box) {
-            expect(box.width).toBeGreaterThan(0);
-            expect(box.height).toBeGreaterThan(0);
-        }
+        expect(box.width).toBeGreaterThan(0);
+        expect(box.height).toBeGreaterThan(0);
     });
 
     test('CanvasRenderer should draw to canvas', async ({ page }) => {
