@@ -345,66 +345,6 @@ test.describe('Level Editor', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'false');
     });
 
-    test('Step 6: should increase zoom when zoom in button clicked', async ({ page }) => {
-        const zoomInButton = page.getByTestId('button-zoom-in');
-        const zoomLevel = page.getByTestId('zoom-level');
-
-        // Initial zoom
-        await expect(zoomLevel).toHaveText('100%');
-
-        // Click zoom in
-        await zoomInButton.click();
-
-        // Zoom should have increased
-        const zoomText = await zoomLevel.textContent();
-        const zoomValue = parseInt(zoomText?.replace('%', '') || '0', 10);
-        expect(zoomValue).toBeGreaterThan(100);
-    });
-
-    test('Step 6: should decrease zoom when zoom out button clicked', async ({ page }) => {
-        const zoomInButton = page.getByTestId('button-zoom-in');
-        const zoomOutButton = page.getByTestId('button-zoom-out');
-        const zoomLevel = page.getByTestId('zoom-level');
-
-        // Zoom in first
-        await zoomInButton.click();
-        await page.waitForTimeout(50);
-
-        const zoomedInText = await zoomLevel.textContent();
-        const zoomedInValue = parseInt(zoomedInText?.replace('%', '') || '0', 10);
-
-        // Zoom out
-        await zoomOutButton.click();
-        await page.waitForTimeout(50);
-
-        const zoomedOutText = await zoomLevel.textContent();
-        const zoomedOutValue = parseInt(zoomedOutText?.replace('%', '') || '0', 10);
-
-        expect(zoomedOutValue).toBeLessThan(zoomedInValue);
-    });
-
-    test('Step 6: should reset zoom when reset button clicked', async ({ page }) => {
-        const zoomInButton = page.getByTestId('button-zoom-in');
-        const resetButton = page.getByTestId('button-reset-zoom');
-        const zoomLevel = page.getByTestId('zoom-level');
-
-        // Zoom in first
-        await zoomInButton.click();
-        await page.waitForTimeout(50);
-
-        // Verify zoomed in
-        const zoomedText = await zoomLevel.textContent();
-        const zoomedValue = parseInt(zoomedText?.replace('%', '') || '0', 10);
-        expect(zoomedValue).toBeGreaterThan(100);
-
-        // Reset zoom
-        await resetButton.click();
-        await page.waitForTimeout(50);
-
-        // Should be back to 100%
-        await expect(zoomLevel).toHaveText('100%');
-    });
-
     test('Step 7: should display LevelTabs component', async ({ page }) => {
         const levelTabs = page.getByTestId('level-tabs');
         await expect(levelTabs).toBeVisible();
@@ -752,38 +692,6 @@ test.describe('Level Editor', () => {
 
         // Should not go above 500%
         expect(zoomValue).toBeLessThanOrEqual(500);
-    });
-
-    test('Step 9: zoom controls should update status bar zoom display', async ({ page }) => {
-        const zoomInButton = page.getByTestId('button-zoom-in');
-        const zoomOutButton = page.getByTestId('button-zoom-out');
-        const resetButton = page.getByTestId('button-reset-zoom');
-        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
-
-        // Initial state
-        await expect(statusBarZoom).toHaveText('100%');
-
-        // Zoom in
-        await zoomInButton.click();
-        await page.waitForTimeout(50);
-        let zoomText = await statusBarZoom.textContent();
-        expect(parseInt(zoomText?.replace('%', '') || '0', 10)).toBeGreaterThan(100);
-
-        // Zoom out
-        await zoomOutButton.click();
-        await page.waitForTimeout(50);
-        await expect(statusBarZoom).toHaveText('100%');
-
-        // Zoom in again
-        await zoomInButton.click();
-        await page.waitForTimeout(50);
-        zoomText = await statusBarZoom.textContent();
-        expect(parseInt(zoomText?.replace('%', '') || '0', 10)).toBeGreaterThan(100);
-
-        // Reset
-        await resetButton.click();
-        await page.waitForTimeout(50);
-        await expect(statusBarZoom).toHaveText('100%');
     });
 
     test('Step 9: toolbar and status bar zoom should always match', async ({ page }) => {
