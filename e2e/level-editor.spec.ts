@@ -1610,37 +1610,43 @@ test.describe('Level Editor', () => {
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 
-    test('Step 13: should copy selected objects with Ctrl+C', async ({ page }) => {
-        // Create a fresh level for this test
-        const fileButton = page.getByRole('button', { name: /File/i });
-        await fileButton.click();
-        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
-        await newLevelButton.click();
-        await page.waitForTimeout(200);
-
+    test('Step 13: should copy with Ctrl+C and copy button', async ({ page }) => {
+        // Both keyboard shortcut and button call the same copy function - test both methods
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
+        const copyButton = page.getByRole('button', { name: /Copy/ });
 
-        // Place a button
+        // Place and select a button
         await buttonTile.click();
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
         await page.mouse.click(box.x + 300, box.y + 300);
         await page.waitForTimeout(100);
 
-        // Select the button
         await selectTool.click();
         await page.mouse.click(box.x + 300, box.y + 300);
         await page.waitForTimeout(100);
 
-        // Copy with Ctrl+C
+        // Test keyboard shortcut (Ctrl+C)
         await page.keyboard.press('Control+c');
         await page.waitForTimeout(100);
+        const keyboardToast = page.getByText('Copied 1 items to clipboard.', { exact: true });
+        await expect(keyboardToast).toBeVisible();
 
-        // Verify toast notification appears (more specific selector)
-        const toast = page.getByText('Copied 1 items to clipboard.', { exact: true });
-        await expect(toast).toBeVisible();
+        // Deselect by clicking empty area (this clears the selection but keeps object on canvas)
+        await page.mouse.click(box.x + 100, box.y + 100);
+        await page.waitForTimeout(100);
+
+        // Re-select the same object
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Test copy button
+        await copyButton.click();
+        await page.waitForTimeout(100);
+        const buttonToast = page.getByText('Copied 1 items to clipboard.', { exact: true });
+        await expect(buttonToast).toBeVisible();
     });
 
     test('Step 13: should paste objects with Ctrl+V and offset them', async ({ page }) => {
@@ -1687,32 +1693,6 @@ test.describe('Level Editor', () => {
 
         // Verify toast notification appears (more specific selector)
         const toast = page.getByText('Pasted 1 items.', { exact: true });
-        await expect(toast).toBeVisible();
-    });
-
-    test('Step 13: should copy button click work', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
-        const buttonTile = page.getByTestId('tile-button');
-        const selectTool = page.getByTestId('tool-select');
-        const copyButton = page.getByRole('button', { name: /Copy/ });
-
-        // Place and select a button
-        await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 350, box.y + 350);
-        await page.waitForTimeout(100);
-
-        await selectTool.click();
-        await page.mouse.click(box.x + 350, box.y + 350);
-        await page.waitForTimeout(100);
-
-        // Click copy button
-        await copyButton.click();
-        await page.waitForTimeout(100);
-
-        // Verify toast notification (more specific selector)
-        const toast = page.getByText('Copied 1 items to clipboard.', { exact: true });
         await expect(toast).toBeVisible();
     });
 
