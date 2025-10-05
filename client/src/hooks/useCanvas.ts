@@ -104,9 +104,12 @@ export function useCanvas({
                     y: worldPos.y - moveStartPositionRef.current.y,
                 };
                 moveDeltaRef.current = delta;
-                // Re-render to show objects in new positions (preview)
+                // Re-render to show ghost preview
                 if (rendererRef.current) {
-                    rendererRef.current.render(levelData, editorState);
+                    rendererRef.current.render(levelData, {
+                        ...editorState,
+                        moveDelta: delta,
+                    });
                 }
                 return;
             }

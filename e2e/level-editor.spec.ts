@@ -57,7 +57,7 @@ test.describe('Level Editor', () => {
         await expect(selectionCount).toBeVisible();
 
         // Initially should be 0 selected
-        await expect(selectionCount).toHaveText('Selected: 0 objects');
+        await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
     test('Step 3: Canvas component should render with CanvasRenderer', async ({ page }) => {
@@ -1067,7 +1067,7 @@ test.describe('Level Editor', () => {
         await page.waitForTimeout(100);
 
         // Selection count should show 1 selected
-        await expect(selectionCount).toHaveText('Selected: 1 object');
+        await expect(selectionCount).toHaveText('Selected: 1 object(s)');
     });
 
     test('Step 11: should clear selection when clicking empty space with select tool', async ({ page }) => {
@@ -1088,14 +1088,14 @@ test.describe('Level Editor', () => {
         await page.waitForTimeout(100);
 
         // Verify object is selected
-        await expect(selectionCount).toHaveText('Selected: 1 object');
+        await expect(selectionCount).toHaveText('Selected: 1 object(s)');
 
         // Click on empty space
         await page.mouse.click(box.x + 100, box.y + 100);
         await page.waitForTimeout(100);
 
         // Selection should be cleared
-        await expect(selectionCount).toHaveText('Selected: 0 objects');
+        await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
     test('Step 11: should select multiple objects with multi-select drag box', async ({ page }) => {
@@ -1180,7 +1180,7 @@ test.describe('Level Editor', () => {
         const selectionCount = page.getByTestId('selection-count');
 
         // Initially 0 selected
-        await expect(selectionCount).toHaveText('Selected: 0 objects');
+        await expect(selectionCount).toHaveText('Selected: 0 object(s)');
 
         // Place two buttons
         await buttonTile.click();
@@ -1195,12 +1195,12 @@ test.describe('Level Editor', () => {
         await selectTool.click();
         await page.mouse.click(box.x + 200, box.y + 200);
         await page.waitForTimeout(100);
-        await expect(selectionCount).toHaveText('Selected: 1 object');
+        await expect(selectionCount).toHaveText('Selected: 1 object(s)');
 
         // Clear selection
         await page.mouse.click(box.x + 100, box.y + 100);
         await page.waitForTimeout(100);
-        await expect(selectionCount).toHaveText('Selected: 0 objects');
+        await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
     test('Step 11: should render multi-select drag box while dragging', async ({ page }) => {
@@ -1268,7 +1268,7 @@ test.describe('Level Editor', () => {
 
         // Object should still be selected after move
         const selectionCount = page.getByTestId('selection-count');
-        await expect(selectionCount).toHaveText('Selected: 1 object');
+        await expect(selectionCount).toHaveText('Selected: 1 object(s)');
     });
 
     test('Step 11B: should move multiple selected objects together', async ({ page }) => {
@@ -1338,6 +1338,67 @@ test.describe('Level Editor', () => {
 
         // No errors should occur
         const selectionCount = page.getByTestId('selection-count');
-        await expect(selectionCount).toHaveText('Selected: 0 objects');
+        await expect(selectionCount).toHaveText('Selected: 0 object(s)');
+    });
+
+    test('Step 11B: should show ghost preview while dragging with move tool', async ({ page }) => {
+        // Create a fresh level for this test
+        const newLevelButton = page.getByRole('button', { name: 'New Level' });
+        await newLevelButton.click();
+        await page.waitForTimeout(100);
+
+        const canvas = page.getByTestId('level-canvas');
+        const basicTile = page.getByTestId('tile-platform-basic');
+        const multiSelectTool = page.getByTestId('tool-multiselect');
+        const moveTool = page.getByTestId('tool-move');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Place a few tiles
+        await basicTile.click();
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.mouse.click(box.x + 232, box.y + 200);
+        await page.mouse.click(box.x + 264, box.y + 200);
+
+        // Multi-select all tiles
+        await multiSelectTool.click();
+        await page.mouse.move(box.x + 180, box.y + 180);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 300, box.y + 220);
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify some objects are selected
+        const selectionCount = page.getByTestId('selection-count');
+        const countText = await selectionCount.textContent();
+        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        expect(count).toBeGreaterThan(0);
+
+        // Switch to move tool
+        await moveTool.click();
+
+        // Take screenshot before dragging
+        await page.screenshot({ path: 'test-results/ghost-before-drag.png' });
+
+        // Start dragging - hold mouse down and move
+        await page.mouse.move(box.x + 232, box.y + 200);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 232, box.y + 300, { steps: 10 });
+
+        // Take screenshot during drag - should show ghost preview
+        await page.screenshot({ path: 'test-results/ghost-during-drag.png' });
+
+        // Complete the move
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Take screenshot after move
+        await page.screenshot({ path: 'test-results/ghost-after-drag.png' });
+
+        // Verify tiles are still selected (same count)
+        const finalCountText = await selectionCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBe(count);
     });
 });

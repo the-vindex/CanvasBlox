@@ -119,7 +119,7 @@ export function Canvas({
                     <div data-testid="mouse-position" style={{ marginBottom: '4px' }}>
                         Mouse: ({editorState.mousePosition.x}, {editorState.mousePosition.y})
                     </div>
-                    <div data-testid="selection-count">Selected: {editorState.selectedObjects.length} objects</div>
+                    <div data-testid="selection-count">Selected: {editorState.selectedObjects.length} object(s)</div>
                 </div>
             </div>
         </div>

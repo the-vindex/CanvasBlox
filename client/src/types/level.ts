@@ -87,6 +87,7 @@ export interface EditorState {
         start: Position;
         end: Position;
     };
+    moveDelta?: Position;
 }
 
 export interface HistoryEntry {

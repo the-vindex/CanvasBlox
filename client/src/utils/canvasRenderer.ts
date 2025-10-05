@@ -1020,6 +1020,51 @@ export class CanvasRenderer {
         this.ctx.restore();
     }
 
+    private drawGhostTile(tile: Tile, delta: Position, pan: Position, zoom: number) {
+        const ghostTile = {
+            ...tile,
+            position: {
+                x: tile.position.x + delta.x,
+                y: tile.position.y + delta.y,
+            },
+        };
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.4;
+        this.drawTile(ghostTile, pan, zoom, false, false);
+        this.ctx.restore();
+    }
+
+    private drawGhostObject(obj: InteractableObject, delta: Position, pan: Position, zoom: number) {
+        const ghostObj = {
+            ...obj,
+            position: {
+                x: obj.position.x + delta.x,
+                y: obj.position.y + delta.y,
+            },
+        };
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.4;
+        this.drawObject(ghostObj, pan, zoom, false, false);
+        this.ctx.restore();
+    }
+
+    private drawGhostSpawnPoint(spawn: SpawnPoint, delta: Position, pan: Position, zoom: number) {
+        const ghostSpawn = {
+            ...spawn,
+            position: {
+                x: spawn.position.x + delta.x,
+                y: spawn.position.y + delta.y,
+            },
+        };
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.4;
+        this.drawSpawnPoint(ghostSpawn, pan, zoom, false, false);
+        this.ctx.restore();
+    }
+
     render(levelData: LevelData, editorState: EditorState) {
         this.clear();
         this.drawBackground(levelData.metadata.backgroundColor);
@@ -1029,22 +1074,70 @@ export class CanvasRenderer {
         levelData.tiles.forEach((tile) => {
             const isSelected = editorState.selectedObjects.includes(tile.id);
             const isDeleting = editorState.deletingObjects.includes(tile.id);
-            this.drawTile(tile, editorState.pan, editorState.zoom, isSelected, isDeleting);
+
+            // If moving, draw original at reduced opacity
+            if (isSelected && editorState.moveDelta) {
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.3;
+                this.drawTile(tile, editorState.pan, editorState.zoom, false, isDeleting);
+                this.ctx.restore();
+            } else {
+                this.drawTile(tile, editorState.pan, editorState.zoom, isSelected, isDeleting);
+            }
         });
 
         // Draw objects
         levelData.objects.forEach((obj) => {
             const isSelected = editorState.selectedObjects.includes(obj.id);
             const isDeleting = editorState.deletingObjects.includes(obj.id);
-            this.drawObject(obj, editorState.pan, editorState.zoom, isSelected, isDeleting);
+
+            // If moving, draw original at reduced opacity
+            if (isSelected && editorState.moveDelta) {
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.3;
+                this.drawObject(obj, editorState.pan, editorState.zoom, false, isDeleting);
+                this.ctx.restore();
+            } else {
+                this.drawObject(obj, editorState.pan, editorState.zoom, isSelected, isDeleting);
+            }
         });
 
         // Draw spawn points
         levelData.spawnPoints.forEach((spawn) => {
             const isSelected = editorState.selectedObjects.includes(spawn.id);
             const isDeleting = editorState.deletingObjects.includes(spawn.id);
-            this.drawSpawnPoint(spawn, editorState.pan, editorState.zoom, isSelected, isDeleting);
+
+            // If moving, draw original at reduced opacity
+            if (isSelected && editorState.moveDelta) {
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.3;
+                this.drawSpawnPoint(spawn, editorState.pan, editorState.zoom, false, isDeleting);
+                this.ctx.restore();
+            } else {
+                this.drawSpawnPoint(spawn, editorState.pan, editorState.zoom, isSelected, isDeleting);
+            }
         });
+
+        // Draw ghost previews if moving
+        if (editorState.moveDelta) {
+            levelData.tiles.forEach((tile) => {
+                if (editorState.selectedObjects.includes(tile.id)) {
+                    this.drawGhostTile(tile, editorState.moveDelta!, editorState.pan, editorState.zoom);
+                }
+            });
+
+            levelData.objects.forEach((obj) => {
+                if (editorState.selectedObjects.includes(obj.id)) {
+                    this.drawGhostObject(obj, editorState.moveDelta!, editorState.pan, editorState.zoom);
+                }
+            });
+
+            levelData.spawnPoints.forEach((spawn) => {
+                if (editorState.selectedObjects.includes(spawn.id)) {
+                    this.drawGhostSpawnPoint(spawn, editorState.moveDelta!, editorState.pan, editorState.zoom);
+                }
+            });
+        }
 
         // Draw links
         this.drawLinks(levelData.objects, editorState.pan, editorState.zoom);
