@@ -74,7 +74,7 @@ PROMPT
     # Using timeout command to ensure process doesn't hang
     # --dangerously-skip-permissions: Auto-accept all tool permissions
     # --dangerously-skip-confirmations: Auto-accept all confirmations
-    timeout ${TIMEOUT_MINUTES}m claude --dangerously-skip-permissions --non-interactive --verbose --message "$PROMPT" || {
+    timeout ${TIMEOUT_MINUTES}m claude --dangerously-skip-permissions --verbose -p "$PROMPT" || {
         EXIT_CODE=$?
 
         if [ $EXIT_CODE -eq 124 ]; then
