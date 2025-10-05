@@ -1,8 +1,8 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Chapter 10 - Not Started
-**Last Updated:** 2025-10-04
+**Current Chapter:** Chapter 11 - Drawing Tools Implementation
+**Last Updated:** 2025-10-05
 
 ---
 
@@ -16,201 +16,23 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
-## Completed Chapters (1-9)
 
-✅ Chapter 1: Enhanced Header & Branding
-✅ Chapter 2: Modern Toolbar
-✅ Chapter 3: Enhanced Canvas Experience
-✅ Chapter 4: Impressive Tile Palette
-❌ Chapter 5: Polished Properties Panel (Skipped)
-❌ Chapter 6: Level Tabs Enhancement (Skipped)
-✅ Chapter 7: Animations & Micro-interactions
-✅ Chapter 8: Color & Theme (Minimized - shadow system only)
-✅ Chapter 9: Context & Feedback (5 core tasks completed)
-
----
-
-
-## Chapter 8: Color & Theme Enhancements
-
-**Status:** ✅ Completed (Minimized)
-**Files:** `tailwind.config.ts`, `client/src/components/level-editor/TilePalette.tsx`
-**Priority:** High → Low (minimized to avoid visual overload)
-
-### Tasks:
-
-#### 8.1 Gradient accents
-- **Status:** ❌ Skipped - Header gradient sufficient
-
-#### 8.2 Glow effects
-- **Status:** ❌ Skipped - Existing glows sufficient
-
-#### 8.3 Glassmorphism
-- **Status:** ❌ Skipped - Already applied where needed
-
-#### 8.4 Layered shadow system
-- **Status:** ✅ Completed - Custom dark-optimized shadows in tailwind.config.ts
-
-#### 8.5 Tile card border fix (bonus)
-- **Status:** ✅ Completed - Added border-white/10 for edge clarity
-
-**Dependencies:** None
-**Notes:** See git commits 83c9d57 and e4d3dd6 for implementation details
-
----
-
-## Chapter 9: Context & Feedback
-
-**Status:** ✅ Completed
-**Files:** Multiple
-**Priority:** Medium
-
-### Tasks:
-
-#### 9.0 Remove line and rectangle tool buttons (not implemented)
-- **Status:** ❌ Skipped - Tools kept for Chapter 11 implementation
-- **Location:** `client/src/components/level-editor/Toolbar.tsx`
-- **Note:** Buttons remain in UI, will be implemented in Chapter 11
-
-#### 9.1 Action history panel (collapsible sidebar)
-- **Status:** ❌ Skipped - Optional feature, low priority
-- **Location:** New component, positioned on right or bottom
-- **Note:** Deferred for future implementation if needed
-
-#### 9.2 Quick tips: Contextual help bubbles
-- **Status:** ❌ Skipped - Optional feature, low priority
-- **Location:** Various UI elements
-- **Note:** Deferred for future implementation if needed
-
-#### 9.3 Remove "snap to grid" feature
-- **Status:** ✅ Completed - Feature never existed
-- **Note:** No snap to grid functionality found in codebase
-
-#### 9.4 Fix redo functionality - changes not properly restored
-- **Status:** ✅ Completed
-- **Location:** `client/src/hooks/useLevelEditor.ts:60-83`
-- **Fix:** Fixed history index management when history is trimmed
-- **Implementation:** Added proper history index adjustment in addToHistory function
-
-#### 9.5 Group consecutive tile placements as single undo/redo action
-- **Status:** ✅ Completed
-- **Location:** Multiple files
-- **Implementation:**
-  - Added skipHistory parameter to addTile function
-  - Track drawing sessions in LevelEditor with drawingSessionTileCount ref
-  - Modified useCanvas to pass isDrawing flag during mousedown→mousemove→mouseup
-  - Created commitBatchToHistory function to save grouped changes
-  - Batched tiles committed as single history entry on mouseup
-
-#### 9.6 Auto-increment level names to avoid duplicates
-- **Status:** ✅ Completed
-- **Location:** `client/src/hooks/useLevelEditor.ts:110-127`
-- **Implementation:** Added logic to check existing names and auto-increment: "New Level", "New Level 2", "New Level 3", etc.
-
-#### 9.7 Add close/collapse functionality to Properties Panel
-- **Status:** ✅ Completed
-- **Location:** Multiple files
-- **Implementation:**
-  - Added close button in Properties Panel header
-  - Toggle button in Toolbar with visual state indicator
-  - Keyboard shortcut: 'P' key
-  - Panel positioned below toolbar to prevent toolbar resize
-  - Gives more canvas space when properties not needed
-
-#### 9.8 Bug: Deactivate tool when choosing tile for placement
-- **Status:** ✅ Completed
-- **Location:** Multiple files
-- **Implementation:**
-  - Made selectedTool nullable in EditorState type
-  - Selecting tile → sets selectedTool to null (placement mode)
-  - Selecting tool → clears selectedTileType (tool mode)
-  - Mutually exclusive modes for clear UI feedback
-
-**Dependencies:** None
-**Notes:** Chapter successfully improved editor UX and bug fixes
-
----
-
-## Chapter 10: Special Effects
-
-**Status:** ✅ Completed
-**Files:** `client/src/index.css`, `client/src/components/level-editor/Canvas.tsx`, `client/src/hooks/useCanvas.ts`
-**Priority:** Low
-
-### Tasks:
-
-#### 10.1 Parallax effect on background grid when panning
-- **Status:** ✅ Completed
-- **Location:** `client/src/components/level-editor/Canvas.tsx`
-- **Implementation:** Background moves at 50% speed of canvas content
-- **Math:** Background offset = pan offset * 0.5
-- **Apply to:** Canvas wrapper background-position
-
-#### 10.2 Glow pulse on selected objects
-- **Status:** ✅ Completed
-- **Location:** `client/src/utils/canvasRenderer.ts`, `client/src/index.css`
-- **Implementation:** Canvas-based glow with time-based animation
-- **Effect:** Pulsing shadow blur around selected objects
-- **Keyframe:** Opacity oscillates between 0.6 and 1.0 using sine wave
-
-#### 10.3 Trail effect when dragging objects
-- **Status:** ⏸️ Skipped - Requires Chapter 11 move tool implementation
-- **Location:** Canvas during drag operation
-- **Implementation:** Draw semi-transparent copies along drag path
-- **Effect:** Motion blur / trail effect
-- **Clear:** Trail fades out on drop
-
-#### 10.4 Scanline effect for retro/tech aesthetic (optional toggle)
-- **Status:** ✅ Completed
-- **Location:** `client/src/components/level-editor/Canvas.tsx`, `client/src/index.css`, `client/src/components/level-editor/Toolbar.tsx`
-- **Implementation:** CSS overlay with repeating gradient animation
-- **Toggle:** `showScanlines` in EditorState
-- **UI:** Toggle switch in Toolbar view options
-- **Effect:** Animated horizontal scanlines with 0.3 opacity
-
-#### 10.5 Fix "Show Grid" checkbox visual consistency
-- **Status:** ✅ Completed
-- **Location:** `client/src/components/level-editor/Toolbar.tsx`
-- **Change:** Replaced checkbox with modern toggle switch
-- **Implementation:**
-  - Replaced Checkbox component with Switch component (shadcn/ui)
-  - Applied consistent spacing and label styling
-  - Matches toolbar design aesthetic
-- **Files modified:**
-  - `client/src/components/level-editor/Toolbar.tsx`
-
-#### 10.6 Improve zoom functionality UX - feels disconnected
-- **Status:** ✅ Completed
-- **Location:** `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useCanvas.ts`, `client/src/components/level-editor/Canvas.tsx`
-- **Fixed Issues:**
-  - ✅ Zoom buttons now anchor to canvas center with pan adjustment
-  - ✅ Wheel zoom (Ctrl+Scroll) anchors to mouse cursor position
-  - ✅ Pan position adjusts correctly to keep anchor point stationary
-  - ✅ Smooth CSS transitions added (0.15s ease-out)
-- **Implementation:**
-  - Button zoom: Centers on canvas viewport center
-  - Wheel zoom: Centers on mouse cursor using formula `newPan = pan + (mousePos - mousePos * zoomRatio)`
-  - Added `handleWheelZoom` callback with mouse position tracking
-  - Added wheel event handler with Ctrl/Cmd modifier check
-  - CSS transition on canvas transform for smooth zoom feel
-- **Files modified:**
-  - `client/src/pages/LevelEditor.tsx` (zoom handlers with pan adjustment)
-  - `client/src/hooks/useCanvas.ts` (wheel event handler)
-  - `client/src/components/level-editor/Canvas.tsx` (onZoom prop)
-  - `client/src/index.css` (transition on #levelCanvas)
-
-**Dependencies:** None
-**Notes:** These are polish effects - keep subtle and performant
 
 ---
 
 ## Chapter 11: Drawing Tools Implementation
 
-**Status:** ⏸️ Not Started
+**Status:** 🔄 In Progress (4/11 tasks complete, 7 remaining)
 **Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`
 **Priority:** High
 
-### Tasks:
+### Completed Tasks:
+✅ **11.3** Selection tool - Click to select objects, shows properties
+✅ **11.4** Move tool - Drag selected objects with ghost preview
+✅ **11.8** Clear brush on tool change - Mutual exclusion between tools/tiles
+✅ **11.X** Multi-select tool - Drag box selection (bonus feature)
+
+### Remaining Tasks:
 
 #### 11.1 Implement line drawing tool
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
@@ -224,7 +46,6 @@ Work through chapters sequentially. After implementing each chapter:
   - `client/src/hooks/useCanvas.ts` (add line drawing logic)
   - `client/src/utils/canvasRenderer.ts` (add drawPreviewLine method)
   - `client/src/hooks/useLevelEditor.ts` (may need batch tile placement method)
-- **Note:** Tool button already exists but functionality is missing
 
 #### 11.2 Implement rectangle drawing tool
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
@@ -241,51 +62,6 @@ Work through chapters sequentially. After implementing each chapter:
   - `client/src/hooks/useCanvas.ts` (add rectangle drawing logic)
   - `client/src/utils/canvasRenderer.ts` (add drawPreviewRectangle method)
   - `client/src/hooks/useLevelEditor.ts` (may need batch tile placement method)
-- **Note:** Tool button already exists but functionality is missing
-
-#### 11.3 Implement selection tool (single select)
-- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
-- **Current:** Selection tool button exists in toolbar ('v' key) but does nothing when activated
-- **Implementation:**
-  - On click: Detect which object (tile/interactable/spawn) is at click position
-  - Select the clicked object and highlight it with selection outline
-  - Deselect previous selection if no modifier key pressed
-  - Update editorState.selectedObjects array
-  - Show selected object properties in PropertiesPanel
-- **Hit detection needed:**
-  - Check tiles array for position match
-  - Check objects array for position match
-  - Check spawnPoints array for position match
-  - Consider object layer/z-index for overlapping objects
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` (add click detection logic)
-  - `client/src/hooks/useLevelEditor.ts` (selectObject function may need updates)
-  - `client/src/utils/canvasRenderer.ts` (selection outline already exists)
-- **Note:** Tool button already exists but functionality is missing - critical for basic editor usage
-
-#### 11.4 Implement move tool and rethink selection/move interaction UX
-- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
-- **Current:** Move tool button exists in toolbar ('h' key) but does nothing when activated
-- **UX Design needed - consider these interaction patterns:**
-  1. **Separate move mode:** Move tool active → click object to grab → drag to move → click to drop
-  2. **Drag in selection mode:** Selection tool → click to select → drag selected to move (no separate move tool)
-  3. **Modifier key:** Selection tool → hold modifier (Alt/Shift) + drag to move selected
-- **Issues to resolve:**
-  - When should selection be cancelled? (Click empty space? Press Escape? Switch tools?)
-  - How to distinguish between click-to-select vs drag-to-move?
-  - Should moving update selection or maintain it?
-  - Multi-select move: move all selected objects together with relative positions preserved
-- **Implementation considerations:**
-  - Track drag start position and current drag offset
-  - Show ghost/preview of objects at new position during drag
-  - Snap to grid during move (optional)
-  - Update object positions on drag end
-  - Add to undo/redo history as single action
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` (add move/drag logic)
-  - `client/src/hooks/useLevelEditor.ts` (add moveObjects function)
-  - `client/src/utils/canvasRenderer.ts` (may need drag preview rendering)
-- **Note:** Needs UX design decision before implementation - critical for editor usability
 
 #### 11.5 Implement linking tool for interactable objects
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
@@ -362,20 +138,6 @@ Work through chapters sequentially. After implementing each chapter:
   - `client/src/components/level-editor/PropertiesPanel.tsx` (rotation UI if keeping)
 - **Note:** User requested decision on rotation tool - needs clarification on intended use case
 
-#### 11.8 Fix: Switching to selection tool should clear active brush/placement tool
-- **Location:** `client/src/pages/LevelEditor.tsx` - handleToolChange function
-- **Current:** When user has a tile type selected (brush mode) and switches to selection tool, the brush remains active
-- **Bug:** Clicking to select an object may instead place the active brush tile
-- **Expected behavior:** Switching to any non-placement tool (select, multiselect, move, link) should immediately clear `editorState.selectedTileType`
-- **Implementation:**
-  - In handleToolChange function, check if new tool is 'select', 'multiselect', 'move', or 'link'
-  - If so, also call `setEditorState(prev => ({ ...prev, selectedTileType: null }))`
-  - This ensures brush preview disappears and selection/move modes work as expected
-- **Files to modify:**
-  - `client/src/pages/LevelEditor.tsx` (handleToolChange function)
-  - May also need updates in `client/src/components/level-editor/TilePalette.tsx` to deselect tile visually
-- **Note:** Bug reported by user - affects basic workflow when switching between placing and selecting
-
 #### 11.9 Implement button numbering system (coordinate with linking tool)
 - **Location:** `client/src/utils/canvasRenderer.ts` - drawObject method (button rendering), `client/src/types/level.ts`
 - **Current:** Buttons are drawn with generic appearance, no visual identification system
@@ -396,8 +158,25 @@ Work through chapters sequentially. After implementing each chapter:
   - `client/src/components/level-editor/PropertiesPanel.tsx` (display button number/label)
 - **Note:** Should be implemented together with Task 11.5 (linking tool) for coherent UX
 
-**Dependencies:** Task 11.3 (selection) should be implemented first if keeping rotation for selected objects
-**Notes:** All tools exist in UI but have no implementation - high priority for usability
+#### 11.10 Implement tile overlap logic - newest tile wins
+- **Location:** `client/src/hooks/useLevelEditor.ts` - addTile function, `client/src/utils/levelSerializer.ts` - deserialize/import functions
+- **Current:** Tiles can be placed on top of each other without removing old tiles, creating overlapping tiles at same position
+- **Change:** When a new tile is placed at a position where another tile exists, remove the old tile(s) at that position
+- **Exception:** Button placed on top of door should NOT delete the door (special case for puzzle mechanics)
+- **Implementation:**
+  - In `addTile` function: Before adding new tile, check for existing tiles at same position
+  - Remove existing tiles at that position (filter out tiles with matching x,y coordinates)
+  - Exception: If new tile is 'button' type and existing tile is 'door' type, keep both
+  - Apply same logic when importing JSON levels (`deserialize` function)
+  - Apply same logic when loading from localStorage (on initial load)
+- **Files to modify:**
+  - `client/src/hooks/useLevelEditor.ts` (addTile function - add overlap detection and removal)
+  - `client/src/utils/levelSerializer.ts` (deserialize - clean up overlapping tiles on import)
+  - `client/src/hooks/useLevelEditor.ts` (useEffect for localStorage load - clean up overlaps)
+- **Note:** This prevents unintended tile stacking and keeps the level clean. Button-on-door exception supports puzzle design patterns.
+
+**Dependencies:** None - core selection/move tools already complete
+**Notes:** 7 tasks remaining. Priority: Tile overlap (11.10), Link/Unlink tools (11.5-11.6), Drawing tools (11.1-11.2), Button numbering (11.9), Rotation decision (11.7)
 
 ---
 
@@ -476,10 +255,10 @@ Work through chapters sequentially. After implementing each chapter:
 
 | Chapter | Status | Approved | Notes |
 |---------|--------|----------|-------|
-| 8. Color & Theme | ✅ Completed | ✓ Minimized | Shadow system only - skipped decoration for performance/clarity |
-| 9. Context & Feedback | ⏸️ Not Started | ❌ | History panel, tooltips, bug fixes, UX improvements |
-| 10. Special Effects | ⏸️ Not Started | ❌ | Parallax, glow pulse, trail effects, scanlines |
-| 11. Drawing Tools | ⏸️ Not Started | ❌ | Line, rectangle, selection, move, linking tools implementation |
+| 8. Color & Theme | ✅ Completed | ✓ | Shadow system, tile borders |
+| 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
+| 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
+| 11. Drawing Tools | 🔄 In Progress | ❌ | 4/11 complete - Selection/move done, link/draw tools remain |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
@@ -492,22 +271,24 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Next Steps
 
-**Current:** Chapter 9 - Context & Feedback (RECOMMENDED NEXT)
-- 🐛 Fix redo functionality bug
-- 🎯 Group consecutive tile placements for better undo/redo
-- 📝 Auto-increment level names to avoid duplicates
-- 🧹 Remove unimplemented tool buttons (line/rectangle)
-- 🎨 Add close/collapse to Properties Panel
-- 📚 Action history panel (optional)
-- 💡 Quick tips/tooltips (optional)
+**Current:** Chapter 11 - Drawing Tools Implementation (4/11 complete, 7 remaining)
 
-**Alternative:** Chapter 11 - Drawing Tools Implementation (CRITICAL FUNCTIONALITY)
-- Implement selection tool (currently broken!)
-- Implement move tool (currently broken!)
-- Implement linking tool (currently broken!)
-- Fix: Clear brush when switching to selection tool
+**✅ Completed (4):**
+- ✅ Selection tool (single select)
+- ✅ Move tool (ghost preview)
+- ✅ Multi-select tool (drag box)
+- ✅ Clear brush on tool change
 
-**May Skip:** Chapter 10 - Special Effects (low priority polish)
+**❌ Remaining (Priority Order):**
+1. 🔧 **11.10** Tile overlap logic - newest tile wins (NEW - HIGH PRIORITY)
+2. 🔗 **11.5** Linking tool for interactable objects
+3. ✂️ **11.6** Unlinking tool (Properties Panel)
+4. 📏 **11.1** Line drawing tool
+5. 📐 **11.2** Rectangle drawing tool
+6. 🔢 **11.9** Button numbering system
+7. 🔄 **11.7** Rotation tool - decision needed
+
+**Future:** Chapter 12 - Documentation (low priority)
 
 ---
 
