@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
+import { useSelectionState } from '@/hooks/useSelectionState';
 import type { EditorState, LevelData, Position } from '@/types/level';
 import { exportToPNG } from '@/utils/levelSerializer';
 
@@ -26,6 +27,7 @@ export default function LevelEditor() {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     const { toast } = useToast();
+    const selectionState = useSelectionState();
 
     // Integrate useLevelEditor hook
     const {
@@ -81,11 +83,11 @@ export default function LevelEditor() {
                     _selectObject(clickedItem.id);
                 } else {
                     // Clear selection when clicking empty space
-                    setEditorState((prev) => ({ ...prev, selectedObjects: [] }));
+                    setEditorState((prev) => ({ ...prev, ...selectionState.clearObjects() }));
                 }
             }
         },
-        [editorState.selectedTool, currentLevel, _selectObject, setEditorState]
+        [editorState.selectedTool, currentLevel, _selectObject, setEditorState, selectionState]
     );
 
     const drawingSessionTileCount = useRef(0);
@@ -202,11 +204,10 @@ export default function LevelEditor() {
         (tileType: string) => {
             setEditorState((prev) => ({
                 ...prev,
-                selectedTileType: tileType,
-                selectedTool: null,
+                ...selectionState.selectTile(tileType),
             }));
         },
-        [setEditorState]
+        [setEditorState, selectionState]
     );
 
     // Toolbar handlers
@@ -214,11 +215,10 @@ export default function LevelEditor() {
         (tool: EditorState['selectedTool']) => {
             setEditorState((prev) => ({
                 ...prev,
-                selectedTool: tool,
-                selectedTileType: null,
+                ...selectionState.selectTool(tool),
             }));
         },
-        [setEditorState]
+        [setEditorState, selectionState]
     );
 
     const handleStateChange = useCallback(
@@ -335,9 +335,7 @@ export default function LevelEditor() {
             if (key === 'escape') {
                 setEditorState((prev) => ({
                     ...prev,
-                    selectedTool: null,
-                    selectedObjects: [],
-                    selectedTileType: null,
+                    ...selectionState.clearAll(),
                 }));
                 return true;
             }
@@ -347,7 +345,7 @@ export default function LevelEditor() {
             }
             return false;
         },
-        [_deleteSelectedObjects]
+        [_deleteSelectedObjects, selectionState, setEditorState]
     );
 
     // Helper: Handle Ctrl/Cmd shortcuts
