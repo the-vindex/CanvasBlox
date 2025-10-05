@@ -3,6 +3,7 @@ import LineIcon from '@/assets/icons/line.svg?react';
 import LinkIcon from '@/assets/icons/link.svg?react';
 import MoveIcon from '@/assets/icons/move.svg?react';
 import MultiselectIcon from '@/assets/icons/multiselect.svg?react';
+import PenIcon from '@/assets/icons/pen.svg?react';
 import RectangleIcon from '@/assets/icons/rectangle.svg?react';
 import SelectIcon from '@/assets/icons/select.svg?react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ function getToolGroupColor(tool: EditorState['selectedTool']) {
     if (tool === 'select' || tool === 'multiselect' || tool === 'move') {
         return 'blue'; // Selection tools
     }
-    if (tool === 'line' || tool === 'rectangle') {
+    if (tool === 'pen' || tool === 'line' || tool === 'rectangle') {
         return 'green'; // Drawing tools
     }
     if (tool === 'link') {
@@ -118,6 +119,14 @@ export function Toolbar({
 
             {/* Drawing Tools */}
             <div className="flex items-center gap-1 pr-2 border-r border-[#333]">
+                <ToolButton
+                    tool="pen"
+                    icon={PenIcon}
+                    title="Pen Tool (B)"
+                    testId="tool-pen"
+                    isActive={editorState.selectedTool === 'pen'}
+                    onToolChange={onToolChange}
+                />
                 <ToolButton
                     tool="line"
                     icon={LineIcon}

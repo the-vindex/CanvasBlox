@@ -220,7 +220,7 @@ export default function LevelEditor() {
         (tileType: string) => {
             setEditorState((prev) => ({
                 ...prev,
-                ...selectionState.selectTile(tileType),
+                ...selectionState.selectTile(tileType, prev.selectedTool),
             }));
         },
         [setEditorState, selectionState]
@@ -328,6 +328,7 @@ export default function LevelEditor() {
                 v: 'select',
                 m: 'multiselect',
                 h: 'move',
+                b: 'pen',
                 l: 'line',
                 r: 'rectangle',
                 k: 'link',

@@ -17,13 +17,13 @@ describe('useSelectionState', () => {
     });
 
     describe('selectTile', () => {
-        it('should return state that sets tile and clears tool', () => {
+        it('should return state that sets tile and auto-selects pen tool', () => {
             const { result } = renderHook(() => useSelectionState());
             const state = result.current.selectTile('platform-grass');
 
             expect(state).toEqual({
                 selectedTileType: 'platform-grass',
-                selectedTool: null,
+                selectedTool: 'pen', // Auto-select pen tool
             });
         });
 
@@ -112,11 +112,11 @@ describe('useSelectionState', () => {
     });
 
     describe('mutual exclusion behavior', () => {
-        it('should ensure tile selection clears tool', () => {
+        it('should ensure tile selection auto-selects pen tool', () => {
             const { result } = renderHook(() => useSelectionState());
             const tileState = result.current.selectTile('platform-grass');
 
-            expect(tileState.selectedTool).toBeNull();
+            expect(tileState.selectedTool).toBe('pen'); // Auto-select pen
             expect(tileState.selectedTileType).toBe('platform-grass');
         });
 
@@ -160,6 +160,35 @@ describe('useSelectionState', () => {
 
             // selectedObjects should not be in the returned state (meaning it's preserved)
             expect(tileState).not.toHaveProperty('selectedObjects');
+        });
+    });
+
+    describe('Drawing Mode Tools interaction pattern', () => {
+        it('should preserve active drawing tool (line) when selecting different tile', () => {
+            const { result } = renderHook(() => useSelectionState());
+
+            // When line tool is active, selecting a tile should preserve it
+            const stateWithLine = result.current.selectTile('platform-grass', 'line');
+            expect(stateWithLine.selectedTileType).toBe('platform-grass');
+            expect(stateWithLine.selectedTool).toBe('line');
+        });
+
+        it('should switch to pen when selecting tile with non-drawing tool active', () => {
+            const { result } = renderHook(() => useSelectionState());
+
+            // When select tool is active, selecting a tile should auto-select pen
+            const stateFromSelect = result.current.selectTile('platform-grass', 'select');
+            expect(stateFromSelect.selectedTileType).toBe('platform-grass');
+            expect(stateFromSelect.selectedTool).toBe('pen');
+        });
+
+        it('should preserve tile when switching between drawing tools', () => {
+            const { result } = renderHook(() => useSelectionState());
+
+            // Line to rectangle (proves the pattern)
+            const lineToRect = result.current.selectTool('rectangle');
+            expect(lineToRect.selectedTool).toBe('rectangle');
+            expect(lineToRect).not.toHaveProperty('selectedTileType'); // Preserved
         });
     });
 });

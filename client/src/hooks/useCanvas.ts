@@ -158,7 +158,8 @@ export function useCanvas({
                 return;
             }
 
-            if (isPaintingRef.current && editorState.selectedTileType) {
+            // Handle pen tool painting
+            if (isPaintingRef.current && editorState.selectedTool === 'pen' && editorState.selectedTileType) {
                 onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
             }
         },
@@ -211,7 +212,8 @@ export function useCanvas({
                 return;
             }
 
-            if (editorState.selectedTileType) {
+            // Handle pen tool - start painting
+            if (editorState.selectedTool === 'pen' && editorState.selectedTileType) {
                 isPaintingRef.current = true;
                 onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
             } else {
@@ -289,11 +291,13 @@ export function useCanvas({
         (e: MouseEvent) => {
             const worldPos = getWorldPosition(e);
 
-            if (!editorState.selectedTileType) {
+            // Only skip canvas click if pen tool is active with a tile
+            const isPenToolActive = editorState.selectedTool === 'pen' && editorState.selectedTileType;
+            if (!isPenToolActive) {
                 onCanvasClick(worldPos, e);
             }
         },
-        [getWorldPosition, onCanvasClick, editorState.selectedTileType]
+        [getWorldPosition, onCanvasClick, editorState.selectedTool, editorState.selectedTileType]
     );
 
     const handleWheel = useCallback(

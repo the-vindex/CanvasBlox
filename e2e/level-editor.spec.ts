@@ -549,6 +549,69 @@ test.describe('Level Editor', () => {
         await expect(linkTool).toHaveAttribute('aria-pressed', 'true');
     });
 
+    test('Step 8: should select pen tool with B shortcut', async ({ page }) => {
+        const penTool = page.getByTestId('tool-pen');
+        await expect(penTool).toBeVisible();
+
+        // Press B key
+        await page.keyboard.press('b');
+
+        // Pen tool should be selected
+        await expect(penTool).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('Step 8: Drawing Mode Tools - should auto-select pen and preserve tile when switching tools', async ({
+        page,
+    }) => {
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const penTool = page.getByTestId('tool-pen');
+        const lineTool = page.getByTestId('tool-line');
+
+        // Select tile - pen should auto-select
+        await grassTile.click();
+        await expect(penTool).toHaveAttribute('aria-pressed', 'true');
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
+
+        // Switch to line tool - tile should be preserved
+        await page.keyboard.press('l');
+        await expect(lineTool).toHaveAttribute('aria-pressed', 'true');
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('Step 8: Drawing Mode Tools - should clear tile when switching to non-drawing tool', async ({ page }) => {
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const penTool = page.getByTestId('tool-pen');
+        const selectTool = page.getByTestId('tool-select');
+
+        // Select tile (pen auto-selects)
+        await grassTile.click();
+        await expect(penTool).toHaveAttribute('aria-pressed', 'true');
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
+
+        // Switch to select tool (non-drawing)
+        await page.keyboard.press('v');
+        await expect(selectTool).toHaveAttribute('aria-pressed', 'true');
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    test('Step 8: Drawing Mode Tools - Escape should clear both tool and tile', async ({ page }) => {
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const lineTool = page.getByTestId('tool-line');
+
+        // Select tile and switch to line tool
+        await grassTile.click();
+        await page.keyboard.press('l');
+        await expect(lineTool).toHaveAttribute('aria-pressed', 'true');
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
+
+        // Press Escape
+        await page.keyboard.press('Escape');
+
+        // Both tool and tile should be cleared
+        await expect(lineTool).toHaveAttribute('aria-pressed', 'false');
+        await expect(grassTile).toHaveAttribute('aria-pressed', 'false');
+    });
+
     test('Step 8: should toggle properties panel with P shortcut', async ({ page }) => {
         const propertiesPanel = page.getByTestId('properties-panel');
 

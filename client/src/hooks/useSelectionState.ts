@@ -1,13 +1,20 @@
 import type { EditorState } from '@/types/level';
 
 /**
+ * Drawing Mode Tools - tools that work with tile selection
+ * These tools preserve tile selection when switched between
+ */
+const DRAWING_TOOLS: EditorState['selectedTool'][] = ['pen', 'line', 'rectangle'];
+
+/**
  * Custom hook for managing selection state transitions
  *
  * This hook provides consistent helpers for managing the three selection-related
  * state variables: selectedTool, selectedTileType, and selectedObjects.
  *
  * Design principles:
- * - selectedTool and selectedTileType are mutually exclusive (can't have both)
+ * - Drawing Mode Tools (pen, line, rectangle) work WITH tiles - they preserve each other
+ * - Other tools (select, move, link) are mutually exclusive with tiles
  * - selectedObjects is preserved during tool/tile switches to support multi-step workflows
  *   (e.g., multi-select → move tool, or select objects → switch to different tool)
  * - Only ESC key or explicit clear operations should clear all three
@@ -25,31 +32,40 @@ export function useSelectionState() {
 
     /**
      * Select a tile from the palette
-     * Clears tool selection (mutual exclusion) but preserves object selection
+     * Drawing Mode Tools: Auto-selects pen if no drawing tool active, preserves active drawing tool
      * @param tileType - The tile type to select
+     * @param currentTool - The currently active tool (optional)
      * @returns Partial EditorState for tile selection
      */
-    const selectTile = (tileType: string): Partial<EditorState> => ({
-        selectedTileType: tileType,
-        selectedTool: null, // Clear tool (mutually exclusive)
-        // selectedObjects preserved for multi-step workflows
-    });
+    const selectTile = (tileType: string, currentTool?: EditorState['selectedTool']): Partial<EditorState> => {
+        // If a drawing tool is already active, keep it
+        if (currentTool && DRAWING_TOOLS.includes(currentTool)) {
+            return {
+                selectedTileType: tileType,
+                selectedTool: currentTool, // Preserve drawing tool
+            };
+        }
+
+        // Otherwise, auto-select pen tool
+        return {
+            selectedTileType: tileType,
+            selectedTool: 'pen', // Auto-select pen for drawing
+        };
+    };
 
     /**
      * Select a tool from the toolbar
-     * - Line and rectangle tools preserve tile selection (they need both tool + tile)
-     * - Other tools clear tile selection (mutual exclusion)
-     * - Object selection is always preserved for multi-step workflows
+     * Drawing Mode Tools: Preserve tile selection when switching between drawing tools
      * @param tool - The tool to select
      * @returns Partial EditorState for tool selection
      */
     const selectTool = (tool: EditorState['selectedTool']): Partial<EditorState> => {
-        // Line and rectangle tools need tile selection to know what to draw
-        const preserveTileSelection = tool === 'line' || tool === 'rectangle';
+        // Drawing tools (pen, line, rectangle) preserve tile selection
+        const isDrawingTool = tool && DRAWING_TOOLS.includes(tool);
 
         return {
             selectedTool: tool,
-            ...(preserveTileSelection ? {} : { selectedTileType: null }), // Only clear tile for other tools
+            ...(isDrawingTool ? {} : { selectedTileType: null }), // Only clear tile for non-drawing tools
             // selectedObjects preserved for multi-step workflows
         };
     };
