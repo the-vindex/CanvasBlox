@@ -221,7 +221,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 **Phase 1 Total:** -4 tests, -92 lines, improved pass rate from 88.1% to 90.2%
 
-### Phase 2: Consolidate Interaction Tests (Medium Priority)
+### Phase 2: Consolidate Interaction Tests (Medium Priority) - 2/4 Complete
 
 #### 13.3 Merge undo keyboard and button tests ✅ COMPLETE
 - **Status:** ✅ COMPLETE
@@ -246,38 +246,19 @@ Work through chapters sequentially. After implementing each chapter:
   - `client/src/hooks/useLevelEditor.test.ts` - Updated unit test expectations
 - **Impact:** -1 test, consolidated test passing, undo/redo now works correctly
 
-#### 13.4 Merge redo keyboard shortcuts and button tests
-- **Location:** Lines 1470-1498 (Ctrl+Y), Lines 1500-1528 (Ctrl+Shift+Z), Lines 1557-1587 (Button)
-- **Current:** 3 separate tests for same redo functionality with different triggers
-- **Consolidated test:**
-  ```typescript
-  test('should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
-      // Setup: Place and undo a tile
-      await placeTile(page, 'tile-platform-grass', 200, 200);
-      await page.keyboard.press('Control+z');
-      const afterUndo = await getObjectCount(page);
+#### 13.4 Merge redo keyboard shortcuts and button tests ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **Location:** Line 1375 (consolidated test)
+- **What was done:**
+  - Consolidated 3 separate redo tests into 1 comprehensive test
+  - Tests all redo methods: Ctrl+Y, Ctrl+Shift+Z, and button click
+  - Simplified structure: place once, undo once, test all methods with resets
+  - Added comment explaining all methods call same redo function
+- **Files modified:**
+  - `e2e/level-editor.spec.ts` - Consolidated test at line 1375
+- **Impact:** -2 tests, -60 lines (better than expected -90 due to refactoring)
 
-      // Test Ctrl+Y
-      await page.keyboard.press('Control+y');
-      expect(await getObjectCount(page)).toBe(afterUndo + 1);
-
-      // Undo again for next test
-      await page.keyboard.press('Control+z');
-
-      // Test Ctrl+Shift+Z
-      await page.keyboard.press('Control+Shift+z');
-      expect(await getObjectCount(page)).toBe(afterUndo + 1);
-
-      // Undo again for button test
-      await page.keyboard.press('Control+z');
-
-      // Test button
-      await page.getByTestId('button-redo').click();
-      expect(await getObjectCount(page)).toBe(afterUndo + 1);
-  });
-  ```
-- **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** -2 tests, -90 lines
+**Phase 2 Progress (2/4 complete):** -3 tests, -91 lines
 
 #### 13.5 Merge copy keyboard and button tests
 - **Location:** Lines 1776-1807 (Ctrl+C) and Lines 1856-1879 (Button)
