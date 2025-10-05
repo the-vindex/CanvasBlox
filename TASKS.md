@@ -526,7 +526,7 @@ Press ESC                      → null            | null               ❌ clea
   - Verify refactored tests are more readable (less boilerplate)
 
 #### 13.11 Refactor existing tests to use helper functions
-- **Status:** 🔄 In Progress (2 of 11 files complete)
+- **Status:** 🔄 In Progress (1 file complete, 1 partial, 9 pending - ~10% done)
 - **Location:** 11 out of 13 E2E test files (all files except tile-placement.spec.ts and zoom-pan.spec.ts)
 - **Current:** Repetitive patterns across test files:
   ```typescript
