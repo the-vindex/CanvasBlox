@@ -127,3 +127,23 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Step 16: Scanlines Toggle
+
+**Question:** The scanlines toggle appears to already be fully implemented. Should I still write comprehensive tests?
+**Assumption/Decision:** Yes, I will write comprehensive E2E and unit tests to verify the feature works correctly, even though the implementation exists. This follows the TDD principle of ensuring test coverage.
+**Reasoning:** The feature restoration plan requires both E2E and unit tests. Currently, there's only a basic visibility test but no test that verifies the scanlines actually toggle on/off. Adding comprehensive tests ensures the feature is properly validated and prevents regressions.
+
+**Question:** Should I test the actual CSS animation or just verify the scanlines overlay element appears/disappears?
+**Assumption/Decision:** Test that the scanlines overlay element is present/absent in the DOM when toggled. Will not test specific CSS animation frames.
+**Reasoning:** Testing CSS animations is fragile and implementation-specific. The important behavior is that the overlay element is conditionally rendered based on the toggle state.
+
+**Question:** There are 8 pre-existing E2E test failures and 1 unit test failure. Should I fix them?
+**Assumption/Decision:** No, will not fix pre-existing test failures. They are not related to Step 16 scanlines toggle. The Step 16 tests I added pass successfully (2/2 E2E tests, 4/4 unit tests).
+**Reasoning:** The task is to implement Step 16, not to fix unrelated test failures from previous steps. The failing tests are in Steps 12 and 14, which were marked as "auto-accepted" but have test issues. This is outside the scope of Step 16.
+
+**Question:** Test review identified issues with useCanvas.test.ts. Should I refactor those tests?
+**Assumption/Decision:** No, will not refactor useCanvas tests. The review confirmed Canvas.test.tsx (my Step 16 tests) are good ✅. The useCanvas issues are pre-existing and outside Step 16 scope.
+**Reasoning:** The test review states: "Canvas component tests for scanlines are solid - they test real UI behavior" and lists all 4 scanlines tests as good examples. The useCanvas problems are from a previous step and not my responsibility in Step 16.
+
+---
+

@@ -2363,4 +2363,47 @@ test.describe('Level Editor', () => {
         const savedClasses = await saveIcon.getAttribute('class');
         expect(savedClasses).toContain('text-green-500');
     });
+
+    test('Step 16: scanlines toggle should show/hide overlay', async ({ page }) => {
+        const scanlinesToggle = page.getByTestId('switch-show-scanlines');
+        const scanlinesOverlay = page.locator('.scanlines-overlay');
+
+        // Initially scanlines should be off
+        await expect(scanlinesToggle).toBeVisible();
+        await expect(scanlinesOverlay).not.toBeVisible();
+
+        // Click toggle to turn on scanlines
+        await scanlinesToggle.click();
+        await expect(scanlinesOverlay).toBeVisible();
+
+        // Click toggle to turn off scanlines
+        await scanlinesToggle.click();
+        await expect(scanlinesOverlay).not.toBeVisible();
+    });
+
+    test('Step 16: scanlines overlay should not block mouse interactions', async ({ page }) => {
+        const scanlinesToggle = page.getByTestId('switch-show-scanlines');
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+
+        // Enable scanlines
+        await scanlinesToggle.click();
+
+        // Verify scanlines are visible
+        const scanlinesOverlay = page.locator('.scanlines-overlay');
+        await expect(scanlinesOverlay).toBeVisible();
+
+        // Try to place a tile - should work despite scanlines overlay
+        await grassTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        const initialObjectCount = await page.getByTestId('statusbar-object-count').textContent();
+        await page.mouse.click(box.x + 150, box.y + 150);
+        await page.waitForTimeout(100);
+
+        // Verify tile was placed (object count should increase)
+        const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
+        expect(newObjectCount).not.toBe(initialObjectCount);
+    });
 });
