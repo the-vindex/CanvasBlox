@@ -705,23 +705,26 @@ test('should load levels from localStorage', () => {
 ---
 
 ### Step 17: Grid Toggle
-**Status**: ⬜ Not Started
-**Current State**: Grid is always on
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: Grid toggle fully working with comprehensive tests
 **Goal**: Toggleable grid
 **Dependencies**: Step 3 (Canvas component)
 
 **Implementation**:
-1. Ensure `editorState.showGrid` updates from Toolbar
-2. CanvasRenderer should check flag before drawing grid
-3. Update toggle button in Toolbar
+1. ✅ `editorState.showGrid` updates from Toolbar
+2. ✅ CanvasRenderer checks flag before drawing grid (line 24-25: early return if !show)
+3. ✅ Toggle button in Toolbar working
 
-**Files to modify**:
-- `client/src/utils/canvasRenderer.ts`
-- Verify Toolbar passes toggle correctly
+**Files modified**:
+- ✅ `e2e/level-editor.spec.ts` (added 2 E2E tests)
+- ✅ `OPEN_QUESTIONS.md` (added assumptions and completion summary)
 
-**Test**:
-- Toggle should show/hide grid
-- Grid should render correctly when on
+**Test Results**:
+- ✅ Toggle shows/hides grid via UI switch
+- ✅ Grid renders correctly when on
+- ✅ Grid toggle doesn't affect canvas interactions
+- ✅ All unit tests pass (103/103)
+- ✅ Step 17 E2E tests pass (2/2)
 
 ---
 
