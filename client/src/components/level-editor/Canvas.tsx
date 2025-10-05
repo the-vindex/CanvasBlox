@@ -43,6 +43,10 @@ export function Canvas({
     const canvasWidth = levelData.metadata.dimensions.width * TILE_SIZE;
     const canvasHeight = levelData.metadata.dimensions.height * TILE_SIZE;
 
+    // Calculate parallax offset (background moves at 50% of pan speed)
+    const parallaxX = editorState.pan.x * 0.5;
+    const parallaxY = editorState.pan.y * 0.5;
+
     return (
         <div
             ref={wrapperRef}
@@ -52,6 +56,7 @@ export function Canvas({
                 height: '100%',
                 overflow: 'auto',
                 background: '#1a1a1a',
+                backgroundPosition: `${parallaxX}px ${parallaxY}px`,
                 position: 'relative',
             }}
         >

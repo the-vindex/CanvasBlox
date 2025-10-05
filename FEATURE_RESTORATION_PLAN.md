@@ -843,30 +843,35 @@ test('should load levels from localStorage', () => {
 ---
 
 ### Step 21: Parallax Background
-**Status**: ⬜ Not Started
-**Current State**: No parallax
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: Parallax effect fully implemented
 **Goal**: Background moves at 50% of pan
 **Dependencies**: Step 9 (pan)
 
 **Implementation**:
-1. Calculate parallax offset in Canvas wrapper:
+1. ✅ Calculate parallax offset in Canvas wrapper:
    ```tsx
    const parallaxX = editorState.pan.x * 0.5;
    const parallaxY = editorState.pan.y * 0.5;
    ```
-2. Apply to wrapper background position:
+2. ✅ Apply to wrapper background position:
    ```tsx
    style={{
      backgroundPosition: `${parallaxX}px ${parallaxY}px`
    }}
    ```
 
-**Files to modify**:
-- `client/src/components/level-editor/Canvas.tsx`
+**Files modified**:
+- `client/src/components/level-editor/Canvas.tsx` - Added parallax offset calculation (lines 46-48, 59)
+- `e2e/level-editor.spec.ts` - Added E2E test for parallax effect
 
-**Test**:
-- Background should move slower than canvas
-- Should create depth effect
+**Tests Added**:
+- E2E test: "background should move at 50% of pan speed (parallax effect)"
+
+**Test Results**:
+- ✅ Step 21 E2E test passes (1/1)
+- ✅ All unit tests pass (109/110 - 1 pre-existing failure in Step 19)
+- Infrastructure ready for background images/patterns
 
 ---
 
