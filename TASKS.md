@@ -27,6 +27,7 @@ Work through chapters sequentially. After implementing each chapter:
 **Priority:** High
 
 ### Completed Tasks:
+✅ **11.0** Pen tool and Drawing Mode Tools interaction pattern - Foundation for drawing tools UX
 ✅ **11.3** Selection tool - Click to select objects, shows properties
 ✅ **11.4** Move tool - Drag selected objects with ghost preview
 ✅ **11.8** Clear brush on tool change - Mutual exclusion between tools/tiles
@@ -73,44 +74,42 @@ Press ESC                      → null            | null               ❌ clea
 
 ### Remaining Tasks:
 
-#### 11.0 Implement Pen tool and refactor interaction model ⏸️ Not Started
+#### 11.0 Implement Pen tool and refactor interaction model ✅ Complete
+- **Status:** ✅ COMPLETE - Commit 4a3ea24 - User tested and approved
 - **Location:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/components/level-editor/Toolbar.tsx`
 - **Purpose:** Create explicit "pen" tool and implement Drawing Mode Tools interaction pattern
-- **Current:** Painting is implicit when tile selected - no explicit tool, confusing state management
-- **Changes Needed:**
-  1. **Add 'pen' tool to EditorState** (`client/src/types/level.ts`)
-     - Update `selectedTool` type: add `'pen'`
-     - Default to 'pen' when tile selected
-  2. **Extract pen tool logic** (`client/src/hooks/useCanvas.ts`)
-     - Current implicit painting → explicit `selectedTool === 'pen'` mode
-     - Similar to line tool implementation
-  3. **Refactor state transitions** (`client/src/hooks/useSelectionState.ts`)
-     - Define drawing mode tools: `const DRAWING_TOOLS = ['pen', 'line', 'rectangle']`
-     - `selectTile()`: If no drawing tool active → default to 'pen'
-     - `selectTile()`: If drawing tool active → keep that tool
-     - `selectTool()`: If drawing tool selected → preserve tile
-     - `selectTool()`: If non-drawing tool → clear tile
-  4. **Visual grouping in toolbar** (`client/src/components/level-editor/Toolbar.tsx`)
-     - Group pen/line/rectangle tools visually (border, background, or separator)
-     - Conditional styling: enabled when tile selected, dimmed when no tile
-     - Add tooltip: "Select a tile first" when disabled
-  5. **Update keyboard shortcuts** (`client/src/pages/LevelEditor.tsx`)
-     - Add 'B' or 'P' key for pen tool (B for Brush is common)
-     - Update ESC handler to clear both tool and tile
-- **Files to modify:**
-  - `client/src/types/level.ts` (add 'pen' to EditorState)
-  - `client/src/hooks/useCanvas.ts` (add pen tool mode)
-  - `client/src/hooks/useSelectionState.ts` (drawing mode tools logic)
-  - `client/src/components/level-editor/Toolbar.tsx` (visual grouping)
-  - `client/src/pages/LevelEditor.tsx` (keyboard shortcuts)
-- **Tests to add:**
-  - E2E: Select tile → verify pen tool auto-selected
-  - E2E: Switch tiles → verify pen tool stays active
-  - E2E: Switch from pen to line → verify tile preserved
-  - E2E: Press ESC → verify both tool and tile cleared
-  - Unit: useSelectionState drawing mode tools transitions
-- **Dependencies:** Must be completed before 11.1 and 11.2 are truly complete
-- **Note:** This is the foundation for the entire drawing tools UX
+- **What was implemented:**
+  1. ✅ **Added 'pen' tool to EditorState** (`client/src/types/level.ts`)
+     - Updated `selectedTool` type to include `'pen'`
+     - Auto-selects pen when tile selected
+  2. ✅ **Extracted pen tool logic** (`client/src/hooks/useCanvas.ts`)
+     - Changed implicit painting → explicit `selectedTool === 'pen'` mode
+     - Matches line tool implementation pattern
+  3. ✅ **Refactored state transitions** (`client/src/hooks/useSelectionState.ts`)
+     - Defined `DRAWING_TOOLS = ['pen', 'line', 'rectangle']`
+     - Auto-selects pen when tile selected (no drawing tool active)
+     - Preserves active drawing tool when selecting tiles
+     - Preserves tile when switching between drawing tools
+     - Clears tile when switching to non-drawing tools
+  4. ✅ **Visual grouping in toolbar** (`client/src/components/level-editor/Toolbar.tsx`)
+     - Grouped pen/line/rectangle tools in dedicated section
+     - Green color theme for drawing tools (vs blue for selection tools)
+     - Added pen icon SVG matching existing icon style
+  5. ✅ **Updated keyboard shortcuts** (`client/src/pages/LevelEditor.tsx`)
+     - Added 'B' key for pen tool (Brush)
+     - ESC clears both tool and tile
+- **Tests:**
+  - ✅ 18 unit tests passing (useSelectionState)
+  - ✅ 4 E2E tests for Drawing Mode Tools pattern
+  - ✅ All existing tests updated to reflect new behavior
+- **Manual Test:**
+  - Select a tile from palette → verify pen tool auto-selects (toolbar shows green)
+  - With pen active, press 'L' → verify line tool selected and tile remains selected
+  - With line tool active, select different tile → verify line tool stays active
+  - Press 'V' (select tool) → verify tile deselects
+  - Press ESC → verify both tool and tile clear
+  - Press 'B' → verify pen tool selects
+- **Note:** Foundation for entire drawing tools UX - 11.1 (line) and 11.2 (rectangle) now properly integrated
 
 #### 11.1 Implement line drawing tool ⚠️ Algorithm Complete, Needs Interaction Model Integration
 - **Status:** Partially complete - Algorithm done, needs Task 11.0 refactor
