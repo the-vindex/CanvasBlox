@@ -293,19 +293,27 @@ export default function LevelEditor() {
 
     // Import/Export handlers
     const handleImportLevel = useCallback(
-        (levelData: LevelData) => {
+        (levelData: LevelData, mode: 'new' | 'overwrite') => {
             // Validate single player spawn
             const playerSpawns = levelData.spawnPoints.filter((spawn) => spawn.type === 'player');
             const otherSpawns = levelData.spawnPoints.filter((spawn) => spawn.type !== 'player');
 
             const validatedSpawnPoints = playerSpawns.length > 0 ? [playerSpawns[0], ...otherSpawns] : otherSpawns;
 
-            updateCurrentLevel(() => ({
+            const validatedLevelData = {
                 ...levelData,
                 spawnPoints: validatedSpawnPoints,
-            }));
+            };
+
+            if (mode === 'new') {
+                // Create new level with imported data
+                createNewLevel(validatedLevelData);
+            } else {
+                // Overwrite current level
+                updateCurrentLevel(() => validatedLevelData);
+            }
         },
-        [updateCurrentLevel]
+        [createNewLevel, updateCurrentLevel]
     );
 
     const handleExportPNG = useCallback(() => {

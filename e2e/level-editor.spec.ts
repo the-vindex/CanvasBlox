@@ -2024,14 +2024,40 @@ test.describe('Level Editor', () => {
         await expect(importModal).not.toBeVisible();
     });
 
-    test('Step 14: should import valid JSON level data', async ({ page }) => {
+    test('Step 14: should import valid JSON level data using new level mode', async ({ page }) => {
         // Create valid level JSON
         const validLevelJson = JSON.stringify({
             levelName: 'Imported Level',
-            tiles: [{ id: '1', position: { x: 0, y: 0 }, tileType: 'platform-grass' }],
+            tiles: [
+                {
+                    id: '1',
+                    position: { x: 0, y: 0 },
+                    dimensions: { width: 1, height: 1 },
+                    rotation: 0,
+                    layer: 1,
+                    type: 'platform-grass',
+                    properties: { collidable: true },
+                },
+            ],
             objects: [],
-            spawnPoints: [{ id: 'spawn-1', type: 'player', position: { x: 5, y: 5 } }],
+            spawnPoints: [
+                {
+                    id: 'spawn-1',
+                    type: 'player',
+                    position: { x: 5, y: 5 },
+                    dimensions: { width: 1, height: 1 },
+                    rotation: 0,
+                    layer: 1,
+                    facingDirection: 'right',
+                    isDefault: true,
+                    properties: {},
+                },
+            ],
             metadata: {
+                version: '1.0',
+                createdAt: new Date().toISOString(),
+                author: 'Test',
+                description: 'Test level',
                 dimensions: { width: 1920, height: 960 },
                 backgroundColor: '#87CEEB',
             },
@@ -2051,18 +2077,18 @@ test.describe('Level Editor', () => {
         const textarea = page.getByRole('textbox');
         await textarea.fill(validLevelJson);
 
+        // Default mode is "Create new level" - verify it
+        const newLevelRadio = page.getByRole('radio', { name: /Create new level/i });
+        await expect(newLevelRadio).toBeChecked();
+
         // Click import button
         const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
         await importConfirmButton.click();
         await page.waitForTimeout(200);
 
-        // Level name should be updated
+        // Should create new level with imported name
         const levelNameInput = page.getByTestId('input-level-name');
         await expect(levelNameInput).toHaveValue('Imported Level');
-
-        // Verify success toast
-        const toast = page.getByText(/Level imported successfully/i);
-        await expect(toast).toBeVisible();
     });
 
     test('Step 14: should show error for invalid JSON', async ({ page }) => {
@@ -2166,7 +2192,156 @@ test.describe('Level Editor', () => {
         expect(download.suggestedFilename()).toMatch(/\.png$/);
     });
 
-    test('Step 14: should validate single player spawn on import', async ({ page }) => {
+    test('Step 14: should import as new level by default', async ({ page }) => {
+        // Create level JSON
+        const importedLevelJson = JSON.stringify({
+            levelName: 'Imported Level',
+            tiles: [
+                {
+                    id: 'tile-1',
+                    type: 'platform-basic',
+                    position: { x: 0, y: 0 },
+                    dimensions: { width: 1, height: 1 },
+                    rotation: 0,
+                    layer: 1,
+                    properties: { collidable: true },
+                },
+            ],
+            objects: [],
+            spawnPoints: [],
+            metadata: {
+                version: '1.0',
+                createdAt: new Date().toISOString(),
+                author: 'Test',
+                description: 'Imported level',
+                dimensions: { width: 1920, height: 960 },
+                backgroundColor: '#87CEEB',
+            },
+        });
+
+        // Get current level count (wait for tabs to render)
+        await page.waitForSelector('[data-testid^="tab-level-"]', { timeout: 5000 });
+        const initialLevelCount = await page.locator('[data-testid^="tab-level-"]').count();
+
+        // Open import modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await expect(importButton).toBeVisible();
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Paste JSON
+        const textarea = page.getByRole('textbox');
+        await textarea.fill(importedLevelJson);
+
+        // Default mode should be "new level"
+        const newLevelRadio = page.getByRole('radio', { name: /Create new level/i });
+        await expect(newLevelRadio).toBeChecked();
+
+        // Click import
+        const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
+        await importConfirmButton.click();
+        await page.waitForTimeout(200);
+
+        // Should create a new level tab (wait for new tab to appear)
+        await page.waitForSelector(`[data-testid="tab-level-${initialLevelCount}"]`, { timeout: 5000 });
+        const newLevelCount = await page.locator('[data-testid^="tab-level-"]').count();
+        expect(newLevelCount).toBe(initialLevelCount + 1);
+
+        // New level should have the imported name
+        const levelNameInput = page.getByTestId('input-level-name');
+        await expect(levelNameInput).toHaveValue('Imported Level');
+
+        // Should have 1 tile from import
+        const objectCount = page.getByTestId('statusbar-object-count');
+        const countText = await objectCount.textContent();
+        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        expect(count).toBe(1);
+    });
+
+    test('Step 14: should overwrite current level when overwrite mode selected', async ({ page }) => {
+        // Set current level name first
+        const levelNameInput = page.getByTestId('input-level-name');
+        await levelNameInput.fill('Original Level');
+        await page.waitForTimeout(100);
+
+        // Create level JSON with different name
+        const importedLevelJson = JSON.stringify({
+            levelName: 'Overwritten Level',
+            tiles: [
+                {
+                    id: 'tile-1',
+                    type: 'platform-grass',
+                    position: { x: 5, y: 5 },
+                    dimensions: { width: 1, height: 1 },
+                    rotation: 0,
+                    layer: 1,
+                    properties: { collidable: true },
+                },
+                {
+                    id: 'tile-2',
+                    type: 'platform-grass',
+                    position: { x: 6, y: 5 },
+                    dimensions: { width: 1, height: 1 },
+                    rotation: 0,
+                    layer: 1,
+                    properties: { collidable: true },
+                },
+            ],
+            objects: [],
+            spawnPoints: [],
+            metadata: {
+                version: '1.0',
+                createdAt: new Date().toISOString(),
+                author: 'Test',
+                description: 'Overwritten level',
+                dimensions: { width: 1920, height: 960 },
+                backgroundColor: '#87CEEB',
+            },
+        });
+
+        // Get current level count
+        const initialLevelCount = await page.locator('[data-testid^="tab-level-"]').count();
+
+        // Open import modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await expect(importButton).toBeVisible();
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Paste JSON
+        const textarea = page.getByRole('textbox');
+        await textarea.fill(importedLevelJson);
+
+        // Select overwrite mode
+        const overwriteRadio = page.getByRole('radio', { name: /Overwrite current level/i });
+        await overwriteRadio.click();
+
+        // Click import
+        const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
+        await importConfirmButton.click();
+        await page.waitForTimeout(200);
+
+        // Should NOT create new level tab
+        const newLevelCount = await page.locator('[data-testid^="tab-level-"]').count();
+        expect(newLevelCount).toBe(initialLevelCount);
+
+        // Current level should have the imported name
+        await expect(levelNameInput).toHaveValue('Overwritten Level');
+
+        // Should have 2 tiles from import
+        const objectCount = page.getByTestId('statusbar-object-count');
+        const countText = await objectCount.textContent();
+        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        expect(count).toBe(2);
+    });
+
+    test('Step 14: should validate single player spawn on import (new level mode)', async ({ page }) => {
         // Create level JSON with multiple player spawns
         const multiplePlayerSpawnsJson = JSON.stringify({
             levelName: 'Invalid Level',
@@ -2178,6 +2353,10 @@ test.describe('Level Editor', () => {
                 { id: 'spawn-3', type: 'enemy', position: { x: 10, y: 10 } },
             ],
             metadata: {
+                version: '1.0',
+                createdAt: new Date().toISOString(),
+                author: 'Test',
+                description: 'Test level',
                 dimensions: { width: 1920, height: 960 },
                 backgroundColor: '#87CEEB',
             },
@@ -2197,23 +2376,26 @@ test.describe('Level Editor', () => {
         const textarea = page.getByRole('textbox');
         await textarea.fill(multiplePlayerSpawnsJson);
 
+        // Default is "Create new level" - no need to select it
+        const newLevelRadio = page.getByRole('radio', { name: /Create new level/i });
+        await expect(newLevelRadio).toBeChecked();
+
         // Click import
         const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
         await importConfirmButton.click();
         await page.waitForTimeout(200);
 
-        // Should still import but only keep first player spawn
-        // Check that import succeeded
+        // Should create new level with imported name
         const levelNameInput = page.getByTestId('input-level-name');
         await expect(levelNameInput).toHaveValue('Invalid Level');
 
-        // Object count should reflect only 1 player spawn + 1 enemy spawn
+        // Object count should reflect only 1 player spawn + 1 enemy spawn (3rd player spawn removed)
         const objectCount = page.getByTestId('statusbar-object-count');
         const countText = await objectCount.textContent();
         const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
 
         // Should have 2 spawn points (1 player + 1 enemy), not 3
-        expect(count).toBeLessThan(3);
+        expect(count).toBe(2);
     });
 
     test('Step 14: should preserve level data after export and import', async ({ page }) => {

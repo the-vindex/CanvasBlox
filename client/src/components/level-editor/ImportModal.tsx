@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -8,6 +8,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import type { LevelData } from '@/types/level';
@@ -16,22 +18,26 @@ import { deserialize } from '@/utils/levelSerializer';
 interface ImportModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onImport: (levelData: LevelData) => void;
+    onImport: (levelData: LevelData, mode: 'new' | 'overwrite') => void;
 }
 
 export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     const [jsonInput, setJsonInput] = useState('');
+    const [importMode, setImportMode] = useState<'new' | 'overwrite'>('new');
     const { toast } = useToast();
+    const newModeId = useId();
+    const overwriteModeId = useId();
 
     const handleImport = () => {
         try {
             const levelData = deserialize(jsonInput);
-            onImport(levelData);
+            onImport(levelData, importMode);
             toast({
                 title: 'Success',
-                description: 'Level imported successfully',
+                description: `Level ${importMode === 'new' ? 'created' : 'overwritten'} successfully`,
             });
             setJsonInput('');
+            setImportMode('new');
             onClose();
         } catch (error) {
             toast({
@@ -44,6 +50,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
     const handleClose = () => {
         setJsonInput('');
+        setImportMode('new');
         onClose();
     };
 
@@ -57,12 +64,35 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <Textarea
-                    value={jsonInput}
-                    onChange={(e) => setJsonInput(e.target.value)}
-                    placeholder="Paste level JSON here..."
-                    className="font-mono text-sm h-96 resize-none"
-                />
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label>Import Mode</Label>
+                        <RadioGroup
+                            value={importMode}
+                            onValueChange={(value) => setImportMode(value as 'new' | 'overwrite')}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="new" id={newModeId} />
+                                <Label htmlFor={newModeId} className="font-normal cursor-pointer">
+                                    Create new level
+                                </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="overwrite" id={overwriteModeId} />
+                                <Label htmlFor={overwriteModeId} className="font-normal cursor-pointer">
+                                    Overwrite current level
+                                </Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
+                    <Textarea
+                        value={jsonInput}
+                        onChange={(e) => setJsonInput(e.target.value)}
+                        placeholder="Paste level JSON here..."
+                        className="font-mono text-sm h-96 resize-none"
+                    />
+                </div>
 
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose}>

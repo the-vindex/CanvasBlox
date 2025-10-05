@@ -159,23 +159,36 @@ export function useLevelEditor() {
     }, [history, historyIndex, currentLevelIndex]);
 
     const createNewLevel = useCallback(
-        (name?: string) => {
-            // Auto-increment level names to avoid duplicates
-            let finalName = name;
-            if (!name) {
-                const existingNames = levels.map((l) => l.levelName);
-                let counter = 0;
-                let newName = 'New Level';
-                while (existingNames.includes(newName)) {
-                    counter++;
-                    newName = `New Level ${counter}`;
+        (nameOrData?: string | LevelData) => {
+            let newLevel: LevelData;
+
+            // Check if we're importing level data or just creating empty level
+            if (typeof nameOrData === 'object') {
+                // Importing level data - use it directly
+                newLevel = nameOrData;
+            } else {
+                // Creating new empty level with optional name
+                const name = nameOrData;
+                let finalName = name;
+                if (!name) {
+                    const existingNames = levels.map((l) => l.levelName);
+                    let counter = 0;
+                    let newName = 'New Level';
+                    while (existingNames.includes(newName)) {
+                        counter++;
+                        newName = `New Level ${counter}`;
+                    }
+                    finalName = newName;
                 }
-                finalName = newName;
+                newLevel = createDefaultLevel(finalName);
             }
 
-            const newLevel = createDefaultLevel(finalName);
-            setLevels((prev) => [...prev, newLevel]);
-            setCurrentLevelIndex(levels.length);
+            setLevels((prev) => {
+                const newLevels = [...prev, newLevel];
+                // Switch to the new level after adding it
+                setCurrentLevelIndex(newLevels.length - 1);
+                return newLevels;
+            });
         },
         [levels]
     );
