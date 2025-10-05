@@ -729,22 +729,32 @@ test('should load levels from localStorage', () => {
 ---
 
 ### Step 18: Selection Animations (Pulsing Glow)
-**Status**: ⬜ Not Started
-**Current State**: No selection animation
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: Pulsing glow fully implemented and tested
 **Goal**: Pulsing glow on selected objects
 **Dependencies**: Step 11 (selection)
 
 **Implementation**:
-1. CanvasRenderer should render pulsing glow for selected objects
-2. Use animation frame for pulsing effect
-3. Ensure CSS keyframes exist if needed
+1. ✅ CanvasRenderer renders pulsing glow for selected objects (already implemented)
+   - Lines 243-262: Pulsing glow for tiles
+   - Lines 627-646: Pulsing glow for objects
+   - Lines 864-883: Pulsing glow for spawn points
+2. ✅ Uses Date.now() / 1000 and Math.sin() for pulsing opacity animation
+3. ✅ No CSS keyframes needed (canvas-based animation)
 
-**Files to modify**:
-- `client/src/utils/canvasRenderer.ts`
+**Files modified**:
+- `client/src/utils/canvasRenderer.test.ts` - Added 3 unit tests
+- `e2e/level-editor.spec.ts` - Added 4 E2E tests
 
-**Test**:
-- Selected objects should have pulsing glow
-- Animation should be smooth
+**Tests**:
+- ✅ Selected tiles have visual feedback (E2E)
+- ✅ Selection works for tiles, objects, spawn points (E2E)
+- ✅ Multiple selections all show selection state (E2E)
+- ✅ Pulsing glow doesn't interfere with tile placement (E2E)
+- ✅ Tiles apply pulsing glow when selected (unit)
+- ✅ Objects apply pulsing glow when selected (unit)
+- ✅ Spawn points apply pulsing glow when selected (unit)
+- ✅ All Step 18 tests pass (4/4 E2E, 3/3 unit)
 
 ---
 
