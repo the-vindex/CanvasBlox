@@ -56,7 +56,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Import Level</DialogTitle>
                     <DialogDescription>
@@ -64,7 +64,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
                     <div className="space-y-2">
                         <Label>Import Mode</Label>
                         <RadioGroup
@@ -90,7 +90,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                         value={jsonInput}
                         onChange={(e) => setJsonInput(e.target.value)}
                         placeholder="Paste level JSON here..."
-                        className="font-mono text-sm h-96 resize-none"
+                        className="font-mono text-sm flex-1 resize-none"
                     />
                 </div>
 
