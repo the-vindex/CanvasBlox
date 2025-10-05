@@ -319,6 +319,23 @@ export function useLevelEditor() {
         }));
     }, []);
 
+    const selectAllObjects = useCallback(() => {
+        const currentLevel = levels[currentLevelIndex];
+        if (!currentLevel) return;
+
+        // Collect all object IDs (tiles, interactable objects, and spawn points)
+        const allObjectIds = [
+            ...currentLevel.tiles.map((tile) => tile.id),
+            ...currentLevel.objects.map((obj) => obj.id),
+            ...currentLevel.spawnPoints.map((spawn) => spawn.id),
+        ];
+
+        setEditorState((prev) => ({
+            ...prev,
+            selectedObjects: allObjectIds,
+        }));
+    }, [levels, currentLevelIndex]);
+
     const deleteSelectedObjects = useCallback(() => {
         if (editorState.selectedObjects.length === 0) return;
 
@@ -500,6 +517,7 @@ export function useLevelEditor() {
         addTile,
         addObject,
         selectObject,
+        selectAllObjects,
         deleteSelectedObjects,
         copySelectedObjects,
         pasteObjects,

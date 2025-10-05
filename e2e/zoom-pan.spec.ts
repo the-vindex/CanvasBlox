@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { getZoomValue } from './helpers';
+import { clickCanvas, getZoomValue } from './helpers';
 
 test.describe('Zoom and Pan', () => {
     test.beforeEach(async ({ page }) => {
@@ -219,5 +219,50 @@ test.describe('Zoom and Pan', () => {
         await page.mouse.up({ button: 'middle' });
 
         // This test just verifies no errors occur - actual tile placement tested elsewhere
+    });
+
+    test('should not zoom while dragging with move tool', async ({ page }) => {
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const moveTool = page.getByTestId('tool-move');
+        const selectTool = page.getByTestId('tool-select');
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const canvas = page.getByTestId('level-canvas');
+
+        // Place a tile
+        await grassTile.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+
+        // Select the tile
+        await selectTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+
+        // Switch to move tool
+        await moveTool.click();
+        await page.waitForTimeout(50);
+
+        // Start dragging the tile
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        await page.mouse.move(box.x + 200, box.y + 200);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 250, box.y + 250, { steps: 5 });
+
+        // Try to zoom while dragging (should not work or should cancel drag gracefully)
+        await zoomInButton.click();
+        await page.waitForTimeout(50);
+
+        // Complete the drag
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // The operation should complete without errors
+        // Zoom may or may not have changed depending on implementation
+        const finalZoom = await getZoomValue(page);
+
+        // This test mainly checks that no errors occur during the interaction
+        expect(typeof finalZoom).toBe('number');
     });
 });

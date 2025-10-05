@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getObjectCount } from './helpers';
 
 test.describe('Keyboard Shortcuts', () => {
     test.beforeEach(async ({ page }) => {
@@ -189,5 +190,45 @@ test.describe('Keyboard Shortcuts', () => {
 
         // Palette tile should be deselected
         await expect(grassTile).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    test('should select all objects with Ctrl+A', async ({ page }) => {
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const selectTool = page.getByTestId('tool-select');
+        const fileButton = page.getByRole('button', { name: /File/i });
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
+
+        // Create a fresh level for test isolation
+        await fileButton.click();
+        await newLevelButton.click();
+        await page.waitForTimeout(200);
+
+        // Place three tiles
+        await grassTile.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(50);
+        await clickCanvas(page, 232, 200);
+        await page.waitForTimeout(50);
+        await clickCanvas(page, 264, 200);
+        await page.waitForTimeout(100);
+
+        // Get count after placing tiles
+        const totalCount = await getObjectCount(page);
+
+        // Switch to select tool (must do this AFTER placing tiles to avoid auto-selecting pen)
+        await selectTool.click();
+        await page.waitForTimeout(100);
+
+        // Press Ctrl+A to select all
+        await page.keyboard.press('Control+a');
+        await page.waitForTimeout(100);
+
+        // Status bar should show all objects selected
+        const selectionStatus = page.getByTestId('selection-count');
+        const statusText = await selectionStatus.textContent();
+
+        // Should show the total count of objects selected
+        expect(statusText).toContain(String(totalCount));
+        expect(statusText).toMatch(/selected/i);
     });
 });

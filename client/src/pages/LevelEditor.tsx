@@ -46,6 +46,7 @@ export default function LevelEditor() {
         addTile,
         addObject,
         selectObject: _selectObject,
+        selectAllObjects: _selectAllObjects,
         deleteSelectedObjects: _deleteSelectedObjects,
         copySelectedObjects: _copySelectedObjects,
         pasteObjects: _pasteObjects,
@@ -398,9 +399,13 @@ export default function LevelEditor() {
                 _pasteObjects();
                 return true;
             }
+            if (key === 'a') {
+                _selectAllObjects();
+                return true;
+            }
             return false;
         },
-        [_undo, _redo, _copySelectedObjects, _pasteObjects, triggerUndoRedoFlash]
+        [_undo, _redo, _copySelectedObjects, _pasteObjects, _selectAllObjects, triggerUndoRedoFlash]
     );
 
     // Keyboard shortcut handlers
@@ -626,6 +631,47 @@ export default function LevelEditor() {
                         }}
                     >
                         Redo
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => _selectAllObjects()}
+                        disabled={
+                            !currentLevel ||
+                            (currentLevel.tiles.length === 0 &&
+                                currentLevel.objects.length === 0 &&
+                                currentLevel.spawnPoints.length === 0)
+                        }
+                        style={{
+                            padding: '8px 16px',
+                            background:
+                                !currentLevel ||
+                                (currentLevel.tiles.length === 0 &&
+                                    currentLevel.objects.length === 0 &&
+                                    currentLevel.spawnPoints.length === 0)
+                                    ? 'rgba(255, 255, 255, 0.1)'
+                                    : 'rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            color:
+                                !currentLevel ||
+                                (currentLevel.tiles.length === 0 &&
+                                    currentLevel.objects.length === 0 &&
+                                    currentLevel.spawnPoints.length === 0)
+                                    ? 'rgba(255, 255, 255, 0.4)'
+                                    : 'white',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            cursor:
+                                !currentLevel ||
+                                (currentLevel.tiles.length === 0 &&
+                                    currentLevel.objects.length === 0 &&
+                                    currentLevel.spawnPoints.length === 0)
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                            border: 'none',
+                            backdropFilter: 'blur(10px)',
+                        }}
+                    >
+                        Select All
                     </button>
                     <button
                         type="button"

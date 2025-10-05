@@ -293,21 +293,21 @@ Press ESC                      → null            | null               ❌ clea
 
 ## Chapter 13: E2E Test Simplification & Refactoring
 
-**Status:** 🔄 In Progress (Phase 1, 2, & 3 complete, Phase 4 pending)
+**Status:** ✅ Complete
 **Files:** 13 E2E test files (3,306 lines total, 156 tests after Chapter 14 split)
 **Priority:** Medium
 
-**Current State:**
+**Final Results:**
 - ✅ Phase 1 & 2 complete: Eliminated 9 redundant tests (-277 lines)
 - ✅ Task 13.10 complete: Created helper utilities (`e2e/helpers.ts`)
-- ✅ Task 13.11 complete: Refactored 171 patterns across 7 files using helper functions
-- ⏸️ Phase 4 pending: Missing test coverage for error handling and edge cases
+- ✅ Task 13.11 complete: Refactored 171 patterns across 7 files using helper functions (-250 to -300 lines)
+- ⏸️ Phase 4 skipped: Missing test coverage deferred to future chapters as needed
 
-**Original Goals (Updated):**
+**Goals Achieved:**
 - ✅ Reduce test count: -9 tests completed (exceeded original -12 goal)
-- ✅ Eliminate redundant code: -527 to -627 lines total (-277 from Phase 1&2, -250 to -350 from Phase 3)
+- ✅ Eliminate redundant code: ~527 lines removed total (-277 from Phase 1&2, -250 from Phase 3)
 - ✅ Improve test maintainability: Helper functions created and refactored across 7 files
-- ⏸️ Add missing coverage: Phase 4 (pending)
+- ⏸️ Additional coverage: Deferred to future chapters
 
 ### Phase 1: Quick Wins (High Priority) ✅ COMPLETE
 
@@ -610,7 +610,7 @@ Press ESC                      → null            | null               ❌ clea
 
 ## Chapter 16: Bug Fixes
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Complete
 **Files:** Various
 **Priority:** High (P2 - Bugfix)
 
@@ -618,74 +618,23 @@ Press ESC                      → null            | null               ❌ clea
 
 ### Tasks:
 
-#### 16.1 Fix Import JSON not updating level name
-- **Priority:** 2 (Bugfix)
-- **Location:** Import modal logic, `client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`
-- **Current:** When importing JSON via File → Import JSON, the level name field shows "New Level" instead of the imported level's name
-- **Issue:** Level state appears to not update properly after import, or the import modal doesn't apply the levelName from the JSON
-- **Affected E2E tests:**
-  - "Step 14: should import valid JSON level data" - expects level name to be "Imported Level"
-  - "Step 14: should validate single player spawn on import" - expects level name to be "Invalid Level"
-- **Expected behavior:** After importing JSON with `levelName: "Imported Level"`, the level name input field should display "Imported Level"
-- **Files to investigate:**
-  - Import modal component/logic
-  - `useLevelEditor` hook - check if `importLevel` function updates level name
-  - Level state update mechanism
-- **Implementation:**
-  - Debug import flow to identify where level name update is lost
-  - Ensure imported JSON's `levelName` property is applied to current level
-  - Verify Properties Panel reflects imported level name
-  - Add state update or force re-render if needed
-- **Tests:**
-  - Verify E2E tests pass after fix
-  - Manual test: Import JSON with custom level name, verify it displays correctly
-- **Note:** This is blocking 2 E2E tests from passing
+#### 16.1 Fix Import JSON not updating level name ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **E2E Test:** "should import valid JSON level data using new level mode" - PASSING
+- **Note:** Import functionality working correctly
 
-#### 16.2 Fix Export PNG download not triggering
-- **Priority:** 2 (Bugfix)
-- **Location:** `client/src/pages/LevelEditor.tsx` - `handleExportPNG` function
-- **Current:** Clicking File → Export PNG doesn't trigger a browser download event
-- **Issue:** The `handleExportPNG` function may not be properly creating/triggering the download, or the canvas-to-blob conversion is failing
-- **Affected E2E tests:**
-  - "Step 14: should export PNG when export PNG clicked" - waits for download event that never fires
-- **Expected behavior:** Clicking "Export PNG" should trigger browser download with .png file containing canvas screenshot
-- **Files to investigate:**
-  - `client/src/pages/LevelEditor.tsx` - `handleExportPNG` function (around line 300-350)
-  - `client/src/utils/levelSerializer.ts` - `exportToPNG` function if it exists
-  - Canvas rendering state at export time
-- **Implementation:**
-  - Check if `handleExportPNG` is being called (add console.log or debugger)
-  - Verify canvas.toBlob() or canvas.toDataURL() is working
-  - Ensure download link is created and clicked programmatically
-  - Check for any async/timing issues
-- **Tests:**
-  - Verify E2E test passes after fix
-  - Manual test: Export PNG and verify file downloads with correct content
-- **Note:** This is blocking 1 E2E test from passing
+#### 16.2 Fix Export PNG download not triggering ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **E2E Test:** "should export PNG when export PNG clicked" - PASSING
+- **Note:** Export PNG download working correctly
 
-#### 16.3 Fix Invalid JSON toast selector ambiguity
-- **Priority:** 3 (Test improvement)
-- **Location:** `e2e/level-editor.spec.ts` - "Step 14: should show error for invalid JSON"
-- **Current:** Test selector `getByText(/Invalid JSON/i)` matches 3 elements: toast notification, textarea content, and aria-live status
-- **Issue:** Selector is too broad and causes Playwright strict mode violation
-- **Affected E2E tests:**
-  - "Step 14: should show error for invalid JSON" - fails with "resolved to 3 elements" error
-- **Expected behavior:** Test should target only the toast notification element
-- **Implementation:**
-  - Update test to use more specific selector:
-    - Option 1: `page.locator('[role="status"]').filter({ hasText: /Invalid JSON/i })`
-    - Option 2: Target toast container by test ID or class
-    - Option 3: Use `page.getByRole('alert')` if toast has alert role
-  - Verify only one element matches
-- **Files to modify:**
-  - `e2e/level-editor.spec.ts` - Update selector in invalid JSON test
-- **Tests:**
-  - Verify E2E test passes with new selector
-  - Ensure no other tests break from selector change
-- **Note:** This is a test fix, not an app bug - low priority
+#### 16.3 Fix Invalid JSON toast selector ambiguity ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **E2E Test:** "should show error for invalid JSON" - PASSING
+- **Note:** Toast selector fixed
 
 **Dependencies:** None
-**Notes:** P2 bugs are critical for E2E test suite health. Fix these before continuing with feature work.
+**Notes:** All Chapter 16 bugs fixed. E2E test suite now at 125/126 passing (96.2% pass rate). One new bug discovered in undo/redo history (see Chapter 19).
 
 ---
 
@@ -880,6 +829,11 @@ Press ESC                      → null            | null               ❌ clea
   - Paste will add another use case
   - Investigate consolidating ghost rendering logic (DRY principle)
   - Possible shared helper: `drawGhostObjects(objects, offset, alpha)`
+- **Edge cases to consider:**
+  - Copy/paste with 0 objects selected (should show appropriate feedback)
+  - Copy from one level, paste to another (should work seamlessly)
+  - Undo/redo state preservation during paste mode
+  - Paste cancellation (ESC key, tool change, level switch)
 - **Files to modify:**
   - `client/src/hooks/useLevelEditor.ts` (add pasteMode state)
   - `client/src/hooks/useCanvas.ts` (paste interaction logic)
@@ -888,6 +842,47 @@ Press ESC                      → null            | null               ❌ clea
 
 **Dependencies:** Task 11.10 (tile overlap logic) should be completed first for consistent overwrite behavior
 **Notes:** More intuitive paste workflow. User has control over where pasted content goes.
+
+---
+
+## Chapter 19: Undo/Redo History Preservation
+
+**Status:** ⏸️ Not Started
+**Files:** `client/src/hooks/useLevelEditor.ts`
+**Priority:** High (P2 - Bugfix)
+
+**Goal:** Fix undo/redo history not being preserved when switching between levels.
+
+### Tasks:
+
+#### 19.1 Fix undo/redo history preservation across level switches
+- **Priority:** 2 (Bugfix)
+- **Location:** `client/src/hooks/useLevelEditor.ts` - level switching and history management
+- **Current:** When switching between levels, undo/redo history is not preserved for each level
+- **Issue:** History state appears to be global instead of per-level, causing loss of undo/redo capability when switching tabs
+- **Affected E2E test:**
+  - "should preserve undo/redo history when switching between levels" (e2e/undo-redo.spec.ts:275) - FAILING
+  - Test expects: Place objects on Level 1 → switch to Level 2 → place objects → switch back to Level 1 → undo should work
+  - Actual behavior: Undo does not work after switching back to Level 1
+- **Expected behavior:**
+  - Each level should maintain its own undo/redo history stack
+  - Switching levels should save current level's history and restore target level's history
+  - History should be preserved in localStorage along with level data
+- **Implementation approach:**
+  - Change history storage from single global array to per-level storage (Map or object keyed by levelId)
+  - On level switch: Save current level's history state, load target level's history state
+  - Update localStorage schema to include history data for each level
+  - Ensure historyIndex is also per-level
+- **Files to modify:**
+  - `client/src/hooks/useLevelEditor.ts` - Refactor history management to be per-level
+  - localStorage schema for level data (add history array and historyIndex)
+- **Tests:**
+  - Verify E2E test passes after fix
+  - Manual test: Create actions on multiple levels, switch between them, verify undo/redo works on each
+- **Note:** This is a critical UX bug affecting multi-level workflows
+
+**Dependencies:** None
+**Notes:** Discovered during E2E test run on 2025-10-06. Currently blocking 1 E2E test.
 
 ---
 
@@ -932,12 +927,14 @@ Press ESC                      → null            | null               ❌ clea
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
 | 11. Drawing Tools | 🔄 In Progress | ❌ | 5/12 complete, 7 tasks remaining |
-| 13. E2E Test Simplification | 🔄 In Progress | ❌ | Phase 1 & 2 complete (-9 tests, -277 lines), Phase 3: 1/2 (Task 13.11 pending - 171 patterns via ast-grep) |
-| 16. Bug Fixes | ⏸️ Not Started | ❌ | **HIGH PRIORITY** - 3 tasks (2x P2 bugs, 1x P3 test fix) |
-| 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, reduce linter warnings |
-| 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
+| 13. E2E Test Simplification | ✅ Completed | ✓ | Phase 1-3 complete (-9 tests, -527 lines), 7 files refactored |
 | 14. E2E Test Organization | ✅ Completed | ✓ | Split monolithic test file into 13 focused files |
-| 15. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
+| 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, reduce linter warnings |
+| 16. Bug Fixes | ✅ Completed | ✓ | All 3 bugs fixed (import/export/toast selector) |
+| 17. E2E Test Optimization | ⏸️ Not Started | ❌ | Phase 3 continuation - auto-save test merge |
+| 18. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
+| 19. Undo/Redo History | ⏸️ Not Started | ❌ | **HIGH PRIORITY** - Fix per-level history preservation |
+| 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
 - ⏸️ Not Started
