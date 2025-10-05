@@ -1,15 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Canvas } from '@/components/level-editor/Canvas';
+import { ExportModal } from '@/components/level-editor/ExportModal';
+import { ImportModal } from '@/components/level-editor/ImportModal';
 import { LevelTabs } from '@/components/level-editor/LevelTabs';
 import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
 import { TilePalette } from '@/components/level-editor/TilePalette';
 import { Toolbar } from '@/components/level-editor/Toolbar';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
-import type { EditorState, Position } from '@/types/level';
+import type { EditorState, LevelData, Position } from '@/types/level';
+import { exportToPNG } from '@/utils/levelSerializer';
 
 export default function LevelEditor() {
     const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
     const [showUndoRedoFlash, setShowUndoRedoFlash] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+
+    const { toast } = useToast();
 
     // Integrate useLevelEditor hook
     const {
@@ -259,6 +274,31 @@ export default function LevelEditor() {
         setTimeout(() => setShowUndoRedoFlash(false), 400);
     }, []);
 
+    // Import/Export handlers
+    const handleImportLevel = useCallback(
+        (levelData: LevelData) => {
+            // Validate single player spawn
+            const playerSpawns = levelData.spawnPoints.filter((spawn) => spawn.type === 'player');
+            const otherSpawns = levelData.spawnPoints.filter((spawn) => spawn.type !== 'player');
+
+            const validatedSpawnPoints = playerSpawns.length > 0 ? [playerSpawns[0], ...otherSpawns] : otherSpawns;
+
+            updateCurrentLevel(() => ({
+                ...levelData,
+                spawnPoints: validatedSpawnPoints,
+            }));
+        },
+        [updateCurrentLevel]
+    );
+
+    const handleExportPNG = useCallback(() => {
+        const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
+        if (canvas && currentLevel) {
+            exportToPNG(canvas, `${currentLevel.levelName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`);
+            toast({ title: 'Exported', description: 'Level exported as PNG!' });
+        }
+    }, [currentLevel, toast]);
+
     // Helper: Check if target is an input element
     const isInputElement = useCallback((target: HTMLElement) => {
         return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
@@ -420,54 +460,41 @@ export default function LevelEditor() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                        type="button"
-                        style={{
-                            padding: '8px 16px',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            borderRadius: '6px',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            border: 'none',
-                            backdropFilter: 'blur(10px)',
-                        }}
-                    >
-                        New Level
-                    </button>
-                    <button
-                        type="button"
-                        style={{
-                            padding: '8px 16px',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            borderRadius: '6px',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            border: 'none',
-                            backdropFilter: 'blur(10px)',
-                        }}
-                    >
-                        Import
-                    </button>
-                    <button
-                        type="button"
-                        style={{
-                            padding: '8px 16px',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            borderRadius: '6px',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            border: 'none',
-                            backdropFilter: 'blur(10px)',
-                        }}
-                    >
-                        Export
-                    </button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-white hover:bg-white/20"
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.2)',
+                                    backdropFilter: 'blur(10px)',
+                                }}
+                            >
+                                <i className="fas fa-file mr-2"></i>
+                                File
+                                <i className="fas fa-chevron-down ml-2 text-xs"></i>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => createNewLevel()}>
+                                <i className="fas fa-file w-4 mr-2"></i>
+                                New Level
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowImportModal(true)}>
+                                <i className="fas fa-file-import w-4 mr-2"></i>
+                                Import JSON
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowExportModal(true)}>
+                                <i className="fas fa-file-export w-4 mr-2"></i>
+                                Export JSON
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportPNG}>
+                                <i className="fas fa-image w-4 mr-2"></i>
+                                Export PNG
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     <button
                         type="button"
                         onClick={() => {
@@ -498,7 +525,10 @@ export default function LevelEditor() {
                         disabled={historyIndex === history.length - 1}
                         style={{
                             padding: '8px 16px',
-                            background: historyIndex === history.length - 1 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
+                            background:
+                                historyIndex === history.length - 1
+                                    ? 'rgba(255, 255, 255, 0.1)'
+                                    : 'rgba(255, 255, 255, 0.2)',
                             borderRadius: '6px',
                             color: historyIndex === history.length - 1 ? 'rgba(255, 255, 255, 0.4)' : 'white',
                             fontSize: '14px',
@@ -509,6 +539,54 @@ export default function LevelEditor() {
                         }}
                     >
                         Redo
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => _copySelectedObjects()}
+                        disabled={editorState.selectedObjects.length === 0}
+                        style={{
+                            padding: '8px 16px',
+                            background:
+                                editorState.selectedObjects.length === 0
+                                    ? 'rgba(255, 255, 255, 0.1)'
+                                    : 'rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            color: editorState.selectedObjects.length === 0 ? 'rgba(255, 255, 255, 0.4)' : 'white',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            cursor: editorState.selectedObjects.length === 0 ? 'not-allowed' : 'pointer',
+                            border: 'none',
+                            backdropFilter: 'blur(10px)',
+                        }}
+                    >
+                        Copy
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => _pasteObjects()}
+                        disabled={!editorState.clipboard || editorState.clipboard.length === 0}
+                        style={{
+                            padding: '8px 16px',
+                            background:
+                                !editorState.clipboard || editorState.clipboard.length === 0
+                                    ? 'rgba(255, 255, 255, 0.1)'
+                                    : 'rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            color:
+                                !editorState.clipboard || editorState.clipboard.length === 0
+                                    ? 'rgba(255, 255, 255, 0.4)'
+                                    : 'white',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            cursor:
+                                !editorState.clipboard || editorState.clipboard.length === 0
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                            border: 'none',
+                            backdropFilter: 'blur(10px)',
+                        }}
+                    >
+                        Paste
                     </button>
                     <button
                         type="button"
@@ -717,6 +795,14 @@ export default function LevelEditor() {
                     </div>
                 </div>
             </footer>
+
+            {/* Import/Export Modals */}
+            <ImportModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={handleImportLevel}
+            />
+            <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} levelData={currentLevel} />
         </div>
     );
 }

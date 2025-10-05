@@ -536,8 +536,8 @@ test('should load levels from localStorage', () => {
 ---
 
 ### Step 13: Copy/Paste
-**Status**: ⬜ Not Started
-**Current State**: No copy/paste
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: Full copy/paste with offset implemented
 **Goal**: Full copy/paste with offset
 **Dependencies**: Step 11 (selection)
 

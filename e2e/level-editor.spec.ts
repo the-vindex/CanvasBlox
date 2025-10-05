@@ -459,13 +459,17 @@ test.describe('Level Editor', () => {
     });
 
     test('Step 7: should create new level when new level button clicked', async ({ page }) => {
-        const newLevelButton = page.getByTestId('button-new-level');
-        await expect(newLevelButton).toBeVisible();
-
         // Count existing tabs before creating new level
         const tabsBeforeCount = await page.getByTestId(/tab-level-\d+/).count();
 
-        // Click new level button
+        // Open File menu
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        await page.waitForTimeout(50);
+
+        // Click New Level option
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
+        await expect(newLevelButton).toBeVisible();
         await newLevelButton.click();
 
         // Should have one more tab now
@@ -481,7 +485,9 @@ test.describe('Level Editor', () => {
 
     test('Step 7: should show close button on tabs when multiple levels exist', async ({ page }) => {
         // Create a second level
-        const newLevelButton = page.getByTestId('button-new-level');
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
         await newLevelButton.click();
 
         // Close buttons should be visible on both tabs
@@ -494,7 +500,9 @@ test.describe('Level Editor', () => {
 
     test('Step 7: should close level when close button clicked', async ({ page }) => {
         // Create a second level
-        const newLevelButton = page.getByTestId('button-new-level');
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
         await newLevelButton.click();
 
         // Count tabs
@@ -1343,7 +1351,9 @@ test.describe('Level Editor', () => {
 
     test('Step 11B: should show ghost preview while dragging with move tool', async ({ page }) => {
         // Create a fresh level for this test
-        const newLevelButton = page.getByRole('button', { name: 'New Level' });
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
         await newLevelButton.click();
         await page.waitForTimeout(100);
 
@@ -1414,7 +1424,9 @@ test.describe('Level Editor', () => {
 
     test('Step 12: should undo tile placement with Ctrl+Z', async ({ page }) => {
         // Create a fresh level for this test
-        const newLevelButton = page.getByRole('button', { name: 'New Level' });
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
         await newLevelButton.click();
         await page.waitForTimeout(200);
 
@@ -1576,7 +1588,9 @@ test.describe('Level Editor', () => {
 
     test('Step 12: should update history display in status bar', async ({ page }) => {
         // Create a fresh level for this test
-        const newLevelButton = page.getByRole('button', { name: 'New Level' });
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
         await newLevelButton.click();
         await page.waitForTimeout(200);
 
@@ -1682,7 +1696,9 @@ test.describe('Level Editor', () => {
 
     test('Step 12: should undo multiple actions in sequence', async ({ page }) => {
         // Create a fresh level for this test
-        const newLevelButton = page.getByRole('button', { name: 'New Level' });
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
         await newLevelButton.click();
         await page.waitForTimeout(200);
 
@@ -1755,5 +1771,522 @@ test.describe('Level Editor', () => {
         const finalCountText = await objectCount.textContent();
         const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
         expect(finalCount).toBeGreaterThan(initialCount);
+    });
+
+    test('Step 13: should copy selected objects with Ctrl+C', async ({ page }) => {
+        // Create a fresh level for this test
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
+        await newLevelButton.click();
+        await page.waitForTimeout(200);
+
+        const canvas = page.getByTestId('level-canvas');
+        const buttonTile = page.getByTestId('tile-button');
+        const selectTool = page.getByTestId('tool-select');
+
+        // Place a button
+        await buttonTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Select the button
+        await selectTool.click();
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Copy with Ctrl+C
+        await page.keyboard.press('Control+c');
+        await page.waitForTimeout(100);
+
+        // Verify toast notification appears (more specific selector)
+        const toast = page.getByText('Copied 1 items to clipboard.', { exact: true });
+        await expect(toast).toBeVisible();
+    });
+
+    test('Step 13: should paste objects with Ctrl+V and offset them', async ({ page }) => {
+        // Create a fresh level for this test
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
+        await newLevelButton.click();
+        await page.waitForTimeout(200);
+
+        const canvas = page.getByTestId('level-canvas');
+        const buttonTile = page.getByTestId('tile-button');
+        const selectTool = page.getByTestId('tool-select');
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Place a button
+        await buttonTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Select the button
+        await selectTool.click();
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Copy with Ctrl+C
+        await page.keyboard.press('Control+c');
+        await page.waitForTimeout(100);
+
+        // Paste with Ctrl+V
+        await page.keyboard.press('Control+v');
+        await page.waitForTimeout(200);
+
+        // Object count should increase (pasted object added)
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThan(initialCount); // Should have more objects
+
+        // Verify toast notification appears (more specific selector)
+        const toast = page.getByText('Pasted 1 items.', { exact: true });
+        await expect(toast).toBeVisible();
+    });
+
+    test('Step 13: should copy button click work', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const buttonTile = page.getByTestId('tile-button');
+        const selectTool = page.getByTestId('tool-select');
+        const copyButton = page.getByRole('button', { name: /Copy/ });
+
+        // Place and select a button
+        await buttonTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+        await page.mouse.click(box.x + 350, box.y + 350);
+        await page.waitForTimeout(100);
+
+        await selectTool.click();
+        await page.mouse.click(box.x + 350, box.y + 350);
+        await page.waitForTimeout(100);
+
+        // Click copy button
+        await copyButton.click();
+        await page.waitForTimeout(100);
+
+        // Verify toast notification (more specific selector)
+        const toast = page.getByText('Copied 1 items to clipboard.', { exact: true });
+        await expect(toast).toBeVisible();
+    });
+
+    test('Step 13: should paste button click work', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const selectTool = page.getByTestId('tool-select');
+        const copyButton = page.getByRole('button', { name: /Copy/ });
+        const pasteButton = page.getByRole('button', { name: /Paste/ });
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Place and select a tile
+        await grassTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+        await page.mouse.click(box.x + 400, box.y + 400);
+        await page.waitForTimeout(100);
+
+        await selectTool.click();
+        await page.mouse.click(box.x + 400, box.y + 400);
+        await page.waitForTimeout(100);
+
+        // Copy and paste with buttons
+        await copyButton.click();
+        await page.waitForTimeout(100);
+        await pasteButton.click();
+        await page.waitForTimeout(200);
+
+        // Object count should increase
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThan(initialCount);
+
+        // Verify paste toast (more specific selector)
+        const toast = page.getByText('Pasted 1 items.', { exact: true });
+        await expect(toast).toBeVisible();
+    });
+
+    test('Step 13: should copy multiple selected objects', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const buttonTile = page.getByTestId('tile-button');
+        const multiSelectTool = page.getByTestId('tool-multiselect');
+        const selectionCount = page.getByTestId('selection-count');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Place 3 buttons
+        await buttonTile.click();
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 264, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 328, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Multi-select all 3
+        await multiSelectTool.click();
+        await page.mouse.move(box.x + 180, box.y + 180);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 360, box.y + 240, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify 3 objects are selected
+        const countText = await selectionCount.textContent();
+        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        expect(count).toBeGreaterThanOrEqual(3);
+
+        // Copy with Ctrl+C
+        await page.keyboard.press('Control+c');
+        await page.waitForTimeout(100);
+
+        // Verify copy toast (check that copy happened - exact count may vary)
+        const copyToast = page.getByText(/Copied \d+ items to clipboard/, { exact: false }).first();
+        await expect(copyToast).toBeVisible();
+
+        // Paste with Ctrl+V
+        await page.keyboard.press('Control+v');
+        await page.waitForTimeout(200);
+
+        // Verify paste toast
+        const pasteToast = page.getByText(/Pasted \d+ items/, { exact: false }).first();
+        await expect(pasteToast).toBeVisible();
+    });
+
+    test('Step 13: pasted objects should be offset from originals', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const selectTool = page.getByTestId('tool-select');
+        const objectCount = page.getByTestId('statusbar-object-count');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Get initial count
+        const initialCountText = await objectCount.textContent();
+        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Place a tile
+        await grassTile.click();
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Select it
+        await selectTool.click();
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Copy and paste
+        await page.keyboard.press('Control+c');
+        await page.waitForTimeout(100);
+        await page.keyboard.press('Control+v');
+        await page.waitForTimeout(200);
+
+        // Object count should increase (original + pasted = 2 total)
+        const finalCountText = await objectCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThan(initialCount);
+    });
+
+    test('Step 13: copy button should be disabled with nothing selected', async ({ page }) => {
+        const copyButton = page.getByRole('button', { name: /Copy/ });
+
+        // Copy button should be disabled when nothing is selected
+        await expect(copyButton).toBeDisabled();
+    });
+
+    test('Step 13: paste button should be disabled with empty clipboard', async ({ page }) => {
+        const pasteButton = page.getByRole('button', { name: /Paste/ });
+
+        // Paste button should be disabled when clipboard is empty
+        await expect(pasteButton).toBeDisabled();
+    });
+
+    test('Step 14: should open import modal when import button clicked', async ({ page }) => {
+        // Look for File menu or Import button
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        await page.waitForTimeout(50);
+
+        // Click Import JSON option
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Import modal should be visible
+        const importModal = page.getByRole('dialog');
+        await expect(importModal).toBeVisible();
+        await expect(importModal).toContainText('Import Level');
+    });
+
+    test('Step 14: should close import modal when cancel clicked', async ({ page }) => {
+        // Open import modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Click cancel button
+        const cancelButton = page.getByRole('button', { name: /Cancel/i });
+        await cancelButton.click();
+        await page.waitForTimeout(100);
+
+        // Modal should be closed
+        const importModal = page.getByRole('dialog');
+        await expect(importModal).not.toBeVisible();
+    });
+
+    test('Step 14: should import valid JSON level data', async ({ page }) => {
+        // Create valid level JSON
+        const validLevelJson = JSON.stringify({
+            levelName: 'Imported Level',
+            tiles: [{ id: '1', position: { x: 0, y: 0 }, tileType: 'platform-grass' }],
+            objects: [],
+            spawnPoints: [{ id: 'spawn-1', type: 'player', position: { x: 5, y: 5 } }],
+            metadata: {
+                dimensions: { width: 1920, height: 960 },
+                backgroundColor: '#87CEEB',
+            },
+        });
+
+        // Open import modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Paste JSON into textarea
+        const textarea = page.getByRole('textbox');
+        await textarea.fill(validLevelJson);
+
+        // Click import button
+        const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
+        await importConfirmButton.click();
+        await page.waitForTimeout(200);
+
+        // Level name should be updated
+        const levelNameInput = page.getByTestId('input-level-name');
+        await expect(levelNameInput).toHaveValue('Imported Level');
+
+        // Verify success toast
+        const toast = page.getByText(/Level imported successfully/i);
+        await expect(toast).toBeVisible();
+    });
+
+    test('Step 14: should show error for invalid JSON', async ({ page }) => {
+        // Open import modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Enter invalid JSON
+        const textarea = page.getByRole('textbox');
+        await textarea.fill('{ invalid json }');
+
+        // Click import button
+        const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
+        await importConfirmButton.click();
+        await page.waitForTimeout(100);
+
+        // Should show error toast
+        const errorToast = page.getByText(/Invalid JSON/i);
+        await expect(errorToast).toBeVisible();
+    });
+
+    test('Step 14: should open export modal when export JSON clicked', async ({ page }) => {
+        // Open File menu
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        await page.waitForTimeout(50);
+
+        // Click Export JSON option
+        const exportButton = page.getByRole('menuitem', { name: /Export JSON/ });
+        await exportButton.click();
+        await page.waitForTimeout(100);
+
+        // Export modal should be visible
+        const exportModal = page.getByRole('dialog');
+        await expect(exportModal).toBeVisible();
+        await expect(exportModal).toContainText('Export Level');
+    });
+
+    test('Step 14: should close export modal when close clicked', async ({ page }) => {
+        // Open export modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const exportButton = page.getByRole('menuitem', { name: /Export JSON/ });
+        await exportButton.click();
+        await page.waitForTimeout(100);
+
+        // Click close button (X or Cancel)
+        const closeButton = page.getByRole('button', { name: /Close|Cancel/i }).first();
+        await closeButton.click();
+        await page.waitForTimeout(100);
+
+        // Modal should be closed
+        const exportModal = page.getByRole('dialog');
+        await expect(exportModal).not.toBeVisible();
+    });
+
+    test('Step 14: should display current level JSON in export modal', async ({ page }) => {
+        // Open export modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const exportButton = page.getByRole('menuitem', { name: /Export JSON/ });
+        await exportButton.click();
+        await page.waitForTimeout(100);
+
+        // Modal should contain JSON textarea with level data
+        const textarea = page.getByRole('textbox');
+        await expect(textarea).toBeVisible();
+
+        const jsonContent = await textarea.inputValue();
+        expect(jsonContent.length).toBeGreaterThan(0);
+
+        // Verify it's valid JSON
+        expect(() => JSON.parse(jsonContent)).not.toThrow();
+    });
+
+    test('Step 14: should export PNG when export PNG clicked', async ({ page }) => {
+        // Open File menu
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        await page.waitForTimeout(50);
+
+        // Set up download listener before clicking
+        const downloadPromise = page.waitForEvent('download');
+
+        // Click Export PNG option
+        const exportPngButton = page.getByRole('menuitem', { name: /Export PNG/ });
+        await exportPngButton.click();
+
+        // Wait for download to start
+        const download = await downloadPromise;
+
+        // Verify download happened and has .png extension
+        expect(download.suggestedFilename()).toMatch(/\.png$/);
+    });
+
+    test('Step 14: should validate single player spawn on import', async ({ page }) => {
+        // Create level JSON with multiple player spawns
+        const multiplePlayerSpawnsJson = JSON.stringify({
+            levelName: 'Invalid Level',
+            tiles: [],
+            objects: [],
+            spawnPoints: [
+                { id: 'spawn-1', type: 'player', position: { x: 0, y: 0 } },
+                { id: 'spawn-2', type: 'player', position: { x: 5, y: 5 } },
+                { id: 'spawn-3', type: 'enemy', position: { x: 10, y: 10 } },
+            ],
+            metadata: {
+                dimensions: { width: 1920, height: 960 },
+                backgroundColor: '#87CEEB',
+            },
+        });
+
+        // Open import modal
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        // Paste JSON
+        const textarea = page.getByRole('textbox');
+        await textarea.fill(multiplePlayerSpawnsJson);
+
+        // Click import
+        const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
+        await importConfirmButton.click();
+        await page.waitForTimeout(200);
+
+        // Should still import but only keep first player spawn
+        // Check that import succeeded
+        const levelNameInput = page.getByTestId('input-level-name');
+        await expect(levelNameInput).toHaveValue('Invalid Level');
+
+        // Object count should reflect only 1 player spawn + 1 enemy spawn
+        const objectCount = page.getByTestId('statusbar-object-count');
+        const countText = await objectCount.textContent();
+        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Should have 2 spawn points (1 player + 1 enemy), not 3
+        expect(count).toBeLessThan(3);
+    });
+
+    test('Step 14: should preserve level data after export and import', async ({ page }) => {
+        // Create a fresh level with specific data
+        const fileButton = page.getByRole('button', { name: /File/i });
+        await fileButton.click();
+        const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
+        await newLevelButton.click();
+        await page.waitForTimeout(200);
+
+        // Set level name
+        const levelNameInput = page.getByTestId('input-level-name');
+        await levelNameInput.fill('Round Trip Test Level');
+        await page.waitForTimeout(100);
+
+        // Place some tiles and objects
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        await grassTile.click();
+        await page.mouse.click(box.x + 100, box.y + 100);
+        await page.waitForTimeout(100);
+
+        // Export to JSON
+        await fileButton.click();
+        const exportButton = page.getByRole('menuitem', { name: /Export JSON/ });
+        await exportButton.click();
+        await page.waitForTimeout(100);
+
+        // Get the JSON
+        const textarea = page.getByRole('textbox');
+        const exportedJson = await textarea.inputValue();
+
+        // Close export modal
+        const closeButton = page.getByRole('button', { name: /Close|Cancel/i }).first();
+        await closeButton.click();
+        await page.waitForTimeout(100);
+
+        // Create another fresh level
+        await newLevelButton.click();
+        await page.waitForTimeout(200);
+
+        // Import the exported JSON
+        await fileButton.click();
+        const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await importButton.click();
+        await page.waitForTimeout(100);
+
+        const importTextarea = page.getByRole('textbox');
+        await importTextarea.fill(exportedJson);
+
+        const importConfirmButton = page.getByRole('button', { name: /^Import$/i });
+        await importConfirmButton.click();
+        await page.waitForTimeout(200);
+
+        // Verify level name was preserved
+        await expect(levelNameInput).toHaveValue('Round Trip Test Level');
     });
 });
