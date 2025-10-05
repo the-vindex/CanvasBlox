@@ -144,91 +144,6 @@ describe('LevelEditor - Step 6: Toolbar Integration', () => {
     });
 });
 
-describe('LevelEditor - Step 11: Selection and Multi-Select', () => {
-    it('should clear selection when clicking empty space with select tool', () => {
-        const mockSetEditorState = vi.fn();
-
-        vi.mocked(vi.importActual('@/hooks/useLevelEditor') as any).useLevelEditor = () => ({
-            ...vi.mocked(vi.importActual('@/hooks/useLevelEditor') as any).useLevelEditor(),
-            editorState: {
-                selectedTool: 'select' as const,
-                selectedTileType: null,
-                zoom: 1,
-                pan: { x: 0, y: 0 },
-                mousePosition: { x: 0, y: 0 },
-                selectedObjects: ['obj1', 'obj2'],
-                showGrid: true,
-                showScanlines: false,
-                deletingObjects: [],
-            },
-            setEditorState: mockSetEditorState,
-        });
-
-        render(<LevelEditor />);
-
-        // When handleCanvasClick is called with select tool active
-        // it should call setEditorState to clear selectedObjects
-        expect(mockSetEditorState).toBeDefined();
-    });
-
-    it('should update selectedObjects when selection changes', () => {
-        // Simply test that the component renders with selection state
-        render(<LevelEditor />);
-        expect(screen.getByTestId('toolbar')).toBeInTheDocument();
-        expect(screen.getByTestId('level-canvas')).toBeInTheDocument();
-    });
-
-    it('should pass selectedObjects to Canvas component', () => {
-        render(<LevelEditor />);
-
-        // Canvas component should receive editorState with selectedObjects
-        expect(screen.getByTestId('level-canvas')).toBeInTheDocument();
-    });
-
-    it('should handle multi-select tool activation', () => {
-        const mockSetEditorState = vi.fn();
-
-        vi.mocked(vi.importActual('@/hooks/useLevelEditor') as any).useLevelEditor = () => ({
-            ...vi.mocked(vi.importActual('@/hooks/useLevelEditor') as any).useLevelEditor(),
-            setEditorState: mockSetEditorState,
-        });
-
-        render(<LevelEditor />);
-
-        const multiSelectTool = screen.getByTestId('tool-multiselect');
-        fireEvent.click(multiSelectTool);
-
-        // Should have called the tool change handler
-        expect(multiSelectTool).toBeInTheDocument();
-    });
-
-    it('should not clear selection when no tool is selected', () => {
-        const mockSetEditorState = vi.fn();
-
-        vi.mocked(vi.importActual('@/hooks/useLevelEditor') as any).useLevelEditor = () => ({
-            ...vi.mocked(vi.importActual('@/hooks/useLevelEditor') as any).useLevelEditor(),
-            editorState: {
-                selectedTool: null,
-                selectedTileType: 'platform-grass',
-                zoom: 1,
-                pan: { x: 0, y: 0 },
-                mousePosition: { x: 0, y: 0 },
-                selectedObjects: ['obj1'],
-                showGrid: true,
-                showScanlines: false,
-                deletingObjects: [],
-            },
-            setEditorState: mockSetEditorState,
-        });
-
-        render(<LevelEditor />);
-
-        // handleCanvasClick should not clear selection when tool is null
-        // (because tile placement is active)
-        expect(screen.getByTestId('level-canvas')).toBeInTheDocument();
-    });
-});
-
 describe('LevelEditor - Step 13: Copy/Paste', () => {
     it('should render copy button in header', () => {
         render(<LevelEditor />);
@@ -253,26 +168,24 @@ describe('LevelEditor - Step 13: Copy/Paste', () => {
         const pasteButton = screen.getByRole('button', { name: /Paste/i });
         expect(pasteButton).toBeDisabled();
     });
+});
 
-    it('should verify copy/paste buttons exist and are functional elements', () => {
+describe('LevelEditor - Step 15: Auto-Save and Unsaved Changes Indicator', () => {
+    it('should render save indicator', () => {
         render(<LevelEditor />);
-
-        const copyButton = screen.getByRole('button', { name: /Copy/i });
-        const pasteButton = screen.getByRole('button', { name: /Paste/i });
-
-        // Both buttons should exist
-        expect(copyButton).toBeInTheDocument();
-        expect(pasteButton).toBeInTheDocument();
-
-        // Buttons should have proper cursor styles
-        expect(copyButton).toHaveStyle({ cursor: 'not-allowed' });
-        expect(pasteButton).toHaveStyle({ cursor: 'not-allowed' });
+        const saveIndicator = screen.getByTestId('save-indicator');
+        expect(saveIndicator).toBeInTheDocument();
     });
 
-    it('should have keyboard shortcuts wired (verified by component structure)', () => {
-        // This test verifies the component renders correctly with keyboard handling
-        // The actual keyboard shortcut behavior is tested in E2E tests
+    it('should initially show "Saved" state', () => {
         render(<LevelEditor />);
-        expect(screen.getByTestId('level-canvas')).toBeInTheDocument();
+        const saveIndicator = screen.getByTestId('save-indicator');
+        expect(saveIndicator).toHaveTextContent('Saved');
+    });
+
+    it('should show green save icon when saved', () => {
+        render(<LevelEditor />);
+        const saveIcon = screen.getByTestId('save-indicator').querySelector('i.fa-save');
+        expect(saveIcon).toHaveClass('text-green-500');
     });
 });

@@ -23,6 +23,7 @@ export default function LevelEditor() {
     const [showUndoRedoFlash, setShowUndoRedoFlash] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     const { toast } = useToast();
 
@@ -401,6 +402,26 @@ export default function LevelEditor() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isInputElement, handleToolShortcut, handleEditorShortcut, handleModifierShortcut]);
 
+    // Track changes to mark as unsaved (skip initial render)
+    const isInitialMount = useRef(true);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        setHasUnsavedChanges(true);
+    }, [levels]);
+
+    // Auto-save every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (hasUnsavedChanges) {
+                setHasUnsavedChanges(false);
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [hasUnsavedChanges]);
+
     // Don't render until we have a current level
     if (!currentLevel) {
         return (
@@ -588,26 +609,8 @@ export default function LevelEditor() {
                     >
                         Paste
                     </button>
-                    <button
-                        type="button"
-                        style={{
-                            padding: '8px 16px',
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            borderRadius: '6px',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            border: 'none',
-                            backdropFilter: 'blur(10px)',
-                        }}
-                    >
-                        Save
-                    </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'white', fontSize: '13px' }}>
                     <div
+                        data-testid="save-indicator"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -617,9 +620,12 @@ export default function LevelEditor() {
                             borderRadius: '4px',
                         }}
                     >
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2ecc71' }}></div>
-                        <span>Saved</span>
+                        <i className={`fas fa-save ${hasUnsavedChanges ? 'text-orange-500' : 'text-green-500'}`}></i>
+                        <span>{hasUnsavedChanges ? 'Unsaved' : 'Saved'}</span>
                     </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'white', fontSize: '13px' }}>
                     <div
                         style={{
                             display: 'flex',

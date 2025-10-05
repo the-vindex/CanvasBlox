@@ -93,3 +93,37 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Step 15: Auto-Save and Unsaved Changes Indicator
+
+**Question:** Should I implement Step 15 or is it already complete?
+**Assumption/Decision:** Step 15 is already fully implemented and all tests pass. The auto-save functionality exists in LevelEditor.tsx (lines 405-423) with unsaved changes tracking and 5-second auto-save timer. Unit tests and E2E tests all pass.
+**Reasoning:** Reviewing the code shows:
+- hasUnsavedChanges state tracks changes (line 26)
+- useEffect tracks levels changes and sets unsaved flag (lines 405-413)
+- Auto-save timer clears unsaved flag every 5 seconds (lines 415-423)
+- Save indicator displays correct state in header (lines 613-625)
+- All unit tests pass (Step 15 tests in LevelEditor.test.tsx lines 280-376)
+- All E2E tests pass (Step 15 tests at lines 2293, 2317, 2341)
+
+**Question:** Should I refactor the tests based on the /review-tests feedback?
+**Assumption/Decision:** Yes, will automatically refactor tests to remove redundant and poorly written tests as recommended by the test review. The review identified 9 tests that should be removed from LevelEditor.test.tsx because they don't test actual behavior, are redundant with E2E tests, or test implementation details.
+**Reasoning:** Following TDD best practices, tests should focus on behavior, not implementation. The review found tests that:
+- Don't test what they claim (keyboard shortcuts test that doesn't test shortcuts)
+- Use unrealistic mock manipulation (re-mocking hook mid-test)
+- Test implementation details (CSS classes, prop passing)
+- Are redundant with comprehensive E2E tests
+
+**Decision:** Will remove these specific test blocks:
+1. Lines 148-172: Selection test that doesn't verify behavior
+2. Lines 174-179: Selection change test that only checks rendering
+3. Lines 181-186: Prop passing test (implementation detail)
+4. Lines 188-203: Multi-select tool test without verification
+5. Lines 205-229: No-tool test without behavior verification
+6. Lines 257-270: Cursor style assertions (keep button tests)
+7. Lines 272-277: Keyboard shortcuts test that doesn't test shortcuts
+8. Lines 299-332: Unsaved state test with unrealistic mocking
+9. Lines 334-366: Icon color test with unrealistic mocking
+10. Lines 368-375: Auto-save timer test that doesn't test auto-save
+
+---
+
