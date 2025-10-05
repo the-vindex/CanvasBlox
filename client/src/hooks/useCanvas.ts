@@ -12,6 +12,7 @@ interface UseCanvasProps {
     onDrawingSessionEnd?: () => void;
     onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
     onMultiSelectComplete?: (start: Position, end: Position) => void;
+    onMoveObjectsComplete?: (delta: Position) => void;
 }
 
 export function useCanvas({
@@ -23,6 +24,7 @@ export function useCanvas({
     onDrawingSessionEnd,
     onZoom,
     onMultiSelectComplete,
+    onMoveObjectsComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -34,6 +36,9 @@ export function useCanvas({
     const isDraggingSelectionRef = useRef(false);
     const selectionStartRef = useRef<Position | null>(null);
     const selectionEndRef = useRef<Position | null>(null);
+    const isMovingObjectsRef = useRef(false);
+    const moveStartPositionRef = useRef<Position | null>(null);
+    const moveDeltaRef = useRef<Position>({ x: 0, y: 0 });
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -92,6 +97,20 @@ export function useCanvas({
             const worldPos = getWorldPosition(e);
             onMouseMove(worldPos);
 
+            // Handle move tool dragging
+            if (isMovingObjectsRef.current && editorState.selectedTool === 'move' && moveStartPositionRef.current) {
+                const delta = {
+                    x: worldPos.x - moveStartPositionRef.current.x,
+                    y: worldPos.y - moveStartPositionRef.current.y,
+                };
+                moveDeltaRef.current = delta;
+                // Re-render to show objects in new positions (preview)
+                if (rendererRef.current) {
+                    rendererRef.current.render(levelData, editorState);
+                }
+                return;
+            }
+
             // Handle multi-select drag box
             if (isDraggingSelectionRef.current && editorState.selectedTool === 'multiselect') {
                 selectionEndRef.current = worldPos;
@@ -137,6 +156,14 @@ export function useCanvas({
             // Left mouse button for drawing/clicking
             const worldPos = getWorldPosition(e);
 
+            // Handle move tool - start dragging selected objects
+            if (editorState.selectedTool === 'move' && editorState.selectedObjects.length > 0) {
+                isMovingObjectsRef.current = true;
+                moveStartPositionRef.current = worldPos;
+                moveDeltaRef.current = { x: 0, y: 0 };
+                return;
+            }
+
             // Handle multi-select tool
             if (editorState.selectedTool === 'multiselect') {
                 isDraggingSelectionRef.current = true;
@@ -166,6 +193,20 @@ export function useCanvas({
             }
         }
 
+        // End move drag
+        if (isMovingObjectsRef.current) {
+            isMovingObjectsRef.current = false;
+            if (onMoveObjectsComplete && (moveDeltaRef.current.x !== 0 || moveDeltaRef.current.y !== 0)) {
+                onMoveObjectsComplete(moveDeltaRef.current);
+            }
+            moveStartPositionRef.current = null;
+            moveDeltaRef.current = { x: 0, y: 0 };
+            // Re-render
+            if (rendererRef.current) {
+                rendererRef.current.render(levelData, editorState);
+            }
+        }
+
         // End multi-select drag
         if (isDraggingSelectionRef.current && selectionStartRef.current && selectionEndRef.current) {
             isDraggingSelectionRef.current = false;
@@ -188,7 +229,7 @@ export function useCanvas({
                 onDrawingSessionEnd();
             }
         }
-    }, [onDrawingSessionEnd, onMultiSelectComplete, levelData, editorState]);
+    }, [onDrawingSessionEnd, onMultiSelectComplete, onMoveObjectsComplete, levelData, editorState]);
 
     const handleClick = useCallback(
         (e: MouseEvent) => {

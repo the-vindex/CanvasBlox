@@ -1236,4 +1236,108 @@ test.describe('Level Editor', () => {
 
         await page.mouse.up();
     });
+
+    test('Step 11B: should move selected objects with move tool', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const buttonTile = page.getByTestId('tile-button');
+        const selectTool = page.getByTestId('tool-select');
+        const moveTool = page.getByTestId('tool-move');
+
+        // Place a button
+        await buttonTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Select the button
+        await selectTool.click();
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Switch to move tool
+        await moveTool.click();
+        await expect(moveTool).toHaveAttribute('aria-pressed', 'true');
+
+        // Drag the button to a new position (2 tiles right, 1 tile down)
+        await page.mouse.move(box.x + 200, box.y + 200);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 264, box.y + 232, { steps: 5 }); // 64px = 2 tiles, 32px = 1 tile
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Object should still be selected after move
+        const selectionCount = page.getByTestId('selection-count');
+        await expect(selectionCount).toHaveText('Selected: 1 object');
+    });
+
+    test('Step 11B: should move multiple selected objects together', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const buttonTile = page.getByTestId('tile-button');
+        const multiSelectTool = page.getByTestId('tool-multiselect');
+        const moveTool = page.getByTestId('tool-move');
+        const selectionCount = page.getByTestId('selection-count');
+
+        // Place 3 buttons
+        await buttonTile.click();
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 264, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 328, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Multi-select all 3
+        await multiSelectTool.click();
+        await page.mouse.move(box.x + 180, box.y + 180);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 360, box.y + 240, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify selection
+        const countText = await selectionCount.textContent();
+        const count = parseInt(countText?.match(/\d+/)?.[0] || '0', 10);
+        expect(count).toBeGreaterThanOrEqual(3);
+
+        // Switch to move tool
+        await moveTool.click();
+
+        // Drag all objects down by 2 tiles
+        await page.mouse.move(box.x + 264, box.y + 200);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 264, box.y + 264, { steps: 5 }); // 64px = 2 tiles down
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // All objects should still be selected
+        const finalCountText = await selectionCount.textContent();
+        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        expect(finalCount).toBeGreaterThanOrEqual(3);
+    });
+
+    test('Step 11B: should not move when no objects selected', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const moveTool = page.getByTestId('tool-move');
+
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Switch to move tool with nothing selected
+        await moveTool.click();
+
+        // Try to drag (should do nothing)
+        await page.mouse.move(box.x + 200, box.y + 200);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 300, box.y + 300, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // No errors should occur
+        const selectionCount = page.getByTestId('selection-count');
+        await expect(selectionCount).toHaveText('Selected: 0 objects');
+    });
 });

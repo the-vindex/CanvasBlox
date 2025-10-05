@@ -379,6 +379,46 @@ export function useLevelEditor() {
         });
     }, [editorState.clipboard, updateCurrentLevel, toast]);
 
+    const moveSelectedObjects = useCallback(
+        (delta: Position) => {
+            if (editorState.selectedObjects.length === 0) return;
+
+            updateCurrentLevel(
+                (level) => {
+                    // Update tiles
+                    const updatedTiles = level.tiles.map((tile) =>
+                        editorState.selectedObjects.includes(tile.id)
+                            ? { ...tile, position: { x: tile.position.x + delta.x, y: tile.position.y + delta.y } }
+                            : tile
+                    );
+
+                    // Update objects
+                    const updatedObjects = level.objects.map((obj) =>
+                        editorState.selectedObjects.includes(obj.id)
+                            ? { ...obj, position: { x: obj.position.x + delta.x, y: obj.position.y + delta.y } }
+                            : obj
+                    );
+
+                    // Update spawn points
+                    const updatedSpawnPoints = level.spawnPoints.map((spawn) =>
+                        editorState.selectedObjects.includes(spawn.id)
+                            ? { ...spawn, position: { x: spawn.position.x + delta.x, y: spawn.position.y + delta.y } }
+                            : spawn
+                    );
+
+                    return {
+                        ...level,
+                        tiles: updatedTiles,
+                        objects: updatedObjects,
+                        spawnPoints: updatedSpawnPoints,
+                    };
+                },
+                `Moved ${editorState.selectedObjects.length} object${editorState.selectedObjects.length > 1 ? 's' : ''}`
+            );
+        },
+        [editorState.selectedObjects, updateCurrentLevel]
+    );
+
     const commitBatchToHistory = useCallback(
         (action: string) => {
             // Create a history entry for the current state (after batched changes)
@@ -415,6 +455,7 @@ export function useLevelEditor() {
         deleteSelectedObjects,
         copySelectedObjects,
         pasteObjects,
+        moveSelectedObjects,
         undo,
         redo,
         commitBatchToHistory,

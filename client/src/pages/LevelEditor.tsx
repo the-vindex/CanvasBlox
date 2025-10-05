@@ -31,6 +31,7 @@ export default function LevelEditor() {
         deleteSelectedObjects: _deleteSelectedObjects,
         copySelectedObjects: _copySelectedObjects,
         pasteObjects: _pasteObjects,
+        moveSelectedObjects: _moveSelectedObjects,
         undo: _undo,
         redo: _redo,
         commitBatchToHistory,
@@ -172,6 +173,13 @@ export default function LevelEditor() {
             setEditorState((prev) => ({ ...prev, selectedObjects: selectedIds }));
         },
         [currentLevel, setEditorState]
+    );
+
+    const handleMoveObjectsComplete = useCallback(
+        (delta: Position) => {
+            _moveSelectedObjects(delta);
+        },
+        [_moveSelectedObjects]
     );
 
     const handleTileSelect = useCallback(
@@ -553,6 +561,7 @@ export default function LevelEditor() {
                             onDrawingSessionEnd={handleDrawingSessionEnd}
                             onZoom={handleWheelZoom}
                             onMultiSelectComplete={handleMultiSelectComplete}
+                            onMoveObjectsComplete={handleMoveObjectsComplete}
                         />
 
                         {/* Undo/Redo Flash Overlay */}
