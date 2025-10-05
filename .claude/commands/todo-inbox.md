@@ -27,22 +27,28 @@ Use regular `/todo` when:
 
 ## Instructions
 
-When this command is invoked:
+1. Read TASKS-INBOX.md
+2. Append task with timestamp
+3. Suggest chapter and priority
+4. Confirm added to inbox
 
-1. Read the TASKS-INBOX.md file
-2. Generate a timestamp for the entry
-3. Append the task to the inbox with this format:
-   ```markdown
-   ### [YYYY-MM-DD HH:MM] Task description
-   - **Added by:** User request
-   - **Suggested chapter:** [Auto-suggest based on task description, or "TBD"]
-   - **Notes:** [Any additional context provided]
-   ```
-4. Confirm the task was added to inbox
-5. Remind user to run `/merge-inbox` later to consolidate into TASKS.md
+## Inbox Format
+
+```markdown
+### [YYYY-MM-DD HH:MM] Task description
+- **Priority:** 3
+- **Suggested chapter:** Chapter 11
+- **Notes:** Additional context
+```
+
+## Priority Values
+
+- **1** - AI config (slash commands, permissions, MCP)
+- **2** - Bugfix
+- **3** - Feature (default)
+- **4** - Idea/enhancement
 
 ## Notes
 
-- Tasks in the inbox are NOT automatically processed by `/next`
-- Use `/merge-inbox` to move tasks from inbox → TASKS.md
-- The inbox is a simple append-only queue - no conflicts possible
+- Use `/merge-inbox` later to consolidate into TASKS.md
+- Inbox tasks NOT processed by `/next`

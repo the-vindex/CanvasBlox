@@ -42,55 +42,37 @@ When this command is invoked:
    - **Only ask user if there's a serious conflict** (corrupted data, duplicate task, etc.)
 
 4. **Add task to TASKS.md:**
-   - Find or create the appropriate chapter section
-   - Use the existing task numbering format (e.g., 11.11, 11.12, etc.)
-   - Format the task following TASKS.md conventions:
+   - Find or create chapter
+   - Use next number (e.g., 11.12)
+   - Format task:
      ```markdown
      #### X.Y Task description
-     - **Location:** File/component path (if known)
-     - **Current:** What exists now (if applicable)
+     - **Priority:** 3
+     - **Location:** File/component path
+     - **Current:** What exists now
      - **Change:** What should change
-     - **Note:** Any additional context
+     - **Implementation:** Steps
+     - **Files to modify:** List
+     - **Tests:** What to test
+     - **Note:** Context
      ```
-   - Add to "Remaining Tasks" or "Tasks" section of that chapter
-   - Update chapter's task count if shown in header
+   - Add to "Remaining Tasks" section
+   - Update chapter task count
 
-5. **Clear the inbox and report:**
-   - After all tasks are merged, reset TASKS-INBOX.md to template state
-   - Show summary:
-     ```
-     ✅ Merged X tasks from inbox:
-     - Task 1 → Chapter 11.11
-     - Task 2 → Chapter 13.10
-     - Task 3 → Chapter 14.1 (new chapter created)
-     ```
+5. **Clear inbox and report:**
+   - Reset TASKS-INBOX.md to template
+   - Show summary
 
-## Important Notes
+## Rules
 
-- **Never add tasks to completed chapters** (marked with ✅ Completed)
-- **Preserve existing task numbering** - find the next available number
-- **Ask before merging** - don't assume chapter placement
-- **Keep inbox clean** - reset to template after successful merge
-- If user cancels mid-merge, leave remaining tasks in inbox
+- **Skip completed chapters** (✅ Completed)
+- **Use existing numbering** - find next available
+- **Auto-merge** - only ask if conflict
+- **Reset inbox** after merge
 
-## Example Flow
+## Priority Values
 
-```
-User: /merge-inbox
-
-Assistant reads inbox, finds 2 tasks:
-
-Task 1: "Add undo animation"
-- Suggested chapter: 11
-- I suggest: Chapter 11 (Drawing Tools) - fits with UI improvements
-- User confirms or corrects
-- Task added as 11.11
-
-Task 2: "Write E2E test for copy/paste"
-- Suggested chapter: 13
-- I suggest: Chapter 13 (E2E Test Simplification)
-- User confirms or corrects
-- Task added as 13.10
-
-Inbox cleared. Summary shown.
-```
+- **1** - AI config - skip by /next
+- **2** - Bugfix
+- **3** - Feature (default)
+- **4** - Idea/enhancement
