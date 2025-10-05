@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getObjectCount, getZoomValue } from './helpers';
 
 test.describe('Level Editor', () => {
     test.beforeEach(async ({ page }) => {
@@ -738,7 +739,6 @@ test.describe('Level Editor', () => {
 
     test('Step 9: should enforce minimum zoom of 10%', async ({ page }) => {
         const zoomOutButton = page.getByTestId('button-zoom-out');
-        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
 
         // Try to zoom out many times (should hit minimum at 10%)
         for (let i = 0; i < 15; i++) {
@@ -746,8 +746,7 @@ test.describe('Level Editor', () => {
         }
         await page.waitForTimeout(50);
 
-        const zoomText = await statusBarZoom.textContent();
-        const zoomValue = parseInt(zoomText?.replace('%', '') || '0', 10);
+        const zoomValue = await getZoomValue(page);
 
         // Should not go below 10%
         expect(zoomValue).toBeGreaterThanOrEqual(10);
@@ -866,27 +865,21 @@ test.describe('Level Editor', () => {
     });
 
     test('Step 10: should place single platform tile with click', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const objectCount = page.getByTestId('statusbar-object-count');
 
         // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Select grass platform tile
         await grassTile.click();
         await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
 
         // Click on canvas to place tile
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
 
         // Object count should increase
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeGreaterThanOrEqual(initialCount + 1);
     });
 
@@ -925,27 +918,21 @@ test.describe('Level Editor', () => {
     });
 
     test('Step 10: should place spawn point object', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
         const playerSpawn = page.getByTestId('tile-spawn-player');
-        const objectCount = page.getByTestId('statusbar-object-count');
 
         // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Select player spawn point
         await playerSpawn.click();
         await expect(playerSpawn).toHaveAttribute('aria-pressed', 'true');
 
         // Click on canvas to place spawn point
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Object count should increase
-        const finalCountText = await objectCount.textContent();
-        const finalCount = parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeGreaterThanOrEqual(initialCount + 1);
     });
 
