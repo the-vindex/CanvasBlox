@@ -182,8 +182,8 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 13: E2E Test Simplification & Refactoring
 
-**Status:** ⏸️ Not Started
-**Files:** `e2e/level-editor.spec.ts` (3,066 lines, 126 tests)
+**Status:** 🔄 In Progress (Phase 1 complete)
+**Files:** `e2e/level-editor.spec.ts` (2,974 lines, 122 tests)
 **Priority:** Medium
 
 **Current State:**
@@ -198,31 +198,28 @@ Work through chapters sequentially. After implementing each chapter:
 - Improve test maintainability and clarity
 - Add missing coverage for error scenarios
 
-### Phase 1: Quick Wins (High Priority)
+### Phase 1: Quick Wins (High Priority) ✅ COMPLETE
 
-#### 13.1 Delete redundant zoom status bar test
-- **Location:** `e2e/level-editor.spec.ts:757-787`
+#### 13.1 Delete redundant zoom status bar test ✅
+- **Status:** ✅ COMPLETE
+- **Location:** `e2e/level-editor.spec.ts:757-787` (deleted)
 - **Test Name:** "Step 9: zoom controls should update status bar zoom display"
-- **Reason:** Fully redundant with consolidated zoom tests
-- **Action:** Delete entire test
-- **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** -1 test, -30 lines
+- **Result:** -1 test, -30 lines
 
-#### 13.2 Merge Step 6 and Step 9 zoom tests
-- **Location:** Lines 348-406 (Step 6) and Lines 658-721 (Step 9)
-- **Current:** 6 duplicate tests testing same zoom functionality
-- **Tests to delete (Step 6 versions):**
-  - Line 348-362: "Step 6: should increase zoom when zoom in button clicked"
-  - Line 364-384: "Step 6: should decrease zoom when zoom out button clicked"
-  - Line 386-406: "Step 6: should reset zoom when reset button clicked"
-- **Tests to keep (Step 9 versions - more comprehensive):**
-  - Line 658-680: "Step 9: should zoom in at viewport center when zoom in button clicked"
-  - Line 682-698: "Step 9: should zoom out at viewport center when zoom out button clicked"
-  - Line 700-721: "Step 9: should reset zoom to 100% when reset button clicked"
-- **Reason:** Step 9 tests verify both toolbar AND status bar updates, while Step 6 only checks toolbar
-- **Action:** Delete Step 6 zoom tests, keep Step 9 tests
-- **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** -3 tests, -120 lines
+#### 13.2 Merge Step 6 and Step 9 zoom tests ✅
+- **Status:** ✅ COMPLETE
+- **Location:** Lines 348-406 (Step 6 - deleted), Lines 658-721 (Step 9 - kept)
+- **Deleted tests:**
+  - "Step 6: should increase zoom when zoom in button clicked"
+  - "Step 6: should decrease zoom when zoom out button clicked"
+  - "Step 6: should reset zoom when reset button clicked"
+- **Kept tests (more comprehensive):**
+  - "Step 9: should zoom in at viewport center when zoom in button clicked"
+  - "Step 9: should zoom out at viewport center when zoom out button clicked"
+  - "Step 9: should reset zoom to 100% when reset button clicked"
+- **Result:** -3 tests, -62 lines
+
+**Phase 1 Total:** -4 tests, -92 lines, improved pass rate from 88.1% to 90.2%
 
 ### Phase 2: Consolidate Interaction Tests (Medium Priority)
 
