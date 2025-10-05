@@ -722,41 +722,38 @@ Press ESC                      → null            | null               ❌ clea
 
 ## Chapter 14: E2E Test Organization & Splitting
 
-**Status:** ⏸️ Not Started
-**Files:** `e2e/level-editor.spec.ts` (2814 lines → split into ~12 files)
+**Status:** ✅ Complete
+**Files:** `e2e/*.spec.ts` (13 files created from monolithic file)
 **Priority:** Medium
 
 **Goal:** Split monolithic level-editor.spec.ts into focused test files organized by feature area. Each file should cover specific functionality with clear behavioral documentation. Must handle Playwright parallel execution properly. All tests passing before and after split - this is purely a refactoring/reorganization task.
 
 ### Tasks:
 
-#### 14.1 Split E2E tests into focused files by functionality
-- **Location:** `e2e/level-editor.spec.ts` (2814 lines)
-- **Current:** Single monolithic test file with all tests
-- **Change:** Split into multiple focused test files organized by feature area
-- **Proposed structure:**
-  - `e2e/basic-ui.spec.ts` - Initial load, tile palette, level tabs, properties panel
-  - `e2e/toolbar.spec.ts` - Toolbar buttons, tool selection, toggles
-  - `e2e/keyboard-shortcuts.spec.ts` - All keyboard shortcuts (V/M/H/L/R/K/P/Escape)
-  - `e2e/zoom-pan.spec.ts` - Zoom controls, pan with middle mouse, viewport interactions
-  - `e2e/tile-placement.spec.ts` - Single click, painting mode, spawn points, interactables
-  - `e2e/selection.spec.ts` - Select tool, multi-select, move tool, ghost preview
-  - `e2e/undo-redo.spec.ts` - Undo/redo operations, history display, button states
-  - `e2e/copy-paste.spec.ts` - Copy/paste operations, clipboard management
-  - `e2e/import-export.spec.ts` - JSON import/export, PNG export, validation
-  - `e2e/auto-save.spec.ts` - Auto-save timing, save indicators, unsaved state
-  - `e2e/visual-effects.spec.ts` - Scanlines, grid toggle, selection feedback, delete animations
-  - `e2e/parallax-zoom.spec.ts` - Initial zoom calculation, parallax background
-  - `e2e/menus.spec.ts` - File dropdown, menu actions
-- **Implementation:**
-  - Extract tests into respective files
-  - Ensure each file has proper test setup/teardown
-  - Handle Playwright parallel execution (each file runs independently)
-  - Verify all tests pass after split
-  - Update test scripts if needed (npm run test:e2e should run all files)
-- **Files to create:** 12+ new test files in `e2e/` directory
-- **Files to modify/delete:** `e2e/level-editor.spec.ts` (will be removed after split)
-- **Note:** This is purely a refactoring task - all tests must pass before and after. No behavioral changes.
+#### 14.1 Split E2E tests into focused files by functionality ✅ COMPLETE
+- **Status:** ✅ COMPLETE - Commit 42e59bb
+- **Location:** `e2e/level-editor.spec.ts` (3240 lines → deleted)
+- **Completed:** Split into 13 focused test files organized by feature area
+- **Files created:**
+  - ✅ `e2e/basic-ui.spec.ts` - Initial load, tile palette, level tabs, properties panel
+  - ✅ `e2e/toolbar.spec.ts` - Toolbar buttons, tool selection, toggles
+  - ✅ `e2e/keyboard-shortcuts.spec.ts` - All keyboard shortcuts (V/M/H/L/R/K/P/Escape)
+  - ✅ `e2e/zoom-pan.spec.ts` - Zoom controls, pan with middle mouse, viewport interactions
+  - ✅ `e2e/tile-placement.spec.ts` - Single click, painting mode, spawn points, interactables
+  - ✅ `e2e/selection.spec.ts` - Select tool, multi-select, move tool, ghost preview, line drawing
+  - ✅ `e2e/undo-redo.spec.ts` - Undo/redo operations, history display, button states
+  - ✅ `e2e/copy-paste.spec.ts` - Copy/paste operations, clipboard management
+  - ✅ `e2e/import-export.spec.ts` - JSON import/export, PNG export, validation
+  - ✅ `e2e/auto-save.spec.ts` - Auto-save timing, save indicators, unsaved state
+  - ✅ `e2e/visual-effects.spec.ts` - Scanlines, grid toggle, selection feedback, delete animations
+  - ✅ `e2e/parallax-zoom.spec.ts` - Initial zoom calculation, parallax background
+  - ✅ `e2e/menus.spec.ts` - File dropdown, menu actions
+- **Results:**
+  - All 123 tests preserved exactly as-is (pure refactoring)
+  - All tests passing (4 skipped)
+  - Improved maintainability - focused files by feature area
+  - Better Playwright parallel execution
+  - Easier navigation and reduced cognitive load
 
 **Dependencies:** None
 **Notes:** Improves test maintainability and parallel execution. Each file becomes focused and easier to navigate.
@@ -850,7 +847,7 @@ Press ESC                      → null            | null               ❌ clea
 | 16. Bug Fixes | ⏸️ Not Started | ❌ | **HIGH PRIORITY** - 3 tasks (2x P2 bugs, 1x P3 test fix) |
 | 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, reduce linter warnings |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
-| 14. E2E Test Organization | ⏸️ Not Started | ❌ | Split monolithic test file into 12+ focused files |
+| 14. E2E Test Organization | ✅ Completed | ✓ | Split monolithic test file into 13 focused files |
 | 15. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
 
 **Legend:**
