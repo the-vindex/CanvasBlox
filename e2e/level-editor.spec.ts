@@ -299,8 +299,11 @@ test.describe('Level Editor', () => {
     });
 
     test('Step 6: should display current zoom level in toolbar', async ({ page }) => {
+        // Wait for toolbar to be visible
+        await expect(page.getByTestId('toolbar')).toBeVisible();
         const zoomLevel = page.getByTestId('zoom-level');
-        await expect(zoomLevel).toHaveText('100%');
+        // Zoom is calculated based on viewport, so just verify it displays a valid percentage
+        await expect(zoomLevel).toHaveText(/^\d+%$/);
     });
 
     test('Step 6: should have grid and scanlines toggles', async ({ page }) => {
@@ -673,61 +676,83 @@ test.describe('Level Editor', () => {
     });
 
     test('Step 9: should zoom in at viewport center when zoom in button clicked', async ({ page }) => {
+        // Wait for UI to be ready
+        await expect(page.getByTestId('toolbar')).toBeVisible();
+
         const zoomInButton = page.getByTestId('button-zoom-in');
         const statusBarZoom = page.getByTestId('statusbar-zoom-display');
         const toolbarZoom = page.getByTestId('zoom-level');
 
-        // Verify initial zoom is 100%
-        await expect(statusBarZoom).toHaveText('100%');
-        await expect(toolbarZoom).toHaveText('100%');
+        // Get initial zoom (calculated based on viewport, not always 100%)
+        const initialZoomText = await statusBarZoom.textContent();
+        const initialZoom = parseInt(initialZoomText?.replace('%', '') || '0', 10);
+
+        // Both displays should match initially
+        await expect(toolbarZoom).toHaveText(`${initialZoom}%`);
 
         // Click zoom in button
         await zoomInButton.click();
         await page.waitForTimeout(50);
 
-        // Both zoom displays should update
+        // Both zoom displays should update by +10%
         const statusZoomText = await statusBarZoom.textContent();
         const toolbarZoomText = await toolbarZoom.textContent();
         const statusZoomValue = parseInt(statusZoomText?.replace('%', '') || '0', 10);
         const toolbarZoomValue = parseInt(toolbarZoomText?.replace('%', '') || '0', 10);
 
-        expect(statusZoomValue).toBe(110); // 100% + 10% = 110%
-        expect(toolbarZoomValue).toBe(110);
+        expect(statusZoomValue).toBe(initialZoom + 10); // Initial + 10%
+        expect(toolbarZoomValue).toBe(initialZoom + 10);
         expect(statusZoomValue).toBe(toolbarZoomValue); // Both should match
     });
 
     test('Step 9: should zoom out at viewport center when zoom out button clicked', async ({ page }) => {
+        // Wait for UI to be ready
+        await expect(page.getByTestId('toolbar')).toBeVisible();
+
         const zoomInButton = page.getByTestId('button-zoom-in');
         const zoomOutButton = page.getByTestId('button-zoom-out');
         const statusBarZoom = page.getByTestId('statusbar-zoom-display');
 
+        // Get initial zoom
+        const initialZoomText = await statusBarZoom.textContent();
+        const initialZoom = parseInt(initialZoomText?.replace('%', '') || '0', 10);
+
         // First zoom in
         await zoomInButton.click();
         await page.waitForTimeout(50);
-        await expect(statusBarZoom).toHaveText('110%');
+        await expect(statusBarZoom).toHaveText(`${initialZoom + 10}%`);
 
         // Then zoom out
         await zoomOutButton.click();
         await page.waitForTimeout(50);
 
-        // Should be back to 100%
-        await expect(statusBarZoom).toHaveText('100%');
+        // Should be back to initial zoom
+        await expect(statusBarZoom).toHaveText(`${initialZoom}%`);
     });
 
     test('Step 9: should reset zoom to 100% when reset button clicked', async ({ page }) => {
+        // Wait for UI to be ready
+        await expect(page.getByTestId('toolbar')).toBeVisible();
+
         const zoomInButton = page.getByTestId('button-zoom-in');
         const resetButton = page.getByTestId('button-reset-zoom');
         const statusBarZoom = page.getByTestId('statusbar-zoom-display');
 
-        // Zoom in multiple times
-        await zoomInButton.click();
-        await zoomInButton.click();
-        await zoomInButton.click();
+        // Get initial zoom
+        const initialZoomText = await statusBarZoom.textContent();
+        const initialZoom = parseInt(initialZoomText?.replace('%', '') || '0', 10);
+
+        // Zoom in enough times to ensure we're above 100% OR different from initial
+        const clicksNeeded = Math.max(5, Math.ceil((110 - initialZoom) / 10));
+        for (let i = 0; i < clicksNeeded; i++) {
+            await zoomInButton.click();
+        }
         await page.waitForTimeout(50);
 
+        // Verify zoom changed from initial
         const zoomedText = await statusBarZoom.textContent();
         const zoomedValue = parseInt(zoomedText?.replace('%', '') || '0', 10);
-        expect(zoomedValue).toBeGreaterThan(100);
+        expect(zoomedValue).not.toBe(initialZoom);
 
         // Reset zoom
         await resetButton.click();
@@ -2015,7 +2040,10 @@ test.describe('Level Editor', () => {
         // Open import modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
+
+        // Wait for dropdown menu to be visible before clicking menu item
         const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await expect(importButton).toBeVisible();
         await importButton.click();
         await page.waitForTimeout(100);
 
@@ -2041,7 +2069,10 @@ test.describe('Level Editor', () => {
         // Open import modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
+
+        // Wait for dropdown menu to be visible
         const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await expect(importButton).toBeVisible();
         await importButton.click();
         await page.waitForTimeout(100);
 
@@ -2117,13 +2148,15 @@ test.describe('Level Editor', () => {
         // Open File menu
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
-        await page.waitForTimeout(50);
+
+        // Wait for dropdown menu to be visible
+        const exportPngButton = page.getByRole('menuitem', { name: /Export PNG/ });
+        await expect(exportPngButton).toBeVisible();
 
         // Set up download listener before clicking
         const downloadPromise = page.waitForEvent('download');
 
         // Click Export PNG option
-        const exportPngButton = page.getByRole('menuitem', { name: /Export PNG/ });
         await exportPngButton.click();
 
         // Wait for download to start
@@ -2153,7 +2186,10 @@ test.describe('Level Editor', () => {
         // Open import modal
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
+
+        // Wait for dropdown menu to be visible
         const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await expect(importButton).toBeVisible();
         await importButton.click();
         await page.waitForTimeout(100);
 
@@ -2184,7 +2220,10 @@ test.describe('Level Editor', () => {
         // Create a fresh level with specific data
         const fileButton = page.getByRole('button', { name: /File/i });
         await fileButton.click();
+
+        // Wait for dropdown menu to be visible
         const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
+        await expect(newLevelButton).toBeVisible();
         await newLevelButton.click();
         await page.waitForTimeout(200);
 
@@ -2205,7 +2244,10 @@ test.describe('Level Editor', () => {
 
         // Export to JSON
         await fileButton.click();
+
+        // Wait for dropdown menu to be visible
         const exportButton = page.getByRole('menuitem', { name: /Export JSON/ });
+        await expect(exportButton).toBeVisible();
         await exportButton.click();
         await page.waitForTimeout(100);
 
@@ -2219,12 +2261,16 @@ test.describe('Level Editor', () => {
         await page.waitForTimeout(100);
 
         // Create another fresh level
-        await newLevelButton.click();
+        await fileButton.click();
+        const newLevelButton2 = page.getByRole('menuitem', { name: /New Level/ });
+        await expect(newLevelButton2).toBeVisible();
+        await newLevelButton2.click();
         await page.waitForTimeout(200);
 
         // Import the exported JSON
         await fileButton.click();
         const importButton = page.getByRole('menuitem', { name: /Import JSON/ });
+        await expect(importButton).toBeVisible();
         await importButton.click();
         await page.waitForTimeout(100);
 
@@ -2626,7 +2672,7 @@ test.describe('Step 19: Delete Animations', () => {
 
         // Get initial object count
         const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0');
+        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
 
         // Delete the tile (pressing Delete key)
         await page.keyboard.press('Delete');
@@ -2642,7 +2688,7 @@ test.describe('Step 19: Delete Animations', () => {
 
         // Object count should now be reduced
         const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0');
+        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
         expect(finalCount).toBeLessThan(initialCount);
 
         // Selection should be cleared
@@ -2685,7 +2731,7 @@ test.describe('Step 19: Delete Animations', () => {
 
         // Get initial count
         const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0');
+        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
 
         // Delete all selected objects
         await page.keyboard.press('Delete');
@@ -2693,7 +2739,7 @@ test.describe('Step 19: Delete Animations', () => {
 
         // Object count should be reduced
         const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0');
+        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
         expect(finalCount).toBeLessThan(initialCount);
 
         // Selection should be cleared
@@ -2742,7 +2788,7 @@ test.describe('Step 19: Delete Animations', () => {
 
         // Get initial count
         const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0');
+        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
 
         // Delete all selected objects
         await page.keyboard.press('Delete');
@@ -2750,7 +2796,7 @@ test.describe('Step 19: Delete Animations', () => {
 
         // Verify objects were deleted
         const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0');
+        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
         expect(finalCount).toBeLessThan(initialCount);
     });
 });
@@ -2771,7 +2817,7 @@ test.describe('Step 20: Initial Zoom Calculation', () => {
         expect(zoomText).toMatch(/\d+%/);
 
         // Parse the zoom percentage
-        const zoomPercent = Number.parseInt(zoomText?.match(/\d+/)?.[0] || '100');
+        const zoomPercent = Number.parseInt(zoomText?.match(/\d+/)?.[0] || '100', 10);
 
         // The calculated zoom should be less than 100% to fit the grass layer
         // (assuming viewport is not extremely tall)
@@ -2789,7 +2835,7 @@ test.describe('Step 20: Initial Zoom Calculation', () => {
 
         // Zoom should have changed
         const newZoomText = await zoomLevel.textContent();
-        const newZoomPercent = Number.parseInt(newZoomText?.match(/\d+/)?.[0] || '100');
+        const newZoomPercent = Number.parseInt(newZoomText?.match(/\d+/)?.[0] || '100', 10);
         expect(newZoomPercent).toBeGreaterThan(initialZoom);
     });
 
@@ -2803,7 +2849,7 @@ test.describe('Step 20: Initial Zoom Calculation', () => {
 
         const zoomLevel = page.getByTestId('statusbar-zoom-display');
         const zoomText = await zoomLevel.textContent();
-        const zoomPercent = Number.parseInt(zoomText?.match(/\d+/)?.[0] || '100');
+        const zoomPercent = Number.parseInt(zoomText?.match(/\d+/)?.[0] || '100', 10);
 
         // With a tall viewport (1080px), zoom should be calculated to fit grass
         expect(zoomPercent).toBeGreaterThan(0);
@@ -2826,7 +2872,7 @@ test.describe('Step 21: Parallax Background', () => {
         // The background should move at half the speed of the canvas pan for depth effect
 
         // Get the canvas wrapper element
-        const canvasWrapper = page.locator('[data-testid="level-canvas"]').locator('..');
+        const _canvasWrapper = page.locator('[data-testid="level-canvas"]').locator('..');
 
         // Wait for initial render
         await page.waitForTimeout(100);

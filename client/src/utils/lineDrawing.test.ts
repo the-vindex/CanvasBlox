@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import type { Position } from '@/types/level';
 import { getLinePositions } from './lineDrawing';
 
 describe('lineDrawing', () => {
