@@ -317,7 +317,7 @@ export default function LevelEditor() {
     );
 
     const handleExportPNG = useCallback(() => {
-        const canvas = document.querySelector('#levelCanvas') as HTMLCanvasElement;
+        const canvas = document.querySelector('[data-testid="level-canvas"]') as HTMLCanvasElement;
         if (canvas && currentLevel) {
             exportToPNG(canvas, `${currentLevel.levelName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`);
             toast({ title: 'Exported', description: 'Level exported as PNG!' });

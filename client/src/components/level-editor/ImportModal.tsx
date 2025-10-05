@@ -56,45 +56,43 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-                <DialogHeader>
+            <DialogContent className="max-w-2xl h-[85vh] max-h-[85vh] flex flex-col">
+                <DialogHeader className="pb-4">
                     <DialogTitle>Import Level</DialogTitle>
-                    <DialogDescription>
-                        Paste your level JSON data below to import it into the editor.
-                    </DialogDescription>
+                    <DialogDescription className="text-xs">Paste JSON data below</DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-                    <div className="space-y-2">
-                        <Label>Import Mode</Label>
+                <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                    <Textarea
+                        value={jsonInput}
+                        onChange={(e) => setJsonInput(e.target.value)}
+                        placeholder="Paste level JSON here..."
+                        className="font-mono text-sm flex-1 min-h-0"
+                        data-testid="textarea-import-json"
+                    />
+                </div>
+
+                <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-2">
+                    <div className="flex items-center gap-2 mr-auto">
                         <RadioGroup
                             value={importMode}
                             onValueChange={(value) => setImportMode(value as 'new' | 'overwrite')}
+                            className="flex items-center gap-3"
                         >
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1.5">
                                 <RadioGroupItem value="new" id={newModeId} />
-                                <Label htmlFor={newModeId} className="font-normal cursor-pointer">
+                                <Label htmlFor={newModeId} className="font-normal cursor-pointer text-xs">
                                     Create new level
                                 </Label>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1.5">
                                 <RadioGroupItem value="overwrite" id={overwriteModeId} />
-                                <Label htmlFor={overwriteModeId} className="font-normal cursor-pointer">
+                                <Label htmlFor={overwriteModeId} className="font-normal cursor-pointer text-xs">
                                     Overwrite current level
                                 </Label>
                             </div>
                         </RadioGroup>
                     </div>
-
-                    <Textarea
-                        value={jsonInput}
-                        onChange={(e) => setJsonInput(e.target.value)}
-                        placeholder="Paste level JSON here..."
-                        className="font-mono text-sm flex-1 resize-none"
-                    />
-                </div>
-
-                <DialogFooter>
                     <Button variant="outline" onClick={handleClose}>
                         Cancel
                     </Button>

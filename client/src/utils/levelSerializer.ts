@@ -64,10 +64,18 @@ export function createDefaultLevel(name: string = 'New Level'): LevelData {
 }
 
 export function exportToPNG(canvas: HTMLCanvasElement, filename: string = 'level.png') {
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL();
-    link.click();
+    try {
+        // Use toDataURL for better compatibility
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Failed to export PNG:', error);
+    }
 }
 
 export function downloadJSON(levelData: LevelData, filename?: string) {
