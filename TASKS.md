@@ -35,18 +35,29 @@ Work through chapters sequentially. After implementing each chapter:
 
 ### Remaining Tasks:
 
-#### 11.1 Implement line drawing tool
-- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
-- **Current:** Line tool button exists in toolbar ('l' key) but does nothing when activated
+#### 11.1 Implement line drawing tool ✅ 🧪 Ready for User Testing
+- **Status:** Complete - Awaiting manual testing
+- **Commit:** 2f0247e
 - **Implementation:**
-  - On mousedown: Record start position
-  - On mousemove: Show preview line from start to current position
-  - On mouseup: Place tiles along the line path using Bresenham's line algorithm
-  - Clear preview and return to normal mode
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` (add line drawing logic)
-  - `client/src/utils/canvasRenderer.ts` (add drawPreviewLine method)
-  - `client/src/hooks/useLevelEditor.ts` (may need batch tile placement method)
+  - ✅ Created `lineDrawing.ts` with Bresenham's algorithm
+  - ✅ Added `drawPreviewLine()` to canvasRenderer
+  - ✅ Implemented mouse handlers in useCanvas
+  - ✅ Real-time preview while dragging
+  - ✅ Batch placement with single undo/redo entry
+  - ✅ ESC key cancels line drawing
+  - ✅ Preserves tile selection when switching tools
+- **Tests:**
+  - ✅ 4 E2E tests (basic, diagonal, palette, ESC cancel)
+  - ✅ 10 unit tests (all Bresenham edge cases)
+  - All passing
+- **Manual Test:**
+  1. Select a tile type from palette
+  2. Click line tool ('L' key) - verify tile stays selected
+  3. Click and drag on canvas - verify preview line appears
+  4. Release mouse - verify tiles placed along line
+  5. Try diagonal, horizontal, vertical lines
+  6. Press ESC during drag - verify line cancels
+  7. Undo - verify all tiles removed as single action
 
 #### 11.2 Implement rectangle drawing tool
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
