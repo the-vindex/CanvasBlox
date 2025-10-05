@@ -11,6 +11,7 @@ interface CanvasProps {
     onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
     onDrawingSessionEnd?: () => void;
     onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
+    onMultiSelectComplete?: (start: Position, end: Position) => void;
 }
 
 export function Canvas({
@@ -21,6 +22,7 @@ export function Canvas({
     onTilePlaced,
     onDrawingSessionEnd,
     onZoom,
+    onMultiSelectComplete,
 }: CanvasProps) {
     const canvasId = useId();
     const { canvasRef, wrapperRef } = useCanvas({
@@ -31,6 +33,7 @@ export function Canvas({
         onTilePlaced,
         onDrawingSessionEnd,
         onZoom,
+        onMultiSelectComplete,
     });
 
     // Calculate canvas pixel size from tile dimensions

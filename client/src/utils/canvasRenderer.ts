@@ -920,20 +920,28 @@ export class CanvasRenderer {
         this.ctx.setLineDash([]);
     }
 
-    drawSelectionBox(start: Position, end: Position) {
-        this.ctx.strokeStyle = '#3b82f6';
-        this.ctx.lineWidth = 1;
-        this.ctx.setLineDash([3, 3]);
+    drawSelectionBox(start: Position, end: Position, pan: Position = { x: 0, y: 0 }, zoom: number = 1) {
+        // Convert tile positions to pixel positions
+        const minX = Math.min(start.x, end.x) * TILE_SIZE * zoom + pan.x;
+        const minY = Math.min(start.y, end.y) * TILE_SIZE * zoom + pan.y;
+        const maxX = Math.max(start.x, end.x) * TILE_SIZE * zoom + pan.x;
+        const maxY = Math.max(start.y, end.y) * TILE_SIZE * zoom + pan.y;
+        const width = maxX - minX + TILE_SIZE * zoom;
+        const height = maxY - minY + TILE_SIZE * zoom;
+
+        this.ctx.save();
+
+        // Draw semi-transparent fill
         this.ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+        this.ctx.fillRect(minX, minY, width, height);
 
-        const x = Math.min(start.x, end.x);
-        const y = Math.min(start.y, end.y);
-        const width = Math.abs(end.x - start.x);
-        const height = Math.abs(end.y - start.y);
+        // Draw dashed border
+        this.ctx.strokeStyle = '#3b82f6';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.strokeRect(minX, minY, width, height);
 
-        this.ctx.fillRect(x, y, width, height);
-        this.ctx.strokeRect(x, y, width, height);
-        this.ctx.setLineDash([]);
+        this.ctx.restore();
     }
 
     drawPreviewTile(position: Position, tileType: string, pan: Position, zoom: number) {
@@ -1040,6 +1048,16 @@ export class CanvasRenderer {
 
         // Draw links
         this.drawLinks(levelData.objects, editorState.pan, editorState.zoom);
+
+        // Draw multi-select drag box if active
+        if (editorState.selectionBox) {
+            this.drawSelectionBox(
+                editorState.selectionBox.start,
+                editorState.selectionBox.end,
+                editorState.pan,
+                editorState.zoom
+            );
+        }
 
         // Draw preview tile if a tile type is selected
         if (editorState.selectedTileType && editorState.mousePosition) {

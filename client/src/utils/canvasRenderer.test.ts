@@ -337,28 +337,37 @@ describe('CanvasRenderer', () => {
 
     describe('drawSelectionBox', () => {
         it('should draw selection box for drag selection', () => {
-            const start = { x: 10, y: 10 };
-            const end = { x: 50, y: 50 };
+            const start = { x: 1, y: 1 }; // Tile positions
+            const end = { x: 2, y: 2 };
+            const pan = { x: 0, y: 0 };
+            const zoom = 1;
 
             const fillRectSpy = vi.spyOn(ctx, 'fillRect');
             const strokeRectSpy = vi.spyOn(ctx, 'strokeRect');
 
-            renderer.drawSelectionBox(start, end);
+            renderer.drawSelectionBox(start, end, pan, zoom);
 
-            expect(fillRectSpy).toHaveBeenCalledWith(10, 10, 40, 40);
-            expect(strokeRectSpy).toHaveBeenCalledWith(10, 10, 40, 40);
+            // Should convert tile positions to pixels (32px per tile)
+            // minX = 1 * 32 = 32, minY = 1 * 32 = 32
+            // width = (2 - 1) * 32 + 32 = 64, height = 64
+            expect(fillRectSpy).toHaveBeenCalledWith(32, 32, 64, 64);
+            expect(strokeRectSpy).toHaveBeenCalledWith(32, 32, 64, 64);
         });
 
         it('should handle reverse drag (bottom-right to top-left)', () => {
-            const start = { x: 50, y: 50 };
-            const end = { x: 10, y: 10 };
+            const start = { x: 2, y: 2 }; // Tile positions
+            const end = { x: 1, y: 1 };
+            const pan = { x: 0, y: 0 };
+            const zoom = 1;
 
             const fillRectSpy = vi.spyOn(ctx, 'fillRect');
 
-            renderer.drawSelectionBox(start, end);
+            renderer.drawSelectionBox(start, end, pan, zoom);
 
             // Should normalize to top-left corner
-            expect(fillRectSpy).toHaveBeenCalledWith(10, 10, 40, 40);
+            // minX = 1 * 32 = 32, minY = 1 * 32 = 32
+            // width = (2 - 1) * 32 + 32 = 64, height = 64
+            expect(fillRectSpy).toHaveBeenCalledWith(32, 32, 64, 64);
         });
     });
 });

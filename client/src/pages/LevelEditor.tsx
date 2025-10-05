@@ -45,13 +45,27 @@ export default function LevelEditor() {
     );
 
     const handleCanvasClick = useCallback(
-        (_position: Position, _event: MouseEvent) => {
-            if (editorState.selectedTool === 'select') {
-                // Clear selection when clicking empty space with select tool
-                setEditorState((prev) => ({ ...prev, selectedObjects: [] }));
+        (position: Position, _event: MouseEvent) => {
+            if (editorState.selectedTool === 'select' && currentLevel) {
+                // Find object at clicked position
+                const clickedObject =
+                    currentLevel.objects.find(
+                        (obj) => obj.position.x === position.x && obj.position.y === position.y
+                    ) ||
+                    currentLevel.spawnPoints.find(
+                        (spawn) => spawn.position.x === position.x && spawn.position.y === position.y
+                    );
+
+                if (clickedObject) {
+                    // Select the clicked object
+                    _selectObject(clickedObject.id);
+                } else {
+                    // Clear selection when clicking empty space
+                    setEditorState((prev) => ({ ...prev, selectedObjects: [] }));
+                }
             }
         },
-        [editorState.selectedTool, setEditorState]
+        [editorState.selectedTool, currentLevel, _selectObject, setEditorState]
     );
 
     const drawingSessionTileCount = useRef(0);
@@ -100,6 +114,47 @@ export default function LevelEditor() {
             });
         },
         [setEditorState]
+    );
+
+    const handleMultiSelectComplete = useCallback(
+        (start: Position, end: Position) => {
+            if (!currentLevel) return;
+
+            // Calculate the bounding box
+            const minX = Math.min(start.x, end.x);
+            const maxX = Math.max(start.x, end.x);
+            const minY = Math.min(start.y, end.y);
+            const maxY = Math.max(start.y, end.y);
+
+            // Find all objects within the selection box
+            const selectedIds: string[] = [];
+
+            currentLevel.objects.forEach((obj) => {
+                if (
+                    obj.position.x >= minX &&
+                    obj.position.x <= maxX &&
+                    obj.position.y >= minY &&
+                    obj.position.y <= maxY
+                ) {
+                    selectedIds.push(obj.id);
+                }
+            });
+
+            currentLevel.spawnPoints.forEach((spawn) => {
+                if (
+                    spawn.position.x >= minX &&
+                    spawn.position.x <= maxX &&
+                    spawn.position.y >= minY &&
+                    spawn.position.y <= maxY
+                ) {
+                    selectedIds.push(spawn.id);
+                }
+            });
+
+            // Update selection
+            setEditorState((prev) => ({ ...prev, selectedObjects: selectedIds }));
+        },
+        [currentLevel, setEditorState]
     );
 
     const handleTileSelect = useCallback(
@@ -480,6 +535,7 @@ export default function LevelEditor() {
                             onTilePlaced={handleTilePlaced}
                             onDrawingSessionEnd={handleDrawingSessionEnd}
                             onZoom={handleWheelZoom}
+                            onMultiSelectComplete={handleMultiSelectComplete}
                         />
 
                         {/* Undo/Redo Flash Overlay */}

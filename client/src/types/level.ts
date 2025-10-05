@@ -83,6 +83,10 @@ export interface EditorState {
     showScanlines: boolean;
     mousePosition: Position;
     deletingObjects: string[];
+    selectionBox?: {
+        start: Position;
+        end: Position;
+    };
 }
 
 export interface HistoryEntry {

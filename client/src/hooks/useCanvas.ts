@@ -11,6 +11,7 @@ interface UseCanvasProps {
     onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
     onDrawingSessionEnd?: () => void;
     onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
+    onMultiSelectComplete?: (start: Position, end: Position) => void;
 }
 
 export function useCanvas({
@@ -21,6 +22,7 @@ export function useCanvas({
     onTilePlaced,
     onDrawingSessionEnd,
     onZoom,
+    onMultiSelectComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -29,6 +31,9 @@ export function useCanvas({
     const isPanningRef = useRef(false);
     const panStartRef = useRef({ x: 0, y: 0 });
     const scrollStartRef = useRef({ left: 0, top: 0 });
+    const isDraggingSelectionRef = useRef(false);
+    const selectionStartRef = useRef<Position | null>(null);
+    const selectionEndRef = useRef<Position | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -87,11 +92,27 @@ export function useCanvas({
             const worldPos = getWorldPosition(e);
             onMouseMove(worldPos);
 
+            // Handle multi-select drag box
+            if (isDraggingSelectionRef.current && editorState.selectedTool === 'multiselect') {
+                selectionEndRef.current = worldPos;
+                // Force re-render to show drag box
+                if (rendererRef.current) {
+                    rendererRef.current.render(levelData, {
+                        ...editorState,
+                        selectionBox: {
+                            start: selectionStartRef.current!,
+                            end: worldPos,
+                        },
+                    });
+                }
+                return;
+            }
+
             if (isPaintingRef.current && editorState.selectedTileType) {
                 onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
             }
         },
-        [getWorldPosition, onMouseMove, onTilePlaced, editorState.selectedTileType]
+        [getWorldPosition, onMouseMove, onTilePlaced, editorState, levelData]
     );
 
     const handleMouseDown = useCallback(
@@ -116,6 +137,14 @@ export function useCanvas({
             // Left mouse button for drawing/clicking
             const worldPos = getWorldPosition(e);
 
+            // Handle multi-select tool
+            if (editorState.selectedTool === 'multiselect') {
+                isDraggingSelectionRef.current = true;
+                selectionStartRef.current = worldPos;
+                selectionEndRef.current = worldPos;
+                return;
+            }
+
             if (editorState.selectedTileType) {
                 isPaintingRef.current = true;
                 onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
@@ -123,7 +152,7 @@ export function useCanvas({
                 onCanvasClick(worldPos, e);
             }
         },
-        [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType]
+        [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType, editorState.selectedTool]
     );
 
     const handleMouseUp = useCallback(() => {
@@ -137,6 +166,20 @@ export function useCanvas({
             }
         }
 
+        // End multi-select drag
+        if (isDraggingSelectionRef.current && selectionStartRef.current && selectionEndRef.current) {
+            isDraggingSelectionRef.current = false;
+            if (onMultiSelectComplete) {
+                onMultiSelectComplete(selectionStartRef.current, selectionEndRef.current);
+            }
+            selectionStartRef.current = null;
+            selectionEndRef.current = null;
+            // Re-render without selection box
+            if (rendererRef.current) {
+                rendererRef.current.render(levelData, editorState);
+            }
+        }
+
         // End painting
         if (isPaintingRef.current) {
             isPaintingRef.current = false;
@@ -145,7 +188,7 @@ export function useCanvas({
                 onDrawingSessionEnd();
             }
         }
-    }, [onDrawingSessionEnd]);
+    }, [onDrawingSessionEnd, onMultiSelectComplete, levelData, editorState]);
 
     const handleClick = useCallback(
         (e: MouseEvent) => {
