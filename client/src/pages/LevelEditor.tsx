@@ -556,8 +556,8 @@ export default function LevelEditor() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>Objects:</span>
-                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>
-                            {currentLevel.objects.length + currentLevel.spawnPoints.length}
+                        <span data-testid="statusbar-object-count" style={{ color: '#e0e0e0', fontWeight: 500 }}>
+                            {currentLevel.tiles.length + currentLevel.objects.length + currentLevel.spawnPoints.length}
                         </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -586,7 +586,7 @@ export default function LevelEditor() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>History:</span>
-                        <span data-testid="statusbar-history-display" style={{ color: '#e0e0e0', fontWeight: 500 }}>
+                        <span data-testid="statusbar-history" style={{ color: '#e0e0e0', fontWeight: 500 }}>
                             {historyIndex + 1}/{history.length}
                         </span>
                     </div>
