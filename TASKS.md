@@ -258,35 +258,20 @@ Work through chapters sequentially. After implementing each chapter:
   - `e2e/level-editor.spec.ts` - Consolidated test at line 1375
 - **Impact:** -2 tests, -60 lines (better than expected -90 due to refactoring)
 
-**Phase 2 Progress (2/4 complete):** -3 tests, -91 lines
+**Phase 2 Progress (3/4 complete):** -4 tests, -116 lines
 
-#### 13.5 Merge copy keyboard and button tests
-- **Location:** Lines 1776-1807 (Ctrl+C) and Lines 1856-1879 (Button)
-- **Current:** 2 separate tests for same copy functionality
-- **Consolidated test:**
-  ```typescript
-  test('should copy with Ctrl+C and button', async ({ page }) => {
-      // Place and select object
-      await placeTile(page, 'tile-platform-grass', 200, 200);
-      await page.getByTestId('button-tool-select').click();
-      await clickCanvas(page, 200, 200);
-
-      // Test keyboard shortcut
-      await page.keyboard.press('Control+c');
-      await expect(page.getByText(/Copied 1 items?/)).toBeVisible();
-
-      // Clear clipboard by pasting and deleting
-      await page.keyboard.press('Control+v');
-      await page.keyboard.press('Delete');
-
-      // Test button
-      await clickCanvas(page, 200, 200); // Re-select
-      await page.getByTestId('button-copy').click();
-      await expect(page.getByText(/Copied 1 items?/)).toBeVisible();
-  });
-  ```
-- **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** -1 test, -30 lines
+#### 13.5 Merge copy keyboard and button tests ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **Location:** Lines 1613-1650 (consolidated test)
+- **What was done:**
+  - Consolidated two separate copy tests into one test that checks both Ctrl+C and button
+  - Deleted old "should copy button click work" test
+  - New test verifies both input methods produce same outcome (toast notification)
+  - Follows pattern from redo consolidation (commit 6d9a118)
+- **Files modified:**
+  - `e2e/level-editor.spec.ts` - Consolidated test at line 1613
+- **Impact:** -1 test, -25 lines
+- **Commit:** 38864db
 
 #### 13.6 Merge paste keyboard and button tests
 - **Location:** Lines 1809-1854 (Ctrl+V) and Lines 1882-1919 (Button)
