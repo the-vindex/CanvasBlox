@@ -561,8 +561,8 @@ test('should load levels from localStorage', () => {
 ---
 
 ### Step 14: Import/Export Modals
-**Status**: ⬜ Not Started
-**Current State**: No import/export
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: Full import/export implemented with modals and File dropdown menu
 **Goal**: Full import/export JSON and PNG
 **Dependencies**: Step 1 (currentLevel)
 
