@@ -1,6 +1,6 @@
 # /todo
 
-Add a todo item to @TASKS.md without implementing it.
+Add a todo item to TASKS.md without implementing it.
 
 ## Usage
 
@@ -13,6 +13,12 @@ Add a todo item to @TASKS.md without implementing it.
 ```
 /todo Add hover effect to save button
 ```
+
+## Note: Concurrent Usage
+
+If another Claude instance is running `/next` (actively working on TASKS.md), use `/todo-inbox` instead to avoid conflicts:
+- `/todo-inbox` adds tasks to TASKS-INBOX.md (no conflicts)
+- Use `/merge-inbox` later to consolidate inbox → TASKS.md
 
 ## Instructions
 

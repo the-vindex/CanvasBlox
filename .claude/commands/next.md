@@ -14,9 +14,15 @@ mode: plan
 
 When this command is invoked:
 
-1. **Read** `TASKS.md`
-2. **Find** the first task with status: ⏸️ Not Started or similar incomplete status
-3. **Implement** that step following the **TDD workflow from CLAUDE.md**:
+1. **Check inbox (if exists):**
+   - Read `TASKS-INBOX.md` if it exists
+   - If inbox contains tasks (not just template), notify user:
+     - "📥 Note: TASKS-INBOX.md has queued tasks. Consider running `/merge-inbox` after this session to consolidate them."
+   - Continue to next step (don't block on inbox)
+
+2. **Read** `TASKS.md`
+3. **Find** the first task with status: ⏸️ Not Started or similar incomplete status
+4. **Implement** that step following the **TDD workflow from CLAUDE.md**:
    - ✅ Write failing tests first (BOTH unit AND e2e)
    - ✅ Implement feature to make tests pass
    - ✅ Verify all tests pass: `npm test && npm run test:e2e`
@@ -26,8 +32,8 @@ When this command is invoked:
    - ✅ **Run linter**: `npm run lint:fix` to fix code style issues
    - ✅ Commit code + tests together
    - ✅ Push to remote: `git push`
-4. **Update** the task's status to: 🧪 Ready for User Testing (or appropriate status)
-5. **Report** to the user:
+5. **Update** the task's status to: 🧪 Ready for User Testing (or appropriate status)
+6. **Report** to the user:
    - Which step was implemented
    - What files were changed
    - What they need to manually test (from the "Manual Test" section)
