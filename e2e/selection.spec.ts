@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getObjectCount } from './helpers';
 
 test.describe('Selection', () => {
     test.beforeEach(async ({ page }) => {
@@ -13,9 +14,7 @@ test.describe('Selection', () => {
 
         // Place a button object
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Switch to select tool
@@ -23,7 +22,7 @@ test.describe('Selection', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'true');
 
         // Click on the placed object to select it
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Selection count should show 1 selected
@@ -31,27 +30,24 @@ test.describe('Selection', () => {
     });
 
     test('should clear selection when clicking empty space with select tool', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
         const selectionCount = page.getByTestId('selection-count');
 
         // Place and select a button
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         await selectTool.click();
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Verify object is selected
         await expect(selectionCount).toHaveText('Selected: 1 object(s)');
 
         // Click on empty space
-        await page.mouse.click(box.x + 100, box.y + 100);
+        await clickCanvas(page, 100, 100);
         await page.waitForTimeout(100);
 
         // Selection should be cleared
@@ -66,15 +62,13 @@ test.describe('Selection', () => {
 
         // Place multiple objects
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Place 3 buttons in a row
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 264, box.y + 200); // 64px apart (2 tiles)
+        await clickCanvas(page, 264, 200); // 64px apart (2 tiles)
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 328, box.y + 200);
+        await clickCanvas(page, 328, 200);
         await page.waitForTimeout(100);
 
         // Switch to multi-select tool
@@ -82,6 +76,8 @@ test.describe('Selection', () => {
         await expect(multiSelectTool).toHaveAttribute('aria-pressed', 'true');
 
         // Drag a selection box over all objects
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         const startX = box.x + 180;
         const startY = box.y + 180;
         const endX = box.x + 360;
@@ -106,14 +102,12 @@ test.describe('Selection', () => {
 
         // Place a button
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Switch to select tool and select the object
         await selectTool.click();
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Verify canvas was redrawn (selection highlight rendered)
@@ -134,7 +128,6 @@ test.describe('Selection', () => {
     });
 
     test('should update selection count correctly', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
         const selectionCount = page.getByTestId('selection-count');
@@ -144,21 +137,19 @@ test.describe('Selection', () => {
 
         // Place two buttons
         await buttonTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 300, box.y + 200);
+        await clickCanvas(page, 300, 200);
         await page.waitForTimeout(100);
 
         // Select first object
         await selectTool.click();
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
         await expect(selectionCount).toHaveText('Selected: 1 object(s)');
 
         // Clear selection
-        await page.mouse.click(box.x + 100, box.y + 100);
+        await clickCanvas(page, 100, 100);
         await page.waitForTimeout(100);
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
