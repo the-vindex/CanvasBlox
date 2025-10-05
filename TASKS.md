@@ -1,7 +1,7 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Chapter 11 - Drawing Tools Implementation
+**Current Chapter:** Chapter 11 - Drawing Tools Implementation (alternative: Chapter 13 - E2E Test Simplification)
 **Last Updated:** 2025-10-05
 
 ---
@@ -180,6 +180,301 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
+## Chapter 13: E2E Test Simplification & Refactoring
+
+**Status:** ⏸️ Not Started
+**Files:** `e2e/level-editor.spec.ts` (3,066 lines, 126 tests)
+**Priority:** Medium
+
+**Current State:**
+- 126 E2E tests with significant duplication
+- ~300 lines of redundant test code identified
+- Repetitive setup patterns in every test
+- Missing test coverage for error handling and edge cases
+
+**Goals:**
+- Reduce test count by 12 tests (-9.5%)
+- Eliminate ~300-500 lines of redundant code (-10-16%)
+- Improve test maintainability and clarity
+- Add missing coverage for error scenarios
+
+### Phase 1: Quick Wins (High Priority)
+
+#### 13.1 Delete redundant zoom status bar test
+- **Location:** `e2e/level-editor.spec.ts:757-787`
+- **Test Name:** "Step 9: zoom controls should update status bar zoom display"
+- **Reason:** Fully redundant with consolidated zoom tests
+- **Action:** Delete entire test
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -1 test, -30 lines
+
+#### 13.2 Merge Step 6 and Step 9 zoom tests
+- **Location:** Lines 348-406 (Step 6) and Lines 658-721 (Step 9)
+- **Current:** 6 duplicate tests testing same zoom functionality
+- **Tests to delete (Step 6 versions):**
+  - Line 348-362: "Step 6: should increase zoom when zoom in button clicked"
+  - Line 364-384: "Step 6: should decrease zoom when zoom out button clicked"
+  - Line 386-406: "Step 6: should reset zoom when reset button clicked"
+- **Tests to keep (Step 9 versions - more comprehensive):**
+  - Line 658-680: "Step 9: should zoom in at viewport center when zoom in button clicked"
+  - Line 682-698: "Step 9: should zoom out at viewport center when zoom out button clicked"
+  - Line 700-721: "Step 9: should reset zoom to 100% when reset button clicked"
+- **Reason:** Step 9 tests verify both toolbar AND status bar updates, while Step 6 only checks toolbar
+- **Action:** Delete Step 6 zoom tests, keep Step 9 tests
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -3 tests, -120 lines
+
+### Phase 2: Consolidate Interaction Tests (Medium Priority)
+
+#### 13.3 Merge undo keyboard and button tests
+- **Location:** Lines 1425-1468 (Ctrl+Z) and Lines 1530-1555 (Button)
+- **Current:** 2 separate tests for same undo functionality
+- **Consolidated test:**
+  ```typescript
+  test('should undo with Ctrl+Z and button', async ({ page }) => {
+      // Setup: Place a tile
+      await page.getByTestId('tile-platform-grass').click();
+      await clickCanvas(page, 200, 200);
+      const initialCount = await getObjectCount(page);
+
+      // Test keyboard shortcut
+      await page.keyboard.press('Control+z');
+      const afterKeyboardUndo = await getObjectCount(page);
+      expect(afterKeyboardUndo).toBe(initialCount - 1);
+
+      // Redo to restore
+      await page.keyboard.press('Control+y');
+
+      // Test button
+      await page.getByTestId('button-undo').click();
+      const afterButtonUndo = await getObjectCount(page);
+      expect(afterButtonUndo).toBe(initialCount - 1);
+  });
+  ```
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -1 test, -45 lines
+
+#### 13.4 Merge redo keyboard shortcuts and button tests
+- **Location:** Lines 1470-1498 (Ctrl+Y), Lines 1500-1528 (Ctrl+Shift+Z), Lines 1557-1587 (Button)
+- **Current:** 3 separate tests for same redo functionality with different triggers
+- **Consolidated test:**
+  ```typescript
+  test('should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
+      // Setup: Place and undo a tile
+      await placeTile(page, 'tile-platform-grass', 200, 200);
+      await page.keyboard.press('Control+z');
+      const afterUndo = await getObjectCount(page);
+
+      // Test Ctrl+Y
+      await page.keyboard.press('Control+y');
+      expect(await getObjectCount(page)).toBe(afterUndo + 1);
+
+      // Undo again for next test
+      await page.keyboard.press('Control+z');
+
+      // Test Ctrl+Shift+Z
+      await page.keyboard.press('Control+Shift+z');
+      expect(await getObjectCount(page)).toBe(afterUndo + 1);
+
+      // Undo again for button test
+      await page.keyboard.press('Control+z');
+
+      // Test button
+      await page.getByTestId('button-redo').click();
+      expect(await getObjectCount(page)).toBe(afterUndo + 1);
+  });
+  ```
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -2 tests, -90 lines
+
+#### 13.5 Merge copy keyboard and button tests
+- **Location:** Lines 1776-1807 (Ctrl+C) and Lines 1856-1879 (Button)
+- **Current:** 2 separate tests for same copy functionality
+- **Consolidated test:**
+  ```typescript
+  test('should copy with Ctrl+C and button', async ({ page }) => {
+      // Place and select object
+      await placeTile(page, 'tile-platform-grass', 200, 200);
+      await page.getByTestId('button-tool-select').click();
+      await clickCanvas(page, 200, 200);
+
+      // Test keyboard shortcut
+      await page.keyboard.press('Control+c');
+      await expect(page.getByText(/Copied 1 items?/)).toBeVisible();
+
+      // Clear clipboard by pasting and deleting
+      await page.keyboard.press('Control+v');
+      await page.keyboard.press('Delete');
+
+      // Test button
+      await clickCanvas(page, 200, 200); // Re-select
+      await page.getByTestId('button-copy').click();
+      await expect(page.getByText(/Copied 1 items?/)).toBeVisible();
+  });
+  ```
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -1 test, -30 lines
+
+#### 13.6 Merge paste keyboard and button tests
+- **Location:** Lines 1809-1854 (Ctrl+V) and Lines 1882-1919 (Button)
+- **Current:** 2 separate tests for same paste functionality
+- **Consolidated test:**
+  ```typescript
+  test('should paste with Ctrl+V and button', async ({ page }) => {
+      // Copy an object first
+      await placeTile(page, 'tile-platform-grass', 200, 200);
+      await page.getByTestId('button-tool-select').click();
+      await clickCanvas(page, 200, 200);
+      await page.keyboard.press('Control+c');
+
+      // Test keyboard shortcut
+      await page.keyboard.press('Control+v');
+      await expect(page.getByText(/Pasted 1 items?/)).toBeVisible();
+      const afterKeyboardPaste = await getObjectCount(page);
+
+      // Test button (clipboard still has the object)
+      await page.getByTestId('button-paste').click();
+      await expect(page.getByText(/Pasted 1 items?/)).toBeVisible();
+      const afterButtonPaste = await getObjectCount(page);
+
+      expect(afterButtonPaste).toBe(afterKeyboardPaste + 1);
+  });
+  ```
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -1 test, -30 lines
+
+### Phase 3: Extract Helper Functions (Medium Priority)
+
+#### 13.7 Create E2E test helper utilities file
+- **Location:** Create new file `e2e/helpers.ts`
+- **Purpose:** Reduce repetitive boilerplate code across all 126 tests
+- **Implementation:**
+  ```typescript
+  // e2e/helpers.ts
+  import type { Page } from '@playwright/test';
+
+  /**
+   * Click on canvas at specific coordinates relative to canvas origin
+   */
+  export async function clickCanvas(page: Page, x: number, y: number) {
+      const canvas = page.getByTestId('level-canvas');
+      const box = await canvas.boundingBox();
+      if (!box) throw new Error('Canvas not found');
+      await page.mouse.click(box.x + x, box.y + y);
+  }
+
+  /**
+   * Place a tile at specific canvas coordinates
+   */
+  export async function placeTile(page: Page, tileTestId: string, x: number, y: number) {
+      await page.getByTestId(tileTestId).click();
+      await clickCanvas(page, x, y);
+      await page.waitForTimeout(100); // Wait for render
+  }
+
+  /**
+   * Get current zoom value from toolbar or status bar
+   */
+  export async function getZoomValue(page: Page, source: 'toolbar' | 'statusbar' = 'toolbar'): Promise<number> {
+      const testId = source === 'toolbar' ? 'zoom-level' : 'statusbar-zoom-display';
+      const text = await page.getByTestId(testId).textContent();
+      return parseInt(text?.replace('%', '') || '100', 10);
+  }
+
+  /**
+   * Get total object count from status bar
+   */
+  export async function getObjectCount(page: Page): Promise<number> {
+      const statusText = await page.getByTestId('selection-count').textContent();
+      const match = statusText?.match(/(\d+) object/);
+      return match ? parseInt(match[1], 10) : 0;
+  }
+
+  /**
+   * Select a tool by test ID
+   */
+  export async function selectTool(page: Page, tool: 'select' | 'multiselect' | 'move' | 'line' | 'rectangle' | 'link') {
+      await page.getByTestId(`button-tool-${tool}`).click();
+  }
+
+  /**
+   * Select and place an object (tile, interactable, or spawn point)
+   */
+  export async function placeObject(page: Page, objectType: string, x: number, y: number) {
+      await page.getByText(objectType, { exact: true }).click();
+      await clickCanvas(page, x, y);
+      await page.waitForTimeout(100);
+  }
+
+  /**
+   * Get canvas bounding box
+   */
+  export async function getCanvasBounds(page: Page) {
+      const canvas = page.getByTestId('level-canvas');
+      const box = await canvas.boundingBox();
+      if (!box) throw new Error('Canvas not found');
+      return box;
+  }
+  ```
+- **Files to create:** `e2e/helpers.ts`
+- **Files to modify:** All tests in `e2e/level-editor.spec.ts` (add import and use helpers)
+- **Impact:** -200 lines across all tests
+
+#### 13.8 Refactor existing tests to use helper functions
+- **Location:** `e2e/level-editor.spec.ts` (all 126 tests)
+- **Current:** Repetitive patterns in every test:
+  ```typescript
+  // BEFORE (repeated ~100 times):
+  const canvas = page.getByTestId('level-canvas');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas not found');
+  await page.mouse.click(box.x + 200, box.y + 200);
+  ```
+- **After refactoring:**
+  ```typescript
+  // AFTER (using helpers):
+  import { clickCanvas, placeTile, getZoomValue } from './helpers';
+
+  await clickCanvas(page, 200, 200);
+  ```
+- **Action:** Replace repetitive patterns with helper function calls
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** -200 lines through code reuse
+
+### Phase 4: Add Missing Coverage (Low Priority)
+
+#### 13.9 Add error handling and edge case tests
+- **Location:** `e2e/level-editor.spec.ts` (new tests to add)
+- **Missing Coverage:**
+  1. **Network Errors:**
+     - Import JSON with network failure
+     - Corrupt localStorage recovery
+     - Invalid tile data handling
+  2. **Edge Cases:**
+     - Copy/paste with 0 objects selected
+     - Zoom during active drag operation
+     - Pan beyond canvas boundaries
+     - Undo/redo across level switches
+  3. **Keyboard Shortcuts:**
+     - Delete key (only animation tested currently)
+     - Ctrl+A (select all) - not implemented or tested
+     - Arrow keys for object movement
+  4. **Cross-Level Operations:**
+     - Copy from one level, paste to another
+     - Undo/redo state preservation across level switches
+  5. **Performance:**
+     - Large canvas with 1000+ objects
+     - Rapid tool switching
+     - Memory leaks on level close
+- **Implementation:** Add 8-12 new targeted tests
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** +12 tests, +300 lines (but filling critical gaps)
+
+**Dependencies:** Phase 3 (helpers) should be completed before Phase 4 to avoid more boilerplate
+**Notes:** Focus on Phase 1 & 2 for immediate maintainability gains. Phase 3 & 4 are optional improvements.
+
+---
+
 ## Chapter 12: Documentation & Project Organization
 
 **Status:** ⏸️ Not Started
@@ -259,6 +554,7 @@ Work through chapters sequentially. After implementing each chapter:
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
 | 11. Drawing Tools | 🔄 In Progress | ❌ | 4/11 complete - Selection/move done, link/draw tools remain |
+| 13. E2E Test Simplification | ⏸️ Not Started | ❌ | Reduce duplication, extract helpers, improve coverage |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
@@ -279,7 +575,7 @@ Work through chapters sequentially. After implementing each chapter:
 - ✅ Multi-select tool (drag box)
 - ✅ Clear brush on tool change
 
-**❌ Remaining (Priority Order):**
+**❌ Chapter 11 Remaining (Priority Order):**
 1. 🔧 **11.10** Tile overlap logic - newest tile wins (NEW - HIGH PRIORITY)
 2. 🔗 **11.5** Linking tool for interactable objects
 3. ✂️ **11.6** Unlinking tool (Properties Panel)
@@ -287,6 +583,12 @@ Work through chapters sequentially. After implementing each chapter:
 5. 📐 **11.2** Rectangle drawing tool
 6. 🔢 **11.9** Button numbering system
 7. 🔄 **11.7** Rotation tool - decision needed
+
+**Alternative Focus:** Chapter 13 - E2E Test Simplification (medium priority)
+- 🧹 Delete 4 redundant zoom tests (-150 lines)
+- 🔀 Merge 8 duplicate undo/redo/copy/paste tests (-165 lines)
+- 🛠️ Extract helper functions (-200 lines)
+- ✅ Add missing error/edge case coverage (+12 tests)
 
 **Future:** Chapter 12 - Documentation (low priority)
 

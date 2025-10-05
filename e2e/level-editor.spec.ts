@@ -2666,7 +2666,7 @@ test.describe('Step 19: Delete Animations', () => {
         await page.waitForTimeout(100);
 
         // Select the tile
-        await page.getByRole('button', { name: /select/i }).click();
+        await page.getByTestId('tool-select').click();
         await page.waitForTimeout(50);
         await page.mouse.click(box.x + 300, box.y + 300);
         await page.waitForTimeout(100);
@@ -2697,7 +2697,7 @@ test.describe('Step 19: Delete Animations', () => {
         expect(finalCount).toBeLessThan(initialCount);
 
         // Selection should be cleared
-        expect(await selectionCount.textContent()).toBe('Selected: 0 objects');
+        expect(await selectionCount.textContent()).toBe('Selected: 0 object(s)');
     });
 
     test('multiple objects should all animate when deleted together', async ({ page }) => {
@@ -2719,7 +2719,7 @@ test.describe('Step 19: Delete Animations', () => {
         await page.waitForTimeout(100);
 
         // Switch to multi-select tool
-        await page.getByRole('button', { name: /multi.*select/i }).click();
+        await page.getByTestId('tool-multiselect').click();
         await page.waitForTimeout(50);
 
         // Drag to select all three tiles
@@ -2748,7 +2748,7 @@ test.describe('Step 19: Delete Animations', () => {
         expect(finalCount).toBeLessThan(initialCount);
 
         // Selection should be cleared
-        expect(await selectionCount.textContent()).toBe('Selected: 0 objects');
+        expect(await selectionCount.textContent()).toBe('Selected: 0 object(s)');
     });
 
     test('delete animation should work for all object types', async ({ page }) => {
@@ -2772,13 +2772,13 @@ test.describe('Step 19: Delete Animations', () => {
         await page.waitForTimeout(50);
 
         // Place a spawn point
-        await page.getByText('Player Spawn', { exact: true }).click();
+        await page.getByText('Player', { exact: true }).click();
         await page.waitForTimeout(50);
         await page.mouse.click(box.x + 450, box.y + 250);
         await page.waitForTimeout(100);
 
         // Select all objects with multi-select
-        await page.getByRole('button', { name: /multi.*select/i }).click();
+        await page.getByTestId('tool-multiselect').click();
         await page.waitForTimeout(50);
         await page.mouse.move(box.x + 230, box.y + 230);
         await page.mouse.down();
