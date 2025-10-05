@@ -17,7 +17,4 @@ When one Claude instance is running `/next` (actively working on tasks), it read
 
 ## Inbox Queue
 
-### [2025-10-05 14:30] Fix all linter issues
-- **Added by:** User request
-- **Suggested chapter:** Chapter 15 - Code Quality & Refactoring
-- **Notes:** Address all linting errors/warnings across the codebase
+_(Empty - all tasks merged into TASKS.md)_

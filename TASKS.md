@@ -1,8 +1,8 @@
 # Visual Enhancement Roadmap - Roblox Level Designer
 
 **Status:** In Progress
-**Current Chapter:** Chapter 11 - Drawing Tools Implementation (alternative: Chapter 13 - E2E Test Simplification)
-**Last Updated:** 2025-10-05
+**Current Chapter:** Chapter 11 - Drawing Tools Implementation (alternative: Chapter 13 - E2E Test Simplification, **PRIORITY:** Chapter 16 - Bug Fixes)
+**Last Updated:** 2025-10-05 (20:15 - Added Chapter 16 Bug Fixes, Chapter 15 Code Quality)
 
 ---
 
@@ -562,6 +562,126 @@ Press ESC                      → null            | null               ❌ clea
 
 ---
 
+## Chapter 16: Bug Fixes
+
+**Status:** ⏸️ Not Started
+**Files:** Various
+**Priority:** High (P2 - Bugfix)
+
+**Goal:** Fix critical bugs discovered through E2E test failures and improve application reliability.
+
+### Tasks:
+
+#### 16.1 Fix Import JSON not updating level name
+- **Priority:** 2 (Bugfix)
+- **Location:** Import modal logic, `client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`
+- **Current:** When importing JSON via File → Import JSON, the level name field shows "New Level" instead of the imported level's name
+- **Issue:** Level state appears to not update properly after import, or the import modal doesn't apply the levelName from the JSON
+- **Affected E2E tests:**
+  - "Step 14: should import valid JSON level data" - expects level name to be "Imported Level"
+  - "Step 14: should validate single player spawn on import" - expects level name to be "Invalid Level"
+- **Expected behavior:** After importing JSON with `levelName: "Imported Level"`, the level name input field should display "Imported Level"
+- **Files to investigate:**
+  - Import modal component/logic
+  - `useLevelEditor` hook - check if `importLevel` function updates level name
+  - Level state update mechanism
+- **Implementation:**
+  - Debug import flow to identify where level name update is lost
+  - Ensure imported JSON's `levelName` property is applied to current level
+  - Verify Properties Panel reflects imported level name
+  - Add state update or force re-render if needed
+- **Tests:**
+  - Verify E2E tests pass after fix
+  - Manual test: Import JSON with custom level name, verify it displays correctly
+- **Note:** This is blocking 2 E2E tests from passing
+
+#### 16.2 Fix Export PNG download not triggering
+- **Priority:** 2 (Bugfix)
+- **Location:** `client/src/pages/LevelEditor.tsx` - `handleExportPNG` function
+- **Current:** Clicking File → Export PNG doesn't trigger a browser download event
+- **Issue:** The `handleExportPNG` function may not be properly creating/triggering the download, or the canvas-to-blob conversion is failing
+- **Affected E2E tests:**
+  - "Step 14: should export PNG when export PNG clicked" - waits for download event that never fires
+- **Expected behavior:** Clicking "Export PNG" should trigger browser download with .png file containing canvas screenshot
+- **Files to investigate:**
+  - `client/src/pages/LevelEditor.tsx` - `handleExportPNG` function (around line 300-350)
+  - `client/src/utils/levelSerializer.ts` - `exportToPNG` function if it exists
+  - Canvas rendering state at export time
+- **Implementation:**
+  - Check if `handleExportPNG` is being called (add console.log or debugger)
+  - Verify canvas.toBlob() or canvas.toDataURL() is working
+  - Ensure download link is created and clicked programmatically
+  - Check for any async/timing issues
+- **Tests:**
+  - Verify E2E test passes after fix
+  - Manual test: Export PNG and verify file downloads with correct content
+- **Note:** This is blocking 1 E2E test from passing
+
+#### 16.3 Fix Invalid JSON toast selector ambiguity
+- **Priority:** 3 (Test improvement)
+- **Location:** `e2e/level-editor.spec.ts` - "Step 14: should show error for invalid JSON"
+- **Current:** Test selector `getByText(/Invalid JSON/i)` matches 3 elements: toast notification, textarea content, and aria-live status
+- **Issue:** Selector is too broad and causes Playwright strict mode violation
+- **Affected E2E tests:**
+  - "Step 14: should show error for invalid JSON" - fails with "resolved to 3 elements" error
+- **Expected behavior:** Test should target only the toast notification element
+- **Implementation:**
+  - Update test to use more specific selector:
+    - Option 1: `page.locator('[role="status"]').filter({ hasText: /Invalid JSON/i })`
+    - Option 2: Target toast container by test ID or class
+    - Option 3: Use `page.getByRole('alert')` if toast has alert role
+  - Verify only one element matches
+- **Files to modify:**
+  - `e2e/level-editor.spec.ts` - Update selector in invalid JSON test
+- **Tests:**
+  - Verify E2E test passes with new selector
+  - Ensure no other tests break from selector change
+- **Note:** This is a test fix, not an app bug - low priority
+
+**Dependencies:** None
+**Notes:** P2 bugs are critical for E2E test suite health. Fix these before continuing with feature work.
+
+---
+
+## Chapter 15: Code Quality & Refactoring
+
+**Status:** ⏸️ Not Started
+**Files:** Various
+**Priority:** Medium
+
+### Tasks:
+
+#### 15.1 Fix all linter issues
+- **Priority:** 3 (Feature)
+- **Location:** Multiple files across codebase
+- **Current:** Biome linter reports warnings for excessive cognitive complexity and other issues
+- **Known issues:**
+  - `client/src/hooks/useCanvas.ts` - 3 functions with excessive complexity (26, 17, 38)
+    - `handleMouseMove` - complexity 26 (max 15)
+    - `handleMouseDown` - complexity 17 (max 15)
+    - `handleMouseUp` - complexity 38 (max 15)
+  - `client/src/pages/LevelEditor.tsx` - `LevelEditor` function complexity 23 (max 15)
+- **Change:** Refactor complex functions to reduce cognitive complexity below threshold (15)
+- **Implementation approach:**
+  - Extract helper functions from complex handlers
+  - Break down conditional logic into smaller, named functions
+  - Consider state machine pattern for tool/mode handling
+  - Use early returns to reduce nesting
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` - Refactor mouse handlers
+  - `client/src/pages/LevelEditor.tsx` - Refactor LevelEditor component
+  - Any other files with linter warnings
+- **Tests:**
+  - Ensure all unit tests still pass after refactoring
+  - Ensure all E2E tests still pass
+  - No behavioral changes - pure refactoring
+- **Note:** This improves code maintainability and makes future changes easier
+
+**Dependencies:** None
+**Notes:** Can be done incrementally - start with highest complexity functions first
+
+---
+
 ## Chapter 12: Documentation & Project Organization
 
 **Status:** ⏸️ Not Started
@@ -727,6 +847,8 @@ Press ESC                      → null            | null               ❌ clea
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
 | 11. Drawing Tools | 🔄 In Progress | ❌ | 5/12 complete, 7 tasks remaining |
 | 13. E2E Test Simplification | 🔄 In Progress | ❌ | Phase 2: 4/7 complete (-5 tests, -185 lines) |
+| 16. Bug Fixes | ⏸️ Not Started | ❌ | **HIGH PRIORITY** - 3 tasks (2x P2 bugs, 1x P3 test fix) |
+| 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, reduce linter warnings |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 | 14. E2E Test Organization | ⏸️ Not Started | ❌ | Split monolithic test file into 12+ focused files |
 | 15. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
@@ -773,10 +895,14 @@ Press ESC                      → null            | null               ❌ clea
 - **Phase 4 (Not Started):** Add error/edge case coverage
 
 **New Chapters (Queued):**
+- **Chapter 16:** Bug Fixes - **HIGH PRIORITY** - Fix import/export bugs blocking E2E tests
+- **Chapter 15:** Code Quality & Refactoring - Reduce linter warnings, refactor complex functions
 - **Chapter 14:** E2E Test Organization - Split monolithic test file
-- **Chapter 15:** Enhanced Copy/Paste - Ghost preview workflow
+- **Chapter 15:** Enhanced Copy/Paste - Ghost preview workflow (renumber to Ch 17)
 
 **Future:** Chapter 12 - Documentation (low priority)
+
+**Recommended Next:** `/next chapter 16` - Fix critical P2 bugs discovered in E2E test session
 
 ---
 
