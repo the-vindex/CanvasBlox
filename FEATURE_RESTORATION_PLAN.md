@@ -675,28 +675,32 @@ test('should load levels from localStorage', () => {
 ## Section 4: Visual Features
 
 ### Step 16: Scanlines Toggle
-**Status**: ⬜ Not Started
-**Current State**: Toggle exists but doesn't work
+**Status**: ✅ Complete (auto-accepted)
+**Current State**: Scanlines toggle fully working with comprehensive tests
 **Goal**: Working scanlines overlay
 **Dependencies**: Step 3 (Canvas component)
 
 **Implementation**:
-1. Ensure `editorState.showScanlines` updates from Toolbar
-2. Canvas component should conditionally render scanlines:
+1. ✅ `editorState.showScanlines` updates from Toolbar
+2. ✅ Canvas component conditionally renders scanlines:
    ```tsx
    {editorState.showScanlines && (
      <div className="scanlines-overlay absolute inset-0 pointer-events-none" />
    )}
    ```
-3. Ensure CSS for `.scanlines-overlay` exists
+3. ✅ CSS for `.scanlines-overlay` exists in `client/src/index.css`
 
-**Files to modify**:
-- Verify `client/src/components/level-editor/Canvas.tsx`
-- Verify `client/src/index.css` has scanlines CSS
+**Files modified**:
+- ✅ `client/src/components/level-editor/Canvas.tsx` (already implemented)
+- ✅ `client/src/index.css` (already has scanlines CSS)
+- ✅ Added `client/src/components/level-editor/Canvas.test.tsx` (4 unit tests)
+- ✅ Added E2E tests in `e2e/level-editor.spec.ts` (2 tests)
 
-**Test**:
-- Toggle should add/remove scanlines
-- Scanlines should not block interaction
+**Tests**:
+- ✅ Toggle adds/removes scanlines overlay (E2E + unit)
+- ✅ Scanlines don't block mouse interactions (E2E)
+- ✅ Scanlines have pointer-events: none (unit)
+- ✅ All tests pass (6/6)
 
 ---
 
