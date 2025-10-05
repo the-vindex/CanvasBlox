@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickCanvas, getObjectCount } from './helpers';
 
 test.describe('Visual Effects', () => {
     test.beforeEach(async ({ page }) => {
@@ -24,7 +25,6 @@ test.describe('Visual Effects', () => {
 
     test('scanlines overlay should not block mouse interactions', async ({ page }) => {
         const scanlinesToggle = page.getByTestId('switch-show-scanlines');
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
 
         // Enable scanlines
@@ -36,16 +36,13 @@ test.describe('Visual Effects', () => {
 
         // Try to place a tile - should work despite scanlines overlay
         await grassTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-
-        const initialObjectCount = await page.getByTestId('statusbar-object-count').textContent();
-        await page.mouse.click(box.x + 150, box.y + 150);
+        const initialObjectCount = await getObjectCount(page);
+        await clickCanvas(page, 150, 150);
         await page.waitForTimeout(100);
 
         // Verify tile was placed (object count should increase)
-        const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
-        expect(newObjectCount).not.toBe(initialObjectCount);
+        const newObjectCount = await getObjectCount(page);
+        expect(newObjectCount).toBeGreaterThan(initialObjectCount);
     });
 
     test('grid toggle should be visible and interactive', async ({ page }) => {
@@ -73,7 +70,6 @@ test.describe('Visual Effects', () => {
 
     test('grid toggle should not affect canvas interactions', async ({ page }) => {
         const gridToggle = page.getByTestId('switch-show-grid');
-        const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
 
         // Turn off grid
@@ -86,30 +82,24 @@ test.describe('Visual Effects', () => {
 
         // Try to place a tile - should work even with grid off
         await grassTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-
-        const initialObjectCount = await page.getByTestId('statusbar-object-count').textContent();
-        await page.mouse.click(box.x + 200, box.y + 200);
+        const initialObjectCount = await getObjectCount(page);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
 
         // Verify tile was placed (object count should increase)
-        const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
-        expect(newObjectCount).not.toBe(initialObjectCount);
+        const newObjectCount = await getObjectCount(page);
+        expect(newObjectCount).toBeGreaterThan(initialObjectCount);
     });
 
     test('selected tiles should have visual selection feedback', async ({ page }) => {
-        // First, place a tile to select
         const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Click a platform tile to select it
         await page.getByText('Basic', { exact: true }).click();
         await page.waitForTimeout(100);
 
         // Place tile on canvas
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Switch to select tool
@@ -118,7 +108,7 @@ test.describe('Visual Effects', () => {
         await page.waitForTimeout(100);
 
         // Click the tile to select it
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Verify selection count increased
@@ -140,22 +130,19 @@ test.describe('Visual Effects', () => {
 
     test('selection should work for different object types', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-
         const selectionCount = page.getByTestId('selection-count');
 
         // Test 1: Select a tile (platform)
         await page.getByText('Grass', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 400, box.y + 400);
+        await clickCanvas(page, 400, 400);
         await page.waitForTimeout(50);
 
         // Switch to select tool and select the tile
         const selectButton = page.getByRole('button', { name: /select/i }).first();
         await selectButton.click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 400, box.y + 400);
+        await clickCanvas(page, 400, 400);
         await page.waitForTimeout(50);
 
         let countText = await selectionCount.textContent();
@@ -168,12 +155,12 @@ test.describe('Visual Effects', () => {
         // Test 2: Select an interactable object (button)
         await page.getByText('Button', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 500, box.y + 500);
+        await clickCanvas(page, 500, 500);
         await page.waitForTimeout(50);
 
         await selectButton.click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 500, box.y + 500);
+        await clickCanvas(page, 500, 500);
         await page.waitForTimeout(50);
 
         countText = await selectionCount.textContent();
@@ -187,12 +174,12 @@ test.describe('Visual Effects', () => {
         // Use "Player" instead of "Player Spawn" as the exact text may vary
         await page.getByText('Player', { exact: true }).first().click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 600, box.y + 400);
+        await clickCanvas(page, 600, 400);
         await page.waitForTimeout(50);
 
         await selectButton.click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 600, box.y + 400);
+        await clickCanvas(page, 600, 400);
         await page.waitForTimeout(50);
 
         countText = await selectionCount.textContent();
@@ -201,19 +188,17 @@ test.describe('Visual Effects', () => {
 
     test('multiple selected objects should all show selection state', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Place multiple tiles
         await page.getByText('Stone', { exact: true }).click();
         await page.waitForTimeout(50);
 
         // Place 3 tiles in a row
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 232, box.y + 200); // Next to first tile
+        await clickCanvas(page, 232, 200); // Next to first tile
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 264, box.y + 200); // Next to second tile
+        await clickCanvas(page, 264, 200); // Next to second tile
         await page.waitForTimeout(50);
 
         // Use multi-select tool to select all tiles
@@ -222,6 +207,8 @@ test.describe('Visual Effects', () => {
         await page.waitForTimeout(50);
 
         // Drag selection box over all tiles
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 190, box.y + 190);
         await page.mouse.down();
         await page.mouse.move(box.x + 280, box.y + 240);
@@ -245,20 +232,18 @@ test.describe('Visual Effects', () => {
 
     test('pulsing glow should not interfere with tile placement', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Select and place a tile
         await page.getByText('Ice', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 350, box.y + 350);
+        await clickCanvas(page, 350, 350);
         await page.waitForTimeout(50);
 
         // Select the tile
         const selectButton = page.getByRole('button', { name: /select/i }).first();
         await selectButton.click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 350, box.y + 350);
+        await clickCanvas(page, 350, 350);
         await page.waitForTimeout(50);
 
         // Verify it's selected
@@ -270,13 +255,13 @@ test.describe('Visual Effects', () => {
         await page.getByText('Lava', { exact: true }).click();
         await page.waitForTimeout(50);
 
-        const initialObjectCount = await page.getByTestId('statusbar-object-count').textContent();
-        await page.mouse.click(box.x + 450, box.y + 350);
+        const initialObjectCount = await getObjectCount(page);
+        await clickCanvas(page, 450, 350);
         await page.waitForTimeout(100);
 
         // Verify new tile was placed (object count increased)
-        const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
-        expect(newObjectCount).not.toBe(initialObjectCount);
+        const newObjectCount = await getObjectCount(page);
+        expect(newObjectCount).toBeGreaterThan(initialObjectCount);
 
         // The important thing is that tile placement works even with selection active
         // We don't strictly require selection to be cleared - that's an implementation detail
@@ -296,20 +281,16 @@ test.describe('Delete Animations', () => {
         await page.goto('/');
         await page.waitForLoadState('networkidle');
 
-        const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-
         // Place a tile
         await page.getByText('Grass', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Select the tile
         await page.getByTestId('tool-select').click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 300, box.y + 300);
+        await clickCanvas(page, 300, 300);
         await page.waitForTimeout(100);
 
         // Verify it's selected
@@ -317,8 +298,7 @@ test.describe('Delete Animations', () => {
         expect(await selectionCount.textContent()).toMatch(/Selected: [1-9]/);
 
         // Get initial object count
-        const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Delete the tile (pressing Delete key)
         await page.keyboard.press('Delete');
@@ -333,8 +313,7 @@ test.describe('Delete Animations', () => {
         await page.waitForTimeout(200);
 
         // Object count should now be reduced
-        const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeLessThan(initialCount);
 
         // Selection should be cleared
@@ -346,17 +325,15 @@ test.describe('Delete Animations', () => {
         await page.waitForLoadState('networkidle');
 
         const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Place multiple tiles
         await page.getByText('Stone', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 200, box.y + 200);
+        await clickCanvas(page, 200, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 250, box.y + 200);
+        await clickCanvas(page, 250, 200);
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 300, box.y + 200);
+        await clickCanvas(page, 300, 200);
         await page.waitForTimeout(100);
 
         // Switch to multi-select tool
@@ -364,6 +341,8 @@ test.describe('Delete Animations', () => {
         await page.waitForTimeout(50);
 
         // Drag to select all three tiles
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 180, box.y + 180);
         await page.mouse.down();
         await page.mouse.move(box.x + 320, box.y + 220);
@@ -376,16 +355,14 @@ test.describe('Delete Animations', () => {
         expect(selectedText).toMatch(/Selected: [2-9]/); // At least 2 objects
 
         // Get initial count
-        const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Delete all selected objects
         await page.keyboard.press('Delete');
         await page.waitForTimeout(300); // Wait for animation to complete
 
         // Object count should be reduced
-        const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeLessThan(initialCount);
 
         // Selection should be cleared
@@ -397,30 +374,30 @@ test.describe('Delete Animations', () => {
         await page.waitForLoadState('networkidle');
 
         const canvas = page.getByTestId('level-canvas');
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
 
         // Place a tile
         await page.getByText('Ice', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 250, box.y + 250);
+        await clickCanvas(page, 250, 250);
         await page.waitForTimeout(50);
 
         // Place an interactable object (button)
         await page.getByText('Button', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 350, box.y + 250);
+        await clickCanvas(page, 350, 250);
         await page.waitForTimeout(50);
 
         // Place a spawn point
         await page.getByText('Player', { exact: true }).click();
         await page.waitForTimeout(50);
-        await page.mouse.click(box.x + 450, box.y + 250);
+        await clickCanvas(page, 450, 250);
         await page.waitForTimeout(100);
 
         // Select all objects with multi-select
         await page.getByTestId('tool-multiselect').click();
         await page.waitForTimeout(50);
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
         await page.mouse.move(box.x + 230, box.y + 230);
         await page.mouse.down();
         await page.mouse.move(box.x + 470, box.y + 270);
@@ -433,16 +410,14 @@ test.describe('Delete Animations', () => {
         expect(selectedText).toMatch(/Selected: [1-9]/);
 
         // Get initial count
-        const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
+        const initialCount = await getObjectCount(page);
 
         // Delete all selected objects
         await page.keyboard.press('Delete');
         await page.waitForTimeout(300); // Wait for animation
 
         // Verify objects were deleted
-        const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
-        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0', 10);
+        const finalCount = await getObjectCount(page);
         expect(finalCount).toBeLessThan(initialCount);
     });
 });
