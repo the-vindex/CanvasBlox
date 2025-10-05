@@ -258,7 +258,7 @@ Work through chapters sequentially. After implementing each chapter:
   - `e2e/level-editor.spec.ts` - Consolidated test at line 1375
 - **Impact:** -2 tests, -60 lines (better than expected -90 due to refactoring)
 
-**Phase 2 Progress (3/7 complete):** -4 tests, -116 lines
+**Phase 2 Progress (4/7 complete):** -5 tests, -185 lines
 
 #### 13.5 Merge copy keyboard and button tests ✅ COMPLETE
 - **Status:** ✅ COMPLETE
@@ -273,23 +273,19 @@ Work through chapters sequentially. After implementing each chapter:
 - **Impact:** -1 test, -25 lines
 - **Commit:** 38864db
 
-#### 13.6 Merge paste keyboard and button tests
-- **Location:** Lines 1652, 1699, 1786 (3 separate paste tests)
-- **Current:** 3 separate tests for paste functionality - all test same thing (object count increases)
-- **Issues found by /review-tests:**
-  - "should paste objects with Ctrl+V and offset them" (line 1652) - tests paste + offset but only checks count
-  - "should paste button click work" (line 1699) - tests paste button via count
-  - "pasted objects should be offset from originals" (line 1786) - DUPLICATE of line 1652
-  - None actually verify offset positioning (just check count increases)
-- **Action:** Consolidate all 3 into ONE test following redo pattern (commit 6d9a118)
-- **Consolidated test approach:**
-  - Place→select→copy once
-  - Test Ctrl+V (verify toast + count)
-  - Undo the paste
-  - Test paste button (verify toast + count)
-  - Both methods call same `pasteObjects()` function
-- **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** -2 tests (consolidate 3 → 1), ~40-50 lines saved
+#### 13.6 Merge paste keyboard and button tests ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **Location:** Lines 1652 (consolidated test)
+- **What was done:**
+  - Consolidated 3 separate paste tests into one test that checks both Ctrl+V and paste button
+  - Deleted redundant tests: "should paste button click work", "pasted objects should be offset from originals"
+  - New test verifies both input methods produce same outcome (count increases + toast notification)
+  - Follows pattern from redo/copy consolidation
+  - Added comment explaining paste operation verification vs offset testing (separate concern)
+- **Files modified:**
+  - `e2e/level-editor.spec.ts` - Consolidated test at line 1652
+- **Impact:** -2 tests, -69 lines
+- **Commit:** ec4adb9
 
 #### 13.7 Fix or remove redundant offset tests
 - **Location:** Lines 1652, 1786 (and potentially line 1806)
