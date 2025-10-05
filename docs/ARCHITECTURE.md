@@ -148,7 +148,7 @@ Preferred communication style: Simple, everyday language.
 **Why Vite in Middleware Mode?**
 - Single-server development experience
 - HMR works seamlessly with Express backend
-- Simplified deployment with unified build output
+- Simplified local development and deployment
 
 **Why Minimal Backend?**
 - Focus on client-side editor functionality

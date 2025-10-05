@@ -6,7 +6,7 @@
 set -e
 
 MAX_ITERATIONS=20
-OPEN_QUESTIONS_FILE="OPEN_QUESTIONS.md"
+OPEN_QUESTIONS_FILE="../docs/OPEN_QUESTIONS.md"
 TIMEOUT_MINUTES=10
 
 # Initialize open questions file
@@ -33,12 +33,12 @@ for i in $(seq 1 $MAX_ITERATIONS); do
 
     # Create prompt for this iteration
     PROMPT=$(cat << 'PROMPT'
-You are running in FULL AUTO MODE. Your goal is to complete the next task from FEATURE_RESTORATION_PLAN.md without ANY user interaction.
+You are running in FULL AUTO MODE. Your goal is to complete the next task from TASKS.md without ANY user interaction.
 
 CRITICAL INSTRUCTIONS:
 1. Run /next command to get the next incomplete step
 2. DO NOT ask the user ANY questions - make reasonable assumptions
-3. Log ALL questions, assumptions, and decisions to OPEN_QUESTIONS.md in this format:
+3. Log ALL questions, assumptions, and decisions to docs/OPEN_QUESTIONS.md in this format:
    ```
    ## Step [N]: [Step Name]
 
@@ -55,7 +55,7 @@ CRITICAL INSTRUCTIONS:
    - Run all tests (npm test && npm run test:e2e)
    - Fix any failures
    - Commit with descriptive message
-6. If you encounter any blockers or the step is already complete, log it to OPEN_QUESTIONS.md
+6. If you encounter any blockers or the step is already complete, log it to docs/OPEN_QUESTIONS.md
 7. Use your best judgment for:
    - Implementation details
    - Test coverage
@@ -96,9 +96,9 @@ PROMPT
     echo "✅ Iteration $i completed"
     echo ""
 
-    # Check if there are more steps to complete
-    # Look for "⬜ Not Started" in FEATURE_RESTORATION_PLAN.md
-    if ! grep -q "⬜ Not Started" FEATURE_RESTORATION_PLAN.md 2>/dev/null; then
+    # Check if there are more tasks to complete
+    # Look for "⏸️ Not Started" in TASKS.md
+    if ! grep -q "⏸️ Not Started" TASKS.md 2>/dev/null; then
         echo "🎉 All steps completed!"
         echo "📝 Review $OPEN_QUESTIONS_FILE for questions and decisions"
         exit 0
@@ -112,4 +112,4 @@ done
 echo ""
 echo "⚠️  Reached maximum iterations ($MAX_ITERATIONS)"
 echo "📝 Review $OPEN_QUESTIONS_FILE for questions and decisions"
-echo "🔍 Check FEATURE_RESTORATION_PLAN.md for remaining steps"
+echo "🔍 Check TASKS.md for remaining tasks"

@@ -239,7 +239,7 @@ The `LevelSerializer` class validates level data on import:
 
 ## Example: Complete Level
 
-See `test-level-data.json` for a complete example with all features.
+See `test-resources/test-level-data.json` for a complete example with all features.
 
 ## Related
 

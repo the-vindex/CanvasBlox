@@ -49,7 +49,7 @@ Testing with empty canvas is not realistic. Test data gives you:
 
 1. Open http://localhost:3000
 2. Press F12 → Console tab
-3. Paste test data script (see `load-test-data.js`)
+3. Paste test data script (see `client/public/load-test-data.js`)
 4. Press Enter
 5. Refresh page
 
@@ -82,7 +82,7 @@ location.reload();
 ## Test Data Files
 
 - `client/public/load-test-data.html` - Interactive test data loader
-- `test-level-data.json` - Sample test data (reference only)
+- `test-resources/test-level-data.json` - Sample test data (reference only)
 
 ## Important Notes
 

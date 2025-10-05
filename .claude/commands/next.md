@@ -1,6 +1,6 @@
 # /next
 
-Implement the next step from the Feature Restoration Plan.
+Implement the next task from the TASKS.md roadmap.
 
 mode: plan
 
@@ -14,8 +14,8 @@ mode: plan
 
 When this command is invoked:
 
-1. **Read** `FEATURE_RESTORATION_PLAN.md`
-2. **Find** the first step with status: ⬜ Not Started
+1. **Read** `TASKS.md`
+2. **Find** the first task with status: ⏸️ Not Started or similar incomplete status
 3. **Implement** that step following the **TDD workflow from CLAUDE.md**:
    - ✅ Write failing tests first (BOTH unit AND e2e)
    - ✅ Implement feature to make tests pass
@@ -26,7 +26,7 @@ When this command is invoked:
    - ✅ **Run linter**: `npm run lint:fix` to fix code style issues
    - ✅ Commit code + tests together
    - ✅ Push to remote: `git push`
-4. **Update** the step's status to: 🧪 Ready for User Testing
+4. **Update** the task's status to: 🧪 Ready for User Testing (or appropriate status)
 5. **Report** to the user:
    - Which step was implemented
    - What files were changed

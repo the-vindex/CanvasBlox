@@ -1,6 +1,6 @@
 # Auto-Implementation Script
 
-This script automatically implements remaining features from `FEATURE_RESTORATION_PLAN.md` using Claude Code in full autonomous mode.
+This script automatically implements remaining tasks from `TASKS.md` using Claude Code in full autonomous mode.
 
 ## How It Works
 
@@ -9,7 +9,7 @@ This script automatically implements remaining features from `FEATURE_RESTORATIO
    - Starts fresh Claude Code session (context reset)
    - Runs `/next` command to get next incomplete step
    - Implements the step autonomously (TDD: tests first, then implementation)
-   - Logs questions/assumptions to `OPEN_QUESTIONS.md`
+   - Logs questions/assumptions to `docs/OPEN_QUESTIONS.md`
    - Commits changes
    - Exits (context cleared for next iteration)
 
@@ -32,13 +32,13 @@ This script automatically implements remaining features from `FEATURE_RESTORATIO
 - ✅ Fixes test failures
 - ✅ Makes implementation decisions
 - ✅ Commits with descriptive messages
-- ✅ Logs all assumptions to `OPEN_QUESTIONS.md`
+- ✅ Logs all assumptions to `docs/OPEN_QUESTIONS.md`
 
 ## What You Review After
 
-1. **`OPEN_QUESTIONS.md`** - Questions, assumptions, and decisions made
+1. **`docs/OPEN_QUESTIONS.md`** - Questions, assumptions, and decisions made
 2. **Git commits** - Review each step's implementation
-3. **`FEATURE_RESTORATION_PLAN.md`** - Steps marked as "✅ Complete (auto-accepted)"
+3. **`TASKS.md`** - Tasks marked as completed
 4. **Tests** - All tests should be passing
 
 ## Safety Features
@@ -58,12 +58,12 @@ Watch the script output:
 
 Check open questions during run:
 ```bash
-tail -f OPEN_QUESTIONS.md
+tail -f docs/OPEN_QUESTIONS.md
 ```
 
-Check feature plan progress:
+Check task progress:
 ```bash
-grep "✅ Complete" FEATURE_RESTORATION_PLAN.md | wc -l
+grep "✅ Completed" TASKS.md | wc -l
 ```
 
 ## Rollback a Step
@@ -84,7 +84,7 @@ Press `Ctrl+C` to stop between iterations (safe - waits for current iteration to
 
 ## Output Files
 
-- `OPEN_QUESTIONS.md` - Questions and assumptions (review this!)
+- `docs/OPEN_QUESTIONS.md` - Questions and assumptions (review this!)
 - `auto-implement.log` - Full execution log (if using `tee`)
 - Git commits - One per completed step
-- Updated `FEATURE_RESTORATION_PLAN.md` - Steps marked complete
+- Updated `TASKS.md` - Tasks marked complete

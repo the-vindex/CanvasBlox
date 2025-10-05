@@ -404,26 +404,25 @@ Work through chapters sequentially. After implementing each chapter:
 ## Chapter 12: Documentation & Project Organization
 
 **Status:** ⏸️ Not Started
-**Files:** `replit.md`, `CLAUDE.md`, `DESIGN_SYSTEM.md`, various `.md` files
+**Files:** `docs/ARCHITECTURE.md`, `CLAUDE.md`, `docs/DESIGN_SYSTEM.md`, various `.md` files
 **Priority:** Low
 
 ### Tasks:
 
 #### 12.1 Reshape and consolidate project documentation
-- **Location:** Root directory - `replit.md`, `CLAUDE.md`, `DESIGN_SYSTEM.md`, and other .md files
+- **Location:** `docs/` directory and root
 - **Current:** Multiple documentation files with overlapping content:
-  - `replit.md` - Original Replit-generated architecture docs
+  - `docs/ARCHITECTURE.md` - System architecture and technical design
   - `CLAUDE.md` - Development guidelines for Claude Code
-  - `DESIGN_SYSTEM.md` - Design system and visual decisions
-  - `VISUAL_ENHANCEMENTS.md` - Task roadmap
+  - `docs/DESIGN_SYSTEM.md` - Design system and visual decisions
+  - Various other docs in `docs/` folder
 - **Goal:** Organize into coherent, well-structured documentation
 - **Proposed structure:**
   - `README.md` - Project overview, quick start, high-level architecture
-  - `ARCHITECTURE.md` - Technical architecture, data flow, key patterns
-  - `DESIGN_SYSTEM.md` - Visual design system (already exists, may need updates)
+  - `docs/ARCHITECTURE.md` - Technical architecture, data flow, key patterns (✅ exists)
+  - `docs/DESIGN_SYSTEM.md` - Visual design system (✅ exists)
   - `DEVELOPMENT.md` - Development workflow, commands, conventions
-  - `CLAUDE.md` - Keep for Claude Code specific instructions
-  - Archive or merge `replit.md` content as appropriate
+  - `CLAUDE.md` - Keep for Claude Code specific instructions (✅ exists)
 - **Tasks:**
   - Audit all existing .md files for content overlap
   - Extract duplicate/conflicting information
@@ -431,8 +430,8 @@ Work through chapters sequentially. After implementing each chapter:
   - Ensure single source of truth for each topic
   - Update cross-references between docs
 - **Files to review:**
-  - `replit.md`, `CLAUDE.md`, `DESIGN_SYSTEM.md`, `VISUAL_ENHANCEMENTS.md`
-  - Any other .md files in root
+  - `docs/ARCHITECTURE.md`, `CLAUDE.md`, `docs/DESIGN_SYSTEM.md`
+  - All .md files in `docs/` directory
 - **Note:** User requested - improve documentation structure and clarity
 
 **Dependencies:** None

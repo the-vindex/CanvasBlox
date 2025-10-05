@@ -19,8 +19,7 @@ When this command is invoked:
 1. **Read project documentation**:
    - `TASKS.md` - Current roadmap and implementation status
    - `CLAUDE.md` - Project architecture and development guidelines
-   - `replit.md` - Detailed architecture and system design (Replit-specific)
-   - `.replit` - Replit configuration
+   - `docs/ARCHITECTURE.md` - Detailed architecture and system design
 
 2. **Read core types and constants**:
    - `client/src/types/level.ts` - Type definitions for Level, EditorState, etc.
