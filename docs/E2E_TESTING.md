@@ -146,6 +146,10 @@ const box = await canvas.boundingBox();
 await page.mouse.move(box.x + 100, box.y + 100);
 ```
 
+### Use Test Helpers
+
+Use helpers from `e2e/helpers.ts` to reduce boilerplate - `clickCanvas()`, `getObjectCount()`, `getZoomValue()`, etc.
+
 ---
 
 ## Quick Examples from CanvasBlox
