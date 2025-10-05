@@ -258,7 +258,7 @@ Work through chapters sequentially. After implementing each chapter:
   - `e2e/level-editor.spec.ts` - Consolidated test at line 1375
 - **Impact:** -2 tests, -60 lines (better than expected -90 due to refactoring)
 
-**Phase 2 Progress (3/4 complete):** -4 tests, -116 lines
+**Phase 2 Progress (3/7 complete):** -4 tests, -116 lines
 
 #### 13.5 Merge copy keyboard and button tests ✅ COMPLETE
 - **Status:** ✅ COMPLETE
@@ -274,36 +274,86 @@ Work through chapters sequentially. After implementing each chapter:
 - **Commit:** 38864db
 
 #### 13.6 Merge paste keyboard and button tests
-- **Location:** Lines 1809-1854 (Ctrl+V) and Lines 1882-1919 (Button)
-- **Current:** 2 separate tests for same paste functionality
-- **Consolidated test:**
-  ```typescript
-  test('should paste with Ctrl+V and button', async ({ page }) => {
-      // Copy an object first
-      await placeTile(page, 'tile-platform-grass', 200, 200);
-      await page.getByTestId('button-tool-select').click();
-      await clickCanvas(page, 200, 200);
-      await page.keyboard.press('Control+c');
-
-      // Test keyboard shortcut
-      await page.keyboard.press('Control+v');
-      await expect(page.getByText(/Pasted 1 items?/)).toBeVisible();
-      const afterKeyboardPaste = await getObjectCount(page);
-
-      // Test button (clipboard still has the object)
-      await page.getByTestId('button-paste').click();
-      await expect(page.getByText(/Pasted 1 items?/)).toBeVisible();
-      const afterButtonPaste = await getObjectCount(page);
-
-      expect(afterButtonPaste).toBe(afterKeyboardPaste + 1);
-  });
-  ```
+- **Location:** Lines 1652, 1699, 1786 (3 separate paste tests)
+- **Current:** 3 separate tests for paste functionality - all test same thing (object count increases)
+- **Issues found by /review-tests:**
+  - "should paste objects with Ctrl+V and offset them" (line 1652) - tests paste + offset but only checks count
+  - "should paste button click work" (line 1699) - tests paste button via count
+  - "pasted objects should be offset from originals" (line 1786) - DUPLICATE of line 1652
+  - None actually verify offset positioning (just check count increases)
+- **Action:** Consolidate all 3 into ONE test following redo pattern (commit 6d9a118)
+- **Consolidated test approach:**
+  - Place→select→copy once
+  - Test Ctrl+V (verify toast + count)
+  - Undo the paste
+  - Test paste button (verify toast + count)
+  - Both methods call same `pasteObjects()` function
 - **Files to modify:** `e2e/level-editor.spec.ts`
-- **Impact:** -1 test, -30 lines
+- **Impact:** -2 tests (consolidate 3 → 1), ~40-50 lines saved
 
-### Phase 3: Extract Helper Functions (Medium Priority)
+#### 13.7 Fix or remove redundant offset tests
+- **Location:** Lines 1652, 1786 (and potentially line 1806)
+- **Issue found by /review-tests:**
+  - Three tests mention "offset" in their names but NONE verify actual offset positioning
+  - All just check object count increases (testing paste, not offset)
+  - This violates TDD principle: "Test what you're building" - tests claim to test offset but don't
+- **Decision needed:**
+  1. **Option A (Recommended):** DELETE offset claims - tests already consolidated in 13.6
+  2. **Option B:** Create ONE proper offset test that checks actual coordinates after paste
+- **If Option B chosen:**
+  - After paste, get canvas positions of original + pasted objects
+  - Verify pasted object is offset by expected amount (e.g., +32px or +1 grid cell)
+  - Use actual coordinate assertions, not just count
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** Either remove redundant tests (already done in 13.6) OR add proper offset verification
 
-#### 13.7 Create E2E test helper utilities file
+#### 13.8 Evaluate and refactor multi-select copy test
+- **Location:** Line 1738 - "should copy multiple selected objects"
+- **Issue found by /review-tests:**
+  - Test is overly complex (places 3 buttons, multi-selects, copies, pastes)
+  - Testing multi-select + copy + paste together (violates single responsibility)
+  - The copy test (line 1613) already verifies copy works
+  - This test is more about multi-select behavior than copy behavior
+- **Action:**
+  - Either MOVE to multi-select test section (where it belongs)
+  - OR simplify to focus specifically on "copy preserves all selected items"
+  - OR DELETE if already covered by multi-select tests
+- **Files to modify:** `e2e/level-editor.spec.ts`
+- **Impact:** Improve test organization, reduce complexity
+
+#### 13.9 Document E2E consolidation pattern
+- **Location:** Create/update `docs/E2E_TESTING.md`
+- **Purpose:** Document the pattern established by commits 6d9a118 (redo) and 38864db (copy)
+- **Content to add:**
+  ```markdown
+  ## Test Consolidation Pattern
+
+  When keyboard shortcut and UI button call the same function, test both in ONE test:
+
+  **Pattern:**
+  1. Setup: Create minimal test data
+  2. Test keyboard shortcut: Verify outcome
+  3. Reset state (undo or deselect)
+  4. Test UI button: Verify same outcome
+  5. Comment: "Both call same function - test both methods"
+
+  **Examples:**
+  - Undo: Ctrl+Z + button (commit 6d9a118)
+  - Redo: Ctrl+Y, Ctrl+Shift+Z + button (commit 6d9a118)
+  - Copy: Ctrl+C + button (commit 38864db)
+  - Paste: Ctrl+V + button (task 13.6)
+
+  **Benefits:**
+  - Reduces test count and duplication
+  - Makes it clear both inputs produce same result
+  - Easier to maintain (one place to update)
+  ```
+- **Files to modify:** `docs/E2E_TESTING.md`
+- **Impact:** Better documentation, clearer patterns for future tests
+
+### Phase 3: Extract Helper Functions (Low Priority)
+
+#### 13.10 Create E2E test helper utilities file
 - **Location:** Create new file `e2e/helpers.ts`
 - **Purpose:** Reduce repetitive boilerplate code across all 126 tests
 - **Implementation:**
@@ -378,7 +428,7 @@ Work through chapters sequentially. After implementing each chapter:
 - **Files to modify:** All tests in `e2e/level-editor.spec.ts` (add import and use helpers)
 - **Impact:** -200 lines across all tests
 
-#### 13.8 Refactor existing tests to use helper functions
+#### 13.11 Refactor existing tests to use helper functions
 - **Location:** `e2e/level-editor.spec.ts` (all 126 tests)
 - **Current:** Repetitive patterns in every test:
   ```typescript
@@ -401,7 +451,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ### Phase 4: Add Missing Coverage (Low Priority)
 
-#### 13.9 Add error handling and edge case tests
+#### 13.12 Add error handling and edge case tests
 - **Location:** `e2e/level-editor.spec.ts` (new tests to add)
 - **Missing Coverage:**
   1. **Network Errors:**
@@ -512,7 +562,7 @@ Work through chapters sequentially. After implementing each chapter:
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
 | 11. Drawing Tools | 🔄 In Progress | ❌ | 4/11 complete - Selection/move done, link/draw tools remain |
-| 13. E2E Test Simplification | ⏸️ Not Started | ❌ | Reduce duplication, extract helpers, improve coverage |
+| 13. E2E Test Simplification | 🔄 In Progress | ❌ | Phase 2: 3/7 complete (-4 tests, -116 lines) |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
@@ -542,11 +592,18 @@ Work through chapters sequentially. After implementing each chapter:
 6. 🔢 **11.9** Button numbering system
 7. 🔄 **11.7** Rotation tool - decision needed
 
-**Alternative Focus:** Chapter 13 - E2E Test Simplification (medium priority)
-- 🧹 Delete 4 redundant zoom tests (-150 lines)
-- 🔀 Merge 8 duplicate undo/redo/copy/paste tests (-165 lines)
-- 🛠️ Extract helper functions (-200 lines)
-- ✅ Add missing error/edge case coverage (+12 tests)
+**Alternative Focus:** Chapter 13 - E2E Test Simplification (IN PROGRESS - 3/7 Phase 2 tasks done)
+- **Phase 1 (Complete):** ✅ Deleted 4 redundant zoom tests (-92 lines)
+- **Phase 2 (In Progress - 3/7 done):**
+  - ✅ 13.3: Merge undo tests (consolidated + fixed bug)
+  - ✅ 13.4: Merge redo tests (-2 tests, -60 lines)
+  - ✅ 13.5: Merge copy tests (-1 test, -25 lines)
+  - ⏸️ 13.6: Merge paste tests (3 tests → 1, ~40-50 lines)
+  - ⏸️ 13.7: Fix/remove redundant offset tests
+  - ⏸️ 13.8: Refactor multi-select copy test
+  - ⏸️ 13.9: Document consolidation pattern
+- **Phase 3 (Not Started):** Extract helper functions (-200 lines)
+- **Phase 4 (Not Started):** Add error/edge case coverage
 
 **Future:** Chapter 12 - Documentation (low priority)
 
