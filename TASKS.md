@@ -413,8 +413,9 @@ Press ESC                      → null            | null               ❌ clea
 
 ### Phase 3: Extract Helper Functions (Low Priority)
 
-#### 13.10 Create E2E test helper utilities file
-- **Location:** Create new file `e2e/helpers.ts`
+#### 13.10 Create E2E test helper utilities file ✅ Complete
+- **Status:** ✅ COMPLETE - Commit 1540d84
+- **Location:** `e2e/helpers.ts` (created)
 - **Purpose:** Reduce repetitive boilerplate code across all 126 tests
 - **Implementation:**
   ```typescript
@@ -484,9 +485,27 @@ Press ESC                      → null            | null               ❌ clea
       return box;
   }
   ```
-- **Files to create:** `e2e/helpers.ts`
-- **Files to modify:** All tests in `e2e/level-editor.spec.ts` (add import and use helpers)
-- **Impact:** -200 lines across all tests
+- **What was implemented:**
+  - ✅ Created `e2e/helpers.ts` with 6 utility functions
+  - ✅ Refactored 3 passing tests as proof of concept:
+    - "Step 10: should place single platform tile with click" (line 869)
+    - "Step 9: should enforce minimum zoom of 10%" (line 740)
+    - "Step 10: should place spawn point object" (line 920)
+  - ✅ All 113 passing E2E tests still pass (verified)
+  - ✅ Reduced boilerplate by ~40 lines in 3 refactored tests
+- **Helper functions implemented:**
+  - `clickCanvas(page, x, y)` - Click at canvas coordinates
+  - `getCanvasBounds(page)` - Get canvas bounding box with error handling
+  - `placeTile(page, tileTestId, x, y)` - Select tile + click canvas + wait
+  - `selectTool(page, tool)` - Select tool by name
+  - `getZoomValue(page, source?)` - Extract zoom percentage
+  - `getObjectCount(page)` - Extract object count from status bar
+- **Files created:** `e2e/helpers.ts`
+- **Files modified:** `e2e/level-editor.spec.ts` (3 tests refactored)
+- **Impact:** -40 lines in 3 tests, demonstrates pattern for Task 13.11 (~200 total lines saved when all tests refactored)
+- **Manual Test:**
+  - Run `npm run test:e2e` - verify all 113 passing tests still pass
+  - Verify refactored tests are more readable (less boilerplate)
 
 #### 13.11 Refactor existing tests to use helper functions
 - **Location:** `e2e/level-editor.spec.ts` (all 126 tests)
