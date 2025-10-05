@@ -47,8 +47,11 @@ export default function LevelEditor() {
     const handleCanvasClick = useCallback(
         (position: Position, _event: MouseEvent) => {
             if (editorState.selectedTool === 'select' && currentLevel) {
-                // Find object at clicked position
-                const clickedObject =
+                // Find object at clicked position (check tiles, objects, and spawn points)
+                const clickedItem =
+                    currentLevel.tiles.find(
+                        (tile) => tile.position.x === position.x && tile.position.y === position.y
+                    ) ||
                     currentLevel.objects.find(
                         (obj) => obj.position.x === position.x && obj.position.y === position.y
                     ) ||
@@ -56,9 +59,9 @@ export default function LevelEditor() {
                         (spawn) => spawn.position.x === position.x && spawn.position.y === position.y
                     );
 
-                if (clickedObject) {
-                    // Select the clicked object
-                    _selectObject(clickedObject.id);
+                if (clickedItem) {
+                    // Select the clicked item (tile, object, or spawn point)
+                    _selectObject(clickedItem.id);
                 } else {
                     // Clear selection when clicking empty space
                     setEditorState((prev) => ({ ...prev, selectedObjects: [] }));
@@ -129,6 +132,19 @@ export default function LevelEditor() {
             // Find all objects within the selection box
             const selectedIds: string[] = [];
 
+            // Select tiles
+            currentLevel.tiles.forEach((tile) => {
+                if (
+                    tile.position.x >= minX &&
+                    tile.position.x <= maxX &&
+                    tile.position.y >= minY &&
+                    tile.position.y <= maxY
+                ) {
+                    selectedIds.push(tile.id);
+                }
+            });
+
+            // Select objects
             currentLevel.objects.forEach((obj) => {
                 if (
                     obj.position.x >= minX &&
@@ -140,6 +156,7 @@ export default function LevelEditor() {
                 }
             });
 
+            // Select spawn points
             currentLevel.spawnPoints.forEach((spawn) => {
                 if (
                     spawn.position.x >= minX &&
