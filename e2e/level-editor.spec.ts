@@ -1372,96 +1372,52 @@ test.describe('Level Editor', () => {
         expect(afterButtonUndoCount).toBeLessThan(afterPlaceCount);
     });
 
-    test('Step 12: should redo tile placement with Ctrl+Y', async ({ page }) => {
+    test('Step 12: should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
         const objectCount = page.getByTestId('statusbar-object-count');
+        const redoButton = page.getByRole('button', { name: /Redo/ });
 
-        // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
-
-        // Place a tile
+        // Place a tile and record the expected count after redo
         await basicTile.click();
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
         await page.mouse.click(box.x + 250, box.y + 250);
         await page.waitForTimeout(100);
 
-        // Undo
+        const afterPlaceText = await objectCount.textContent();
+        const expectedCount = parseInt(afterPlaceText?.match(/\d+/)?.[0] || '0', 10);
+
+        // Undo once to create a redo opportunity
         await page.keyboard.press('Control+z');
         await page.waitForTimeout(100);
 
-        // Redo with Ctrl+Y
+        // All three redo methods should restore to the same state (call same redo function)
+
+        // Test Ctrl+Y
         await page.keyboard.press('Control+y');
         await page.waitForTimeout(100);
-
-        // Object count should be back to after placement
-        const afterRedoText = await objectCount.textContent();
-        const afterRedoCount = parseInt(afterRedoText?.match(/\d+/)?.[0] || '0', 10);
-        expect(afterRedoCount).toBeGreaterThan(initialCount);
-    });
-
-    test('Step 12: should redo with Ctrl+Shift+Z', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
-        const grassTile = page.getByTestId('tile-platform-grass');
-        const objectCount = page.getByTestId('statusbar-object-count');
-
-        // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
-
-        // Place a tile
-        await grassTile.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 280, box.y + 280);
+        const afterCtrlY = await objectCount.textContent();
+        const ctrlYCount = parseInt(afterCtrlY?.match(/\d+/)?.[0] || '0', 10);
+        expect(ctrlYCount).toBe(expectedCount);
+        await page.keyboard.press('Control+z'); // Reset for next test
         await page.waitForTimeout(100);
 
-        // Undo
-        await page.keyboard.press('Control+z');
-        await page.waitForTimeout(100);
-
-        // Redo with Ctrl+Shift+Z
+        // Test Ctrl+Shift+Z
         await page.keyboard.press('Control+Shift+Z');
         await page.waitForTimeout(100);
-
-        // Object count should be back to after placement
-        const afterRedoText = await objectCount.textContent();
-        const afterRedoCount = parseInt(afterRedoText?.match(/\d+/)?.[0] || '0', 10);
-        expect(afterRedoCount).toBeGreaterThan(initialCount);
-    });
-
-    test('Step 12: should redo by clicking redo button', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
-        const playerSpawn = page.getByTestId('tile-spawn-player');
-        const objectCount = page.getByTestId('statusbar-object-count');
-        const undoButton = page.getByRole('button', { name: /Undo/ });
-        const redoButton = page.getByRole('button', { name: /Redo/ });
-
-        // Get initial object count
-        const initialCountText = await objectCount.textContent();
-        const initialCount = parseInt(initialCountText?.match(/\d+/)?.[0] || '0', 10);
-
-        // Place a spawn point
-        await playerSpawn.click();
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 400, box.y + 300);
+        const afterCtrlShiftZ = await objectCount.textContent();
+        const ctrlShiftZCount = parseInt(afterCtrlShiftZ?.match(/\d+/)?.[0] || '0', 10);
+        expect(ctrlShiftZCount).toBe(expectedCount);
+        await page.keyboard.press('Control+z'); // Reset for next test
         await page.waitForTimeout(100);
 
-        // Undo
-        await undoButton.click();
-        await page.waitForTimeout(100);
-
-        // Click redo button
+        // Test button
         await redoButton.click();
         await page.waitForTimeout(100);
-
-        // Object count should be back to after placement
-        const afterRedoText = await objectCount.textContent();
-        const afterRedoCount = parseInt(afterRedoText?.match(/\d+/)?.[0] || '0', 10);
-        expect(afterRedoCount).toBeGreaterThan(initialCount);
+        const afterButton = await objectCount.textContent();
+        const buttonCount = parseInt(afterButton?.match(/\d+/)?.[0] || '0', 10);
+        expect(buttonCount).toBe(expectedCount);
     });
 
     test('Step 12: should update history display in status bar', async ({ page }) => {
