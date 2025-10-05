@@ -83,21 +83,19 @@ export default function LevelEditor() {
     }, [commitBatchToHistory]);
 
     const handleWheelZoom = useCallback(
-        (delta: number, mouseX: number, mouseY: number) => {
+        (delta: number, _mouseX: number, _mouseY: number) => {
             setEditorState((prev) => {
                 const newZoom = Math.min(Math.max(prev.zoom + delta, 0.1), 5);
 
-                // Calculate pan adjustment to zoom at mouse position
-                const zoomRatio = newZoom / prev.zoom;
-                const newPan = {
-                    x: prev.pan.x + (mouseX - mouseX * zoomRatio),
-                    y: prev.pan.y + (mouseY - mouseY * zoomRatio),
-                };
+                // Note: In scrollbar-based mode, we don't adjust pan here
+                // The scrollbars provide the panning functionality
+                // Pan adjustment would conflict with scrollbar position
 
                 return {
                     ...prev,
                     zoom: newZoom,
-                    pan: newPan,
+                    // Keep pan at {x:0, y:0} to work with scrollbars
+                    pan: { x: 0, y: 0 },
                 };
             });
         },
@@ -152,6 +150,7 @@ export default function LevelEditor() {
         setEditorState((prev) => ({
             ...prev,
             zoom: 1.0,
+            pan: { x: 0, y: 0 },
         }));
     }, [setEditorState]);
 
