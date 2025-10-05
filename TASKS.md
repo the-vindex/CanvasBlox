@@ -269,8 +269,25 @@ Press ESC                      → null            | null               ❌ clea
   - `client/src/hooks/useLevelEditor.ts` (useEffect for localStorage load - clean up overlaps)
 - **Note:** This prevents unintended tile stacking and keeps the level clean. Button-on-door exception supports puzzle design patterns.
 
+#### 11.12 Enhance zoom reset to fit all content
+- **Location:** Zoom reset function in `client/src/hooks/useCanvas.ts` or zoom control handlers
+- **Current:** Reset zoom sets to 100% regardless of content
+- **Change:** Calculate zoom level that fits all placed content on screen (fit-to-view)
+- **Implementation:**
+  - Calculate bounding box of all placed objects (tiles, interactables, spawn points)
+  - Determine zoom level that fits entire bounding box within viewport
+  - Account for padding/margins (e.g., 10% margin around content)
+  - If no objects placed, reset to 100% (current behavior)
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` or zoom control handlers
+  - `client/src/utils/canvasRenderer.ts` (if zoom calculation logic exists there)
+- **Tests:**
+  - E2E test: Place objects → zoom reset → verify all objects visible
+  - Unit test: Verify zoom calculation for various object layouts
+- **Note:** Makes zoom reset more intelligent and useful for level design workflow
+
 **Dependencies:** None - core selection/move tools already complete
-**Notes:** 7 tasks remaining. Priority: Tile overlap (11.10), Link/Unlink tools (11.5-11.6), Drawing tools (11.1-11.2), Button numbering (11.9), Rotation decision (11.7)
+**Notes:** 8 tasks remaining. Priority: Tile overlap (11.10), Link/Unlink tools (11.5-11.6), Drawing tools (11.1-11.2), Button numbering (11.9), Rotation decision (11.7), Zoom fit-to-view (11.12)
 
 ---
 
@@ -760,7 +777,50 @@ Press ESC                      → null            | null               ❌ clea
 
 ---
 
-## Chapter 15: Enhanced Copy/Paste with Ghost Preview
+## Chapter 17: E2E Test Optimization - Phase 3
+
+**Status:** ⏸️ Not Started
+**Files:** `e2e/auto-save.spec.ts`, `e2e/tile-placement.spec.ts`
+**Priority:** Low
+
+**Goal:** Continue E2E test consolidation from Chapter 13 with additional redundant test removal.
+
+### Tasks:
+
+#### 17.1 Merge auto-save E2E tests
+- **Status:** ⏸️ Not Started
+- **Priority:** 3 (Test consolidation)
+- **Location:** `e2e/auto-save.spec.ts`
+- **Tests to merge:**
+  - Line 32: "should auto-save after 5 seconds"
+  - Line 56: "should change icon color based on save state"
+- **Reason:** Both tests verify auto-save behavior, can be consolidated into single comprehensive test
+- **Pattern:** Follow consolidation pattern from Chapter 13 (undo/redo/copy/paste merges)
+- **Implementation:**
+  - Merge both tests into single test that verifies timing AND icon state changes
+  - Place tiles → wait 5 seconds → verify save occurred + icon state
+  - Delete tests → verify icon shows unsaved state
+- **Files to modify:**
+  - `e2e/auto-save.spec.ts`
+- **Impact:** -1 test, reduces E2E execution time
+
+#### 17.2 Remove redundant platform tile placement test
+- **Status:** ⏸️ Not Started
+- **Priority:** 3 (Test cleanup)
+- **Location:** `e2e/tile-placement.spec.ts:9`
+- **Test to remove:** "should place single platform tile with click"
+- **Reason:** Redundant coverage - single-click placement mechanics already verified by:
+  - Line 62: spawn point placement (same click mechanics)
+  - Line 81: button placement (same click mechanics)
+  - Line 142: undo history for single-click (verifies placement works)
+- **Impact:** Reduces E2E execution time without losing coverage
+- **Pattern:** Each test should verify unique behavior; object-type-specific tests already cover placement mechanics
+- **Files to modify:**
+  - `e2e/tile-placement.spec.ts`
+
+---
+
+## Chapter 18: Enhanced Copy/Paste with Ghost Preview
 
 **Status:** ⏸️ Not Started
 **Files:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useLevelEditor.ts`, `client/src/utils/canvasRenderer.ts`

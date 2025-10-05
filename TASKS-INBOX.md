@@ -17,9 +17,4 @@ When one Claude instance is running `/next` (actively working on tasks), it read
 
 ## Inbox Queue
 
-### Fix zoom reset calculation
-- **Priority:** P2 (Bugfix)
-- **Location:** Zoom reset function
-- **Description:** Zoom reset function must calculate correct zoom level to fit the whole really placed blocks on the level onto screen
-- **Current:** Reset zoom sets to 100% regardless of content
-- **Expected:** Calculate zoom level that fits all placed content on screen
+_(No tasks queued)_
