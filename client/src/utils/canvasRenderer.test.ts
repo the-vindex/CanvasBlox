@@ -450,4 +450,200 @@ describe('CanvasRenderer', () => {
             expect(fillRectSpy).toHaveBeenCalledWith(32, 32, 64, 64);
         });
     });
+
+    describe('Step 19: Delete Animations', () => {
+        it('should apply shrink scale transformation when tile is deleting', () => {
+            const tile: Tile = {
+                id: 'tile-1',
+                type: 'platform-grass',
+                position: { x: 0, y: 0 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: {},
+            };
+
+            // Set up editorState with deletion tracking
+            const editorState: EditorState = {
+                selectedTool: null,
+                selectedTileType: null,
+                selectedObjects: [],
+                clipboard: [],
+                deletingObjects: ['tile-1'],
+                deletionStartTimes: new Map([['tile-1', Date.now()]]),
+                zoom: 1,
+                pan: { x: 0, y: 0 },
+                showGrid: true,
+                showScanlines: false,
+                mousePosition: { x: 0, y: 0 },
+            };
+
+            const levelData: LevelData = {
+                id: 'test',
+                levelName: 'Test',
+                metadata: {
+                    backgroundColor: '#000',
+                    dimensions: { width: 10, height: 10 },
+                },
+                tiles: [tile],
+                objects: [],
+                spawnPoints: [],
+            };
+
+            const scaleSpy = vi.spyOn(ctx, 'scale');
+
+            // Render to set editorState in renderer
+            renderer.render(levelData, editorState);
+
+            expect(scaleSpy).toHaveBeenCalled();
+        });
+
+        it('should apply shrink scale transformation when object is deleting', () => {
+            const obj: InteractableObject = {
+                id: 'button-1',
+                type: 'button',
+                position: { x: 0, y: 0 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: {},
+            };
+
+            const editorState: EditorState = {
+                selectedTool: null,
+                selectedTileType: null,
+                selectedObjects: [],
+                clipboard: [],
+                deletingObjects: ['button-1'],
+                deletionStartTimes: new Map([['button-1', Date.now()]]),
+                zoom: 1,
+                pan: { x: 0, y: 0 },
+                showGrid: true,
+                showScanlines: false,
+                mousePosition: { x: 0, y: 0 },
+            };
+
+            const levelData: LevelData = {
+                id: 'test',
+                levelName: 'Test',
+                metadata: {
+                    backgroundColor: '#000',
+                    dimensions: { width: 10, height: 10 },
+                },
+                tiles: [],
+                objects: [obj],
+                spawnPoints: [],
+            };
+
+            const scaleSpy = vi.spyOn(ctx, 'scale');
+
+            renderer.render(levelData, editorState);
+
+            expect(scaleSpy).toHaveBeenCalled();
+        });
+
+        it('should apply shrink scale transformation when spawn point is deleting', () => {
+            const spawn: SpawnPoint = {
+                id: 'spawn-1',
+                type: 'player',
+                position: { x: 0, y: 0 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: {},
+            };
+
+            const editorState: EditorState = {
+                selectedTool: null,
+                selectedTileType: null,
+                selectedObjects: [],
+                clipboard: [],
+                deletingObjects: ['spawn-1'],
+                deletionStartTimes: new Map([['spawn-1', Date.now()]]),
+                zoom: 1,
+                pan: { x: 0, y: 0 },
+                showGrid: true,
+                showScanlines: false,
+                mousePosition: { x: 0, y: 0 },
+            };
+
+            const levelData: LevelData = {
+                id: 'test',
+                levelName: 'Test',
+                metadata: {
+                    backgroundColor: '#000',
+                    dimensions: { width: 10, height: 10 },
+                },
+                tiles: [],
+                objects: [],
+                spawnPoints: [spawn],
+            };
+
+            const scaleSpy = vi.spyOn(ctx, 'scale');
+
+            renderer.render(levelData, editorState);
+
+            expect(scaleSpy).toHaveBeenCalled();
+        });
+
+        it('should not apply scale transformation when object is not deleting', () => {
+            const tile: Tile = {
+                id: 'tile-1',
+                type: 'platform-grass',
+                position: { x: 0, y: 0 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: {},
+            };
+
+            // Test without deletion
+            const editorStateNoDeletion: EditorState = {
+                selectedTool: null,
+                selectedTileType: null,
+                selectedObjects: [],
+                clipboard: [],
+                deletingObjects: [],
+                zoom: 1,
+                pan: { x: 0, y: 0 },
+                showGrid: true,
+                showScanlines: false,
+                mousePosition: { x: 0, y: 0 },
+            };
+
+            const levelDataNoDeletion: LevelData = {
+                id: 'test',
+                levelName: 'Test',
+                metadata: {
+                    backgroundColor: '#000',
+                    dimensions: { width: 10, height: 10 },
+                },
+                tiles: [tile],
+                objects: [],
+                spawnPoints: [],
+            };
+
+            const scaleSpy = vi.spyOn(ctx, 'scale');
+
+            renderer.render(levelDataNoDeletion, editorStateNoDeletion);
+            const scaleCallsWithoutDelete = scaleSpy.mock.calls.length;
+
+            // Reset spy
+            scaleSpy.mockClear();
+
+            // Test with deletion
+            const editorStateWithDeletion: EditorState = {
+                ...editorStateNoDeletion,
+                deletingObjects: ['tile-1'],
+                deletionStartTimes: new Map([['tile-1', Date.now()]]),
+            };
+
+            const levelDataWithDeletion: LevelData = {
+                ...levelDataNoDeletion,
+                tiles: [tile],
+            };
+
+            renderer.render(levelDataWithDeletion, editorStateWithDeletion);
+            const scaleCallsWithDelete = scaleSpy.mock.calls.length;
+
+            // Should have additional scale calls for delete animation
+            expect(scaleCallsWithDelete).toBeGreaterThan(scaleCallsWithoutDelete);
+        });
+    });
 });

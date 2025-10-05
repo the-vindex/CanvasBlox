@@ -422,6 +422,49 @@ export default function LevelEditor() {
         return () => clearInterval(interval);
     }, [hasUnsavedChanges]);
 
+    // Calculate initial zoom to show grass layer
+    useEffect(() => {
+        if (!currentLevel) return;
+
+        // Only calculate zoom on first load (when zoom is still at default 1.0)
+        if (editorState.zoom !== 1) return;
+
+        // Use requestAnimationFrame to ensure DOM is fully rendered
+        requestAnimationFrame(() => {
+            const header = document.querySelector('header');
+            const levelTabs = document.querySelector('[data-testid="level-tabs"]');
+            const toolbar = document.querySelector('[data-testid="toolbar"]');
+            const footer = document.querySelector('footer');
+
+            const headerHeight = header?.clientHeight || 56;
+            const tabsHeight = levelTabs?.clientHeight || 40;
+            const toolbarHeight = toolbar?.clientHeight || 60;
+            const footerHeight = footer?.clientHeight || 32;
+
+            const viewportHeight =
+                window.innerHeight - headerHeight - tabsHeight - toolbarHeight - footerHeight;
+
+            if (viewportHeight <= 0) return;
+
+            // TILE_SIZE is 32px, DEFAULT_GRASS_Y is 20
+            const TILE_SIZE = 32;
+            const DEFAULT_GRASS_Y = 20;
+
+            const currentlyVisibleTiles = viewportHeight / TILE_SIZE;
+            const targetVisibleTiles = DEFAULT_GRASS_Y + 5; // Show grass + 5 tiles above
+            const calculatedZoom = currentlyVisibleTiles / targetVisibleTiles;
+            const initialZoom = Math.min(Math.max(calculatedZoom, 0.1), 1);
+
+            setEditorState((prev) => {
+                // Double-check zoom hasn't changed
+                if (prev.zoom === 1) {
+                    return { ...prev, zoom: initialZoom };
+                }
+                return prev;
+            });
+        });
+    }, [currentLevel, editorState.zoom, setEditorState]);
+
     // Don't render until we have a current level
     if (!currentLevel) {
         return (

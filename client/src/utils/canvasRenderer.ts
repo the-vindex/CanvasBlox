@@ -4,6 +4,7 @@ import type { EditorState, InteractableObject, LevelData, Position, SpawnPoint, 
 export class CanvasRenderer {
     private ctx: CanvasRenderingContext2D;
     private gridSize = TILE_SIZE;
+    private editorState?: EditorState;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -202,19 +203,35 @@ export class CanvasRenderer {
 
         this.ctx.save();
 
-        // Apply delete animation effect
-        if (isDeleting) {
-            this.ctx.globalAlpha = 0.3;
+        // Apply delete animation effect (shrink from 1.0 to 0.0 over 250ms)
+        let isAnimatingDelete = false;
+        let scale = 1.0;
+        if (isDeleting && this.editorState?.deletionStartTimes?.has(tile.id)) {
+            const startTime = this.editorState.deletionStartTimes.get(tile.id)!;
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / 250, 1.0); // 250ms animation
+            scale = Math.max(1.0 - progress, 0.01); // Shrink from 1.0 to 0.01 (avoid 0 which breaks rendering)
+            isAnimatingDelete = true;
+
+            // Also fade out
+            this.ctx.globalAlpha = scale;
+        }
+
+        // Translate to center for scaling/rotation
+        this.ctx.translate(x + width / 2, y + height / 2);
+
+        // Apply scale for delete animation
+        if (isAnimatingDelete) {
+            this.ctx.scale(scale, scale);
         }
 
         // Apply rotation
         if (tile.rotation !== 0) {
-            this.ctx.translate(x + width / 2, y + height / 2);
             this.ctx.rotate((tile.rotation * Math.PI) / 180);
-            this.ctx.translate(-width / 2, -height / 2);
-        } else {
-            this.ctx.translate(x, y);
         }
+
+        // Translate back to top-left for drawing
+        this.ctx.translate(-width / 2, -height / 2);
 
         // Draw tile with textures based on type
         switch (tile.type) {
@@ -584,12 +601,26 @@ export class CanvasRenderer {
 
         this.ctx.save();
 
-        // Apply delete animation effect
-        if (isDeleting) {
-            this.ctx.globalAlpha = 0.3;
+        // Apply delete animation effect (shrink from 1.0 to 0.0 over 250ms)
+        let isAnimatingDelete = false;
+        let scale = 1.0;
+        if (isDeleting && this.editorState?.deletionStartTimes?.has(obj.id)) {
+            const startTime = this.editorState.deletionStartTimes.get(obj.id)!;
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / 250, 1.0); // 250ms animation
+            scale = Math.max(1.0 - progress, 0.01); // Shrink from 1.0 to 0.01 (avoid 0 which breaks rendering)
+            isAnimatingDelete = true;
+
+            // Also fade out
+            this.ctx.globalAlpha = scale;
         }
 
         this.ctx.translate(x + width / 2, y + height / 2);
+
+        // Apply scale for delete animation
+        if (isAnimatingDelete) {
+            this.ctx.scale(scale, scale);
+        }
 
         // Apply rotation
         if (obj.rotation !== 0) {
@@ -848,12 +879,30 @@ export class CanvasRenderer {
 
         this.ctx.save();
 
-        // Apply delete animation effect
-        if (isDeleting) {
-            this.ctx.globalAlpha = 0.3;
+        // Apply delete animation effect (shrink from 1.0 to 0.0 over 250ms)
+        let isAnimatingDelete = false;
+        let scale = 1.0;
+        if (isDeleting && this.editorState?.deletionStartTimes?.has(spawn.id)) {
+            const startTime = this.editorState.deletionStartTimes.get(spawn.id)!;
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / 250, 1.0); // 250ms animation
+            scale = Math.max(1.0 - progress, 0.01); // Shrink from 1.0 to 0.01 (avoid 0 which breaks rendering)
+            isAnimatingDelete = true;
+
+            // Also fade out
+            this.ctx.globalAlpha = scale;
         }
 
-        this.ctx.translate(x, y);
+        // Translate to center for scaling
+        this.ctx.translate(x + size / 2, y + size / 2);
+
+        // Apply scale for delete animation
+        if (isAnimatingDelete) {
+            this.ctx.scale(scale, scale);
+        }
+
+        // Translate back to top-left for drawing
+        this.ctx.translate(-size / 2, -size / 2);
 
         if (spawn.type === 'player') {
             this.drawPlayerCharacter(size, spawn.facingDirection);
@@ -1066,6 +1115,7 @@ export class CanvasRenderer {
     }
 
     render(levelData: LevelData, editorState: EditorState) {
+        this.editorState = editorState; // Store for use in draw methods
         this.clear();
         this.drawBackground(levelData.metadata.backgroundColor);
         this.drawGrid(editorState.pan, editorState.zoom, editorState.showGrid);

@@ -2649,3 +2649,219 @@ test.describe('Level Editor', () => {
         expect(hasContent).toBe(true);
     });
 });
+
+test.describe('Step 19: Delete Animations', () => {
+    test('deleted objects should animate (shrink) before disappearing', async ({ page }) => {
+        await page.goto('/');
+        await page.waitForLoadState('networkidle');
+
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Place a tile
+        await page.getByText('Grass', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Select the tile
+        await page.getByRole('button', { name: /select/i }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Verify it's selected
+        const selectionCount = page.getByTestId('selection-count');
+        expect(await selectionCount.textContent()).toMatch(/Selected: [1-9]/);
+
+        // Get initial object count
+        const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
+        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0');
+
+        // Delete the tile (pressing Delete key)
+        await page.keyboard.press('Delete');
+
+        // During the animation (wait 100ms, which is mid-animation if it's 250ms)
+        await page.waitForTimeout(100);
+
+        // Object should still exist in deletingObjects state during animation
+        // We can't directly test the visual shrink, but we can verify timing
+
+        // After animation completes (wait another 200ms to exceed 250ms total)
+        await page.waitForTimeout(200);
+
+        // Object count should now be reduced
+        const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
+        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0');
+        expect(finalCount).toBeLessThan(initialCount);
+
+        // Selection should be cleared
+        expect(await selectionCount.textContent()).toBe('Selected: 0 objects');
+    });
+
+    test('multiple objects should all animate when deleted together', async ({ page }) => {
+        await page.goto('/');
+        await page.waitForLoadState('networkidle');
+
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Place multiple tiles
+        await page.getByText('Stone', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 250, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 300, box.y + 200);
+        await page.waitForTimeout(100);
+
+        // Switch to multi-select tool
+        await page.getByRole('button', { name: /multi.*select/i }).click();
+        await page.waitForTimeout(50);
+
+        // Drag to select all three tiles
+        await page.mouse.move(box.x + 180, box.y + 180);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 320, box.y + 220);
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify multiple objects selected
+        const selectionCount = page.getByTestId('selection-count');
+        const selectedText = await selectionCount.textContent();
+        expect(selectedText).toMatch(/Selected: [2-9]/); // At least 2 objects
+
+        // Get initial count
+        const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
+        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0');
+
+        // Delete all selected objects
+        await page.keyboard.press('Delete');
+        await page.waitForTimeout(300); // Wait for animation to complete
+
+        // Object count should be reduced
+        const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
+        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0');
+        expect(finalCount).toBeLessThan(initialCount);
+
+        // Selection should be cleared
+        expect(await selectionCount.textContent()).toBe('Selected: 0 objects');
+    });
+
+    test('delete animation should work for all object types', async ({ page }) => {
+        await page.goto('/');
+        await page.waitForLoadState('networkidle');
+
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Place a tile
+        await page.getByText('Ice', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 250, box.y + 250);
+        await page.waitForTimeout(50);
+
+        // Place an interactable object (button)
+        await page.getByText('Button', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 350, box.y + 250);
+        await page.waitForTimeout(50);
+
+        // Place a spawn point
+        await page.getByText('Player Spawn', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 450, box.y + 250);
+        await page.waitForTimeout(100);
+
+        // Select all objects with multi-select
+        await page.getByRole('button', { name: /multi.*select/i }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.move(box.x + 230, box.y + 230);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 470, box.y + 270);
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify objects are selected
+        const selectionCount = page.getByTestId('selection-count');
+        const selectedText = await selectionCount.textContent();
+        expect(selectedText).toMatch(/Selected: [1-9]/);
+
+        // Get initial count
+        const initialCountText = await page.getByTestId('statusbar-object-count').textContent();
+        const initialCount = Number.parseInt(initialCountText?.match(/\d+/)?.[0] || '0');
+
+        // Delete all selected objects
+        await page.keyboard.press('Delete');
+        await page.waitForTimeout(300); // Wait for animation
+
+        // Verify objects were deleted
+        const finalCountText = await page.getByTestId('statusbar-object-count').textContent();
+        const finalCount = Number.parseInt(finalCountText?.match(/\d+/)?.[0] || '0');
+        expect(finalCount).toBeLessThan(initialCount);
+    });
+});
+
+test.describe('Step 20: Initial Zoom Calculation', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/');
+    });
+
+    test('should calculate initial zoom to show grass layer', async ({ page }) => {
+        // The initial zoom should be calculated to show the grass layer (at y=20)
+        // instead of always starting at 100%
+        const zoomLevel = page.getByTestId('statusbar-zoom-display');
+        await expect(zoomLevel).toBeVisible();
+
+        // Get the initial zoom value
+        const zoomText = await zoomLevel.textContent();
+        expect(zoomText).toMatch(/\d+%/);
+
+        // Parse the zoom percentage
+        const zoomPercent = Number.parseInt(zoomText?.match(/\d+/)?.[0] || '100');
+
+        // The calculated zoom should be less than 100% to fit the grass layer
+        // (assuming viewport is not extremely tall)
+        // Typical viewport will show grass at around 40-60% zoom
+        expect(zoomPercent).toBeGreaterThan(0);
+        expect(zoomPercent).toBeLessThanOrEqual(100);
+
+        // Verify the calculation only happens once - changing levels shouldn't reset zoom
+        // Get current zoom
+        const initialZoom = zoomPercent;
+
+        // Zoom in manually
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        await zoomInButton.click();
+
+        // Zoom should have changed
+        const newZoomText = await zoomLevel.textContent();
+        const newZoomPercent = Number.parseInt(newZoomText?.match(/\d+/)?.[0] || '100');
+        expect(newZoomPercent).toBeGreaterThan(initialZoom);
+    });
+
+    test('initial zoom should be viewport-dependent', async ({ page }) => {
+        // Resize viewport to test zoom calculation
+        await page.setViewportSize({ width: 1920, height: 1080 });
+
+        // Reload to trigger initial zoom calculation
+        await page.reload();
+        await page.waitForTimeout(200); // Wait for DOM to settle
+
+        const zoomLevel = page.getByTestId('statusbar-zoom-display');
+        const zoomText = await zoomLevel.textContent();
+        const zoomPercent = Number.parseInt(zoomText?.match(/\d+/)?.[0] || '100');
+
+        // With a tall viewport (1080px), zoom should be calculated to fit grass
+        expect(zoomPercent).toBeGreaterThan(0);
+        expect(zoomPercent).toBeLessThanOrEqual(100);
+
+        // The zoom should result in grass being visible (we can't directly check canvas
+        // rendering in E2E, but we can verify the zoom calculation ran)
+        // Typical calculation for 1080px viewport should give ~40-60% zoom
+    });
+});

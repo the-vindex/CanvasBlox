@@ -83,6 +83,7 @@ export interface EditorState {
     showScanlines: boolean;
     mousePosition: Position;
     deletingObjects: string[];
+    deletionStartTimes?: Map<string, number>; // Object ID -> deletion start timestamp
     selectionBox?: {
         start: Position;
         end: Position;

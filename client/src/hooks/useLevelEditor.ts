@@ -290,16 +290,23 @@ export function useLevelEditor() {
         if (editorState.selectedObjects.length === 0) return;
 
         const objectsToDelete = [...editorState.selectedObjects];
+        const deletionTime = Date.now();
 
         // Clear any existing timeout
         if (deleteTimeoutRef.current) {
             clearTimeout(deleteTimeoutRef.current);
         }
 
-        // Mark objects as deleting for animation
+        // Mark objects as deleting for animation and track start times
+        const deletionStartTimes = new Map<string, number>();
+        objectsToDelete.forEach((id) => {
+            deletionStartTimes.set(id, deletionTime);
+        });
+
         setEditorState((prev) => ({
             ...prev,
             deletingObjects: objectsToDelete,
+            deletionStartTimes,
         }));
 
         // After animation completes (250ms), actually delete the objects
@@ -318,6 +325,7 @@ export function useLevelEditor() {
                 ...prev,
                 selectedObjects: [],
                 deletingObjects: [],
+                deletionStartTimes: undefined,
             }));
             deleteTimeoutRef.current = null;
         }, 250);
