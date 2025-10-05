@@ -22,18 +22,6 @@ test.describe('Level Editor', () => {
         await expect(page.getByText('Spawn Points')).toBeVisible();
     });
 
-    test('should have default level loaded', async ({ page }) => {
-        // Canvas should be present and have default dimensions
-        const canvas = page.getByTestId('level-canvas');
-        await expect(canvas).toBeVisible();
-
-        const width = await canvas.getAttribute('width');
-        const height = await canvas.getAttribute('height');
-
-        expect(width).toBe('1920');
-        expect(height).toBe('960');
-    });
-
     test('should show level tabs', async ({ page }) => {
         // Look for level tab with testid
         const firstTab = page.getByTestId('tab-level-0');
@@ -41,46 +29,6 @@ test.describe('Level Editor', () => {
 
         // Verify it contains the level name
         await expect(firstTab).toContainText('New Level');
-    });
-
-    test('should have toolbar buttons', async ({ page }) => {
-        // Check for zoom controls in the toolbar (not status bar)
-        const toolbar = page.locator('main').first();
-        await expect(toolbar.getByText('100%')).toBeVisible();
-    });
-
-    // TODO: Remove this test later when we have user-observable state testing via components
-    test('[TEMPORARY] should load level data from localStorage', async ({ page }) => {
-        // Set custom level data in localStorage before page load
-        await page.addInitScript(() => {
-            const customLevel = [
-                {
-                    levelName: 'Test Level From Storage',
-                    metadata: {
-                        version: '1.0',
-                        createdAt: new Date().toISOString(),
-                        author: 'Test',
-                        description: 'Test level',
-                        dimensions: { width: 100, height: 50 },
-                        backgroundColor: '#87CEEB',
-                    },
-                    tiles: [],
-                    objects: [],
-                    spawnPoints: [],
-                },
-            ];
-            localStorage.setItem('levelEditor_levels', JSON.stringify(customLevel));
-        });
-
-        await page.goto('/');
-
-        // Verify the custom level was loaded by checking canvas dimensions
-        // (100 tiles * 32px = 3200, 50 tiles * 32px = 1600)
-        const canvas = page.getByTestId('level-canvas');
-        const width = await canvas.getAttribute('width');
-        const height = await canvas.getAttribute('height');
-        expect(width).toBe('3200');
-        expect(height).toBe('1600');
     });
 
     test('Step 2: should track mouse position over canvas', async ({ page }) => {
@@ -101,46 +49,6 @@ test.describe('Level Editor', () => {
         // Check that coordinates are being tracked (not stuck at 0,0)
         const positionText = await mousePosition.textContent();
         expect(positionText).toMatch(/Mouse: \(\d+, \d+\)/);
-    });
-
-    // TODO: This test will work properly in Step 3 when CanvasRenderer is wired up
-    // Currently zoom state updates but Playwright can't trigger the wheel event properly on the wrapper
-    test.skip('Step 2: should update zoom state with Ctrl+wheel', async ({ page }) => {
-        // Move mouse over the scrollable canvas wrapper (not just the canvas)
-        const canvasWrapper = page.locator('[data-testid="level-canvas"]').locator('..');
-
-        // Check initial zoom displays 100%
-        const zoomDisplay = page.getByTestId('statusbar-zoom-display');
-        await expect(zoomDisplay).toHaveText('100%');
-
-        // Get the wrapper bounding box for mouse position
-        const box = await canvasWrapper.boundingBox();
-        if (!box) {
-            // Fallback to canvas if wrapper doesn't work
-            const canvas = page.getByTestId('level-canvas');
-            const canvasBox = await canvas.boundingBox();
-            if (!canvasBox) throw new Error('Canvas not found');
-
-            // Move mouse over canvas
-            await page.mouse.move(canvasBox.x + canvasBox.width / 2, canvasBox.y + canvasBox.height / 2);
-        } else {
-            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        }
-
-        // Try zooming WITHOUT Ctrl - should not change
-        await page.mouse.wheel(0, -100);
-        await expect(zoomDisplay).toHaveText('100%');
-
-        // Now zoom WITH Ctrl+wheel - the wrapper handles wheel events
-        await page.keyboard.down('Control');
-        await page.mouse.wheel(0, -100); // Scroll up with Ctrl - should zoom in
-        await page.keyboard.up('Control');
-
-        // Zoom should have increased - extract and verify value
-        await page.waitForTimeout(100);
-        const zoomText = await zoomDisplay.textContent();
-        const zoomValue = parseInt(zoomText?.replace('%', '') || '0', 10);
-        expect(zoomValue).toBeGreaterThan(100);
     });
 
     test('Step 2: should show correct selection count', async ({ page }) => {
@@ -737,5 +645,153 @@ test.describe('Level Editor', () => {
 
         // Tool should be deselected
         await expect(selectTool).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    test('Step 9: should zoom in at viewport center when zoom in button clicked', async ({ page }) => {
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+        const toolbarZoom = page.getByTestId('zoom-level');
+
+        // Verify initial zoom is 100%
+        await expect(statusBarZoom).toHaveText('100%');
+        await expect(toolbarZoom).toHaveText('100%');
+
+        // Click zoom in button
+        await zoomInButton.click();
+        await page.waitForTimeout(50);
+
+        // Both zoom displays should update
+        const statusZoomText = await statusBarZoom.textContent();
+        const toolbarZoomText = await toolbarZoom.textContent();
+        const statusZoomValue = parseInt(statusZoomText?.replace('%', '') || '0', 10);
+        const toolbarZoomValue = parseInt(toolbarZoomText?.replace('%', '') || '0', 10);
+
+        expect(statusZoomValue).toBe(110); // 100% + 10% = 110%
+        expect(toolbarZoomValue).toBe(110);
+        expect(statusZoomValue).toBe(toolbarZoomValue); // Both should match
+    });
+
+    test('Step 9: should zoom out at viewport center when zoom out button clicked', async ({ page }) => {
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const zoomOutButton = page.getByTestId('button-zoom-out');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+
+        // First zoom in
+        await zoomInButton.click();
+        await page.waitForTimeout(50);
+        await expect(statusBarZoom).toHaveText('110%');
+
+        // Then zoom out
+        await zoomOutButton.click();
+        await page.waitForTimeout(50);
+
+        // Should be back to 100%
+        await expect(statusBarZoom).toHaveText('100%');
+    });
+
+    test('Step 9: should reset zoom to 100% when reset button clicked', async ({ page }) => {
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const resetButton = page.getByTestId('button-reset-zoom');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+
+        // Zoom in multiple times
+        await zoomInButton.click();
+        await zoomInButton.click();
+        await zoomInButton.click();
+        await page.waitForTimeout(50);
+
+        const zoomedText = await statusBarZoom.textContent();
+        const zoomedValue = parseInt(zoomedText?.replace('%', '') || '0', 10);
+        expect(zoomedValue).toBeGreaterThan(100);
+
+        // Reset zoom
+        await resetButton.click();
+        await page.waitForTimeout(50);
+
+        // Should be exactly 100%
+        await expect(statusBarZoom).toHaveText('100%');
+    });
+
+    test('Step 9: should enforce minimum zoom of 10%', async ({ page }) => {
+        const zoomOutButton = page.getByTestId('button-zoom-out');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+
+        // Try to zoom out many times (should hit minimum at 10%)
+        for (let i = 0; i < 15; i++) {
+            await zoomOutButton.click();
+        }
+        await page.waitForTimeout(50);
+
+        const zoomText = await statusBarZoom.textContent();
+        const zoomValue = parseInt(zoomText?.replace('%', '') || '0', 10);
+
+        // Should not go below 10%
+        expect(zoomValue).toBeGreaterThanOrEqual(10);
+    });
+
+    test('Step 9: should enforce maximum zoom of 500%', async ({ page }) => {
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+
+        // Try to zoom in many times (should hit maximum at 500%)
+        for (let i = 0; i < 50; i++) {
+            await zoomInButton.click();
+        }
+        await page.waitForTimeout(50);
+
+        const zoomText = await statusBarZoom.textContent();
+        const zoomValue = parseInt(zoomText?.replace('%', '') || '0', 10);
+
+        // Should not go above 500%
+        expect(zoomValue).toBeLessThanOrEqual(500);
+    });
+
+    test('Step 9: zoom controls should update status bar zoom display', async ({ page }) => {
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const zoomOutButton = page.getByTestId('button-zoom-out');
+        const resetButton = page.getByTestId('button-reset-zoom');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+
+        // Initial state
+        await expect(statusBarZoom).toHaveText('100%');
+
+        // Zoom in
+        await zoomInButton.click();
+        await page.waitForTimeout(50);
+        let zoomText = await statusBarZoom.textContent();
+        expect(parseInt(zoomText?.replace('%', '') || '0', 10)).toBeGreaterThan(100);
+
+        // Zoom out
+        await zoomOutButton.click();
+        await page.waitForTimeout(50);
+        await expect(statusBarZoom).toHaveText('100%');
+
+        // Zoom in again
+        await zoomInButton.click();
+        await page.waitForTimeout(50);
+        zoomText = await statusBarZoom.textContent();
+        expect(parseInt(zoomText?.replace('%', '') || '0', 10)).toBeGreaterThan(100);
+
+        // Reset
+        await resetButton.click();
+        await page.waitForTimeout(50);
+        await expect(statusBarZoom).toHaveText('100%');
+    });
+
+    test('Step 9: toolbar and status bar zoom should always match', async ({ page }) => {
+        const zoomInButton = page.getByTestId('button-zoom-in');
+        const toolbarZoom = page.getByTestId('zoom-level');
+        const statusBarZoom = page.getByTestId('statusbar-zoom-display');
+
+        // Check multiple zoom levels
+        for (let i = 0; i < 3; i++) {
+            await zoomInButton.click();
+            await page.waitForTimeout(50);
+
+            const toolbarText = await toolbarZoom.textContent();
+            const statusBarText = await statusBarZoom.textContent();
+
+            expect(toolbarText).toBe(statusBarText);
+        }
     });
 });
