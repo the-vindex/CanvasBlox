@@ -22,7 +22,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Chapter 11: Drawing Tools Implementation
 
-**Status:** 🔄 In Progress (4/11 tasks complete, 7 remaining)
+**Status:** 🔄 In Progress (5/12 tasks complete, 7 remaining)
 **Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`
 **Priority:** High
 
@@ -31,6 +31,7 @@ Work through chapters sequentially. After implementing each chapter:
 ✅ **11.4** Move tool - Drag selected objects with ghost preview
 ✅ **11.8** Clear brush on tool change - Mutual exclusion between tools/tiles
 ✅ **11.X** Multi-select tool - Drag box selection (bonus feature)
+✅ **11.11** Fix ESC key not cancelling palette tool - Critical bug fixed
 
 ### Remaining Tasks:
 
@@ -501,6 +502,91 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
+## Chapter 14: E2E Test Organization & Splitting
+
+**Status:** ⏸️ Not Started
+**Files:** `e2e/level-editor.spec.ts` (2814 lines → split into ~12 files)
+**Priority:** Medium
+
+**Goal:** Split monolithic level-editor.spec.ts into focused test files organized by feature area. Each file should cover specific functionality with clear behavioral documentation. Must handle Playwright parallel execution properly. All tests passing before and after split - this is purely a refactoring/reorganization task.
+
+### Tasks:
+
+#### 14.1 Split E2E tests into focused files by functionality
+- **Location:** `e2e/level-editor.spec.ts` (2814 lines)
+- **Current:** Single monolithic test file with all tests
+- **Change:** Split into multiple focused test files organized by feature area
+- **Proposed structure:**
+  - `e2e/basic-ui.spec.ts` - Initial load, tile palette, level tabs, properties panel
+  - `e2e/toolbar.spec.ts` - Toolbar buttons, tool selection, toggles
+  - `e2e/keyboard-shortcuts.spec.ts` - All keyboard shortcuts (V/M/H/L/R/K/P/Escape)
+  - `e2e/zoom-pan.spec.ts` - Zoom controls, pan with middle mouse, viewport interactions
+  - `e2e/tile-placement.spec.ts` - Single click, painting mode, spawn points, interactables
+  - `e2e/selection.spec.ts` - Select tool, multi-select, move tool, ghost preview
+  - `e2e/undo-redo.spec.ts` - Undo/redo operations, history display, button states
+  - `e2e/copy-paste.spec.ts` - Copy/paste operations, clipboard management
+  - `e2e/import-export.spec.ts` - JSON import/export, PNG export, validation
+  - `e2e/auto-save.spec.ts` - Auto-save timing, save indicators, unsaved state
+  - `e2e/visual-effects.spec.ts` - Scanlines, grid toggle, selection feedback, delete animations
+  - `e2e/parallax-zoom.spec.ts` - Initial zoom calculation, parallax background
+  - `e2e/menus.spec.ts` - File dropdown, menu actions
+- **Implementation:**
+  - Extract tests into respective files
+  - Ensure each file has proper test setup/teardown
+  - Handle Playwright parallel execution (each file runs independently)
+  - Verify all tests pass after split
+  - Update test scripts if needed (npm run test:e2e should run all files)
+- **Files to create:** 12+ new test files in `e2e/` directory
+- **Files to modify/delete:** `e2e/level-editor.spec.ts` (will be removed after split)
+- **Note:** This is purely a refactoring task - all tests must pass before and after. No behavioral changes.
+
+**Dependencies:** None
+**Notes:** Improves test maintainability and parallel execution. Each file becomes focused and easier to navigate.
+
+---
+
+## Chapter 15: Enhanced Copy/Paste with Ghost Preview
+
+**Status:** ⏸️ Not Started
+**Files:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useLevelEditor.ts`, `client/src/utils/canvasRenderer.ts`
+**Priority:** Medium
+
+**Goal:** Change paste behavior to show ghost preview instead of immediate placement. Paste becomes a "complex palette mode" similar to other drawing tools.
+
+### Tasks:
+
+#### 15.1 Rethink copy/paste workflow with ghost preview
+- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useLevelEditor.ts`
+- **Current:** Paste immediately places tiles at clipboard position
+- **Change:** Paste shows ghost preview, waits for click to place
+- **New workflow:**
+  - **Copy:** Selected tiles → clipboard (unchanged)
+  - **Paste:** Show ghost image of tiles, wait for click to place
+  - **Placement:** Clicking places tiles at cursor position
+  - **Overwrite:** Pasted tiles overwrite overlapping tiles (connects to Task 11.10)
+  - **Cancel:** ESC key or selecting other tool/palette cancels paste mode
+- **Implementation:**
+  - In `useLevelEditor`: Add `pasteMode` state (boolean)
+  - In `useCanvas`: On paste, set `pasteMode = true`, store clipboard data in temp state
+  - In `canvasRenderer`: Render ghost preview of clipboard tiles at cursor position
+  - In `useCanvas`: On click, place tiles from clipboard at clicked position
+  - In `useCanvas`: On ESC or tool change, clear `pasteMode`
+- **Ghost reuse opportunity:**
+  - Currently ghost rendering used in move tool
+  - Paste will add another use case
+  - Investigate consolidating ghost rendering logic (DRY principle)
+  - Possible shared helper: `drawGhostObjects(objects, offset, alpha)`
+- **Files to modify:**
+  - `client/src/hooks/useLevelEditor.ts` (add pasteMode state)
+  - `client/src/hooks/useCanvas.ts` (paste interaction logic)
+  - `client/src/utils/canvasRenderer.ts` (ghost preview rendering)
+- **Note:** Paste essentially becomes a "complex palette mode" similar to other drawing tools
+
+**Dependencies:** Task 11.10 (tile overlap logic) should be completed first for consistent overwrite behavior
+**Notes:** More intuitive paste workflow. User has control over where pasted content goes.
+
+---
+
 ## Technical Context
 
 ### Current Architecture:
@@ -541,9 +627,11 @@ Work through chapters sequentially. After implementing each chapter:
 | 8. Color & Theme | ✅ Completed | ✓ | Shadow system, tile borders |
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
-| 11. Drawing Tools | 🔄 In Progress | ❌ | 4/11 complete - Selection/move done, link/draw tools remain |
-| 13. E2E Test Simplification | 🔄 In Progress | ❌ | Phase 2: 3/7 complete (-4 tests, -116 lines) |
+| 11. Drawing Tools | 🔄 In Progress | ❌ | 5/12 complete, 7 tasks remaining |
+| 13. E2E Test Simplification | 🔄 In Progress | ❌ | Phase 2: 4/7 complete (-5 tests, -185 lines) |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
+| 14. E2E Test Organization | ⏸️ Not Started | ❌ | Split monolithic test file into 12+ focused files |
+| 15. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
 
 **Legend:**
 - ⏸️ Not Started
@@ -555,16 +643,17 @@ Work through chapters sequentially. After implementing each chapter:
 
 ## Next Steps
 
-**Current:** Chapter 11 - Drawing Tools Implementation (4/11 complete, 7 remaining)
+**Current:** Chapter 11 - Drawing Tools Implementation (5/12 complete, 7 remaining)
 
-**✅ Completed (4):**
+**✅ Completed (5):**
 - ✅ Selection tool (single select)
 - ✅ Move tool (ghost preview)
 - ✅ Multi-select tool (drag box)
 - ✅ Clear brush on tool change
+- ✅ ESC key bug fix - Now cancels palette selection
 
 **❌ Chapter 11 Remaining (Priority Order):**
-1. 🔧 **11.10** Tile overlap logic - newest tile wins (NEW - HIGH PRIORITY)
+1. 🔧 **11.10** Tile overlap logic - newest tile wins (HIGH PRIORITY)
 2. 🔗 **11.5** Linking tool for interactable objects
 3. ✂️ **11.6** Unlinking tool (Properties Panel)
 4. 📏 **11.1** Line drawing tool
@@ -572,18 +661,22 @@ Work through chapters sequentially. After implementing each chapter:
 6. 🔢 **11.9** Button numbering system
 7. 🔄 **11.7** Rotation tool - decision needed
 
-**Alternative Focus:** Chapter 13 - E2E Test Simplification (IN PROGRESS - 3/7 Phase 2 tasks done)
+**Alternative Focus:** Chapter 13 - E2E Test Simplification (IN PROGRESS - 4/7 Phase 2 tasks done)
 - **Phase 1 (Complete):** ✅ Deleted 4 redundant zoom tests (-92 lines)
-- **Phase 2 (In Progress - 3/7 done):**
+- **Phase 2 (In Progress - 4/7 done):**
   - ✅ 13.3: Merge undo tests (consolidated + fixed bug)
   - ✅ 13.4: Merge redo tests (-2 tests, -60 lines)
   - ✅ 13.5: Merge copy tests (-1 test, -25 lines)
-  - ⏸️ 13.6: Merge paste tests (3 tests → 1, ~40-50 lines)
+  - ✅ 13.6: Merge paste tests (-2 tests, -69 lines)
   - ⏸️ 13.7: Fix/remove redundant offset tests
   - ⏸️ 13.8: Refactor multi-select copy test
   - ⏸️ 13.9: Document consolidation pattern
 - **Phase 3 (Not Started):** Extract helper functions (-200 lines)
 - **Phase 4 (Not Started):** Add error/edge case coverage
+
+**New Chapters (Queued):**
+- **Chapter 14:** E2E Test Organization - Split monolithic test file
+- **Chapter 15:** Enhanced Copy/Paste - Ghost preview workflow
 
 **Future:** Chapter 12 - Documentation (low priority)
 
