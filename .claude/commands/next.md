@@ -22,6 +22,10 @@ When this command is invoked:
 
 2. **Read** `TASKS.md`
 3. **Find** the first task with status: ⏸️ Not Started or similar incomplete status
+   - **Priority order:** Skip P1 (AI config), then P2 (bugfix) → P3 (feature) → P4 (idea)
+   - **P1 tasks are skipped** - they require user to modify .claude/, permissions, or MCP
+   - Within same priority, use document order (top to bottom)
+   - If no priority specified, assume P3
 4. **Implement** that step following the **TDD workflow from CLAUDE.md**:
    - ✅ Write failing tests first (BOTH unit AND e2e)
    - ✅ Implement feature to make tests pass

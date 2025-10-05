@@ -156,19 +156,21 @@ test('should load levels from localStorage', () => {
 Each task should define:
 
 1. **Status** - Current state (⬜/🧪/✅)
-2. **Current State** - What exists now
-3. **Goal** - What we're building
-4. **Dependencies** - Prerequisites (other tasks that must complete first)
-5. **Implementation** - Step-by-step approach with code examples
-6. **Files to modify** - Specific file paths
-7. **Manual Test** - How to verify manually
-8. **Automated Test** - What to test and where
+2. **Priority** - 1 (AI config), 2 (bugfix), 3 (feature - default), 4 (idea)
+3. **Current State** - What exists now
+4. **Goal** - What we're building
+5. **Dependencies** - Prerequisites (other tasks that must complete first)
+6. **Implementation** - Step-by-step approach with code examples
+7. **Files to modify** - Specific file paths
+8. **Manual Test** - How to verify manually
+9. **Automated Test** - What to test and where
 
 ### Example Task Template
 
 ```markdown
 ### Task X: Feature Name
 **Status**: ⬜ Not Started
+**Priority**: 3
 **Current State**: Description of current implementation
 **Goal**: What this task achieves
 **Dependencies**: Task Y (prerequisite)
