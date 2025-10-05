@@ -88,6 +88,21 @@ vi.mock('@/components/level-editor/Toolbar', () => ({
             <button type="button" data-testid="tool-select" onClick={() => onToolChange('select')}>
                 Select
             </button>
+            <button type="button" data-testid="tool-multiselect" onClick={() => onToolChange('multiselect')}>
+                Multi-select
+            </button>
+            <button type="button" data-testid="tool-move" onClick={() => onToolChange('move')}>
+                Move
+            </button>
+            <button type="button" data-testid="tool-line" onClick={() => onToolChange('line')}>
+                Line
+            </button>
+            <button type="button" data-testid="tool-rectangle" onClick={() => onToolChange('rectangle')}>
+                Rectangle
+            </button>
+            <button type="button" data-testid="tool-link" onClick={() => onToolChange('link')}>
+                Link
+            </button>
             <button type="button" data-testid="button-zoom-in" onClick={onZoomIn}>
                 Zoom In
             </button>
@@ -103,6 +118,10 @@ vi.mock('@/components/level-editor/Toolbar', () => ({
             <span data-testid="zoom-level">{Math.round(editorState.zoom * 100)}%</span>
         </div>
     ),
+}));
+
+vi.mock('@/components/level-editor/LevelTabs', () => ({
+    LevelTabs: () => <div data-testid="level-tabs">Level Tabs</div>,
 }));
 
 describe('LevelEditor - Step 6: Toolbar Integration', () => {

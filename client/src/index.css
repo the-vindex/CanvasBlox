@@ -374,3 +374,13 @@
     animation: scanlines 0.5s linear infinite;
     opacity: 0.3;
 }
+
+/* Flash animation for undo/redo feedback */
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}

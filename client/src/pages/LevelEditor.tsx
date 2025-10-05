@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Canvas } from '@/components/level-editor/Canvas';
 import { LevelTabs } from '@/components/level-editor/LevelTabs';
 import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
@@ -9,6 +9,7 @@ import type { EditorState, Position } from '@/types/level';
 
 export default function LevelEditor() {
     const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
+    const [showUndoRedoFlash, setShowUndoRedoFlash] = useState(false);
 
     // Integrate useLevelEditor hook
     const {
@@ -172,6 +173,110 @@ export default function LevelEditor() {
         },
         [levels, deleteLevel]
     );
+
+    // Undo/redo flash animation trigger
+    const triggerUndoRedoFlash = useCallback(() => {
+        setShowUndoRedoFlash(true);
+        setTimeout(() => setShowUndoRedoFlash(false), 400);
+    }, []);
+
+    // Keyboard shortcut handlers
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't trigger shortcuts when typing in input fields
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+                return;
+            }
+
+            // Tool shortcuts (single keys)
+            if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'v':
+                        e.preventDefault();
+                        handleToolChange('select');
+                        break;
+                    case 'm':
+                        e.preventDefault();
+                        handleToolChange('multiselect');
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        handleToolChange('move');
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        handleToolChange('line');
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        handleToolChange('rectangle');
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        handleToolChange('link');
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        setShowPropertiesPanel((prev) => !prev);
+                        break;
+                    case 'escape':
+                        e.preventDefault();
+                        setEditorState((prev) => ({
+                            ...prev,
+                            selectedTool: null,
+                            selectedObjects: [],
+                        }));
+                        break;
+                    case 'delete':
+                        e.preventDefault();
+                        _deleteSelectedObjects();
+                        break;
+                }
+            }
+
+            // Ctrl/Cmd shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            _redo();
+                            triggerUndoRedoFlash();
+                        } else {
+                            _undo();
+                            triggerUndoRedoFlash();
+                        }
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        _redo();
+                        triggerUndoRedoFlash();
+                        break;
+                    case 'c':
+                        e.preventDefault();
+                        _copySelectedObjects();
+                        break;
+                    case 'v':
+                        e.preventDefault();
+                        _pasteObjects();
+                        break;
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [
+        handleToolChange,
+        setEditorState,
+        _deleteSelectedObjects,
+        _undo,
+        _redo,
+        _copySelectedObjects,
+        _pasteObjects,
+        triggerUndoRedoFlash,
+    ]);
 
     // Don't render until we have a current level
     if (!currentLevel) {
@@ -363,7 +468,7 @@ export default function LevelEditor() {
                     />
 
                     {/* Canvas Component with CanvasRenderer */}
-                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                         <Canvas
                             levelData={currentLevel}
                             editorState={editorState}
@@ -373,6 +478,22 @@ export default function LevelEditor() {
                             onDrawingSessionEnd={handleDrawingSessionEnd}
                             onZoom={handleWheelZoom}
                         />
+
+                        {/* Undo/Redo Flash Overlay */}
+                        {showUndoRedoFlash && (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    pointerEvents: 'none',
+                                    animation: 'flash 0.4s ease-out',
+                                }}
+                            />
+                        )}
                     </div>
                 </main>
 
