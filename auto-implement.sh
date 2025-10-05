@@ -31,9 +31,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
-    # Create prompt file for this iteration
-    PROMPT_FILE=$(mktemp)
-    cat > "$PROMPT_FILE" << 'PROMPT'
+    # Create prompt for this iteration
+    PROMPT=$(cat << 'PROMPT'
 You are running in FULL AUTO MODE. Your goal is to complete the next task from FEATURE_RESTORATION_PLAN.md without ANY user interaction.
 
 CRITICAL INSTRUCTIONS:
@@ -69,14 +68,14 @@ FINAL STEP: After committing your work, you MUST end the session. Do NOT wait fo
 
 BEGIN AUTO-IMPLEMENTATION NOW. Run /next and complete the step autonomously. After committing, EXIT.
 PROMPT
+)
 
     # Run Claude Code with timeout
     # Using timeout command to ensure process doesn't hang
     # --dangerously-skip-permissions: Auto-accept all tool permissions
     # --dangerously-skip-confirmations: Auto-accept all confirmations
-    timeout ${TIMEOUT_MINUTES}m claude-code --dangerously-skip-permissions --dangerously-skip-confirmations < "$PROMPT_FILE" || {
+    timeout ${TIMEOUT_MINUTES}m claude --dangerously-skip-permissions --non-interactive --verbose --message "$PROMPT" || {
         EXIT_CODE=$?
-        rm -f "$PROMPT_FILE"
 
         if [ $EXIT_CODE -eq 124 ]; then
             echo ""
@@ -92,8 +91,6 @@ PROMPT
             exit 1
         fi
     }
-
-    rm -f "$PROMPT_FILE"
 
     echo ""
     echo "✅ Iteration $i completed"
