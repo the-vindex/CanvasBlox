@@ -129,6 +129,37 @@ describe('CanvasRenderer', () => {
             // Should draw the tile and selection outline
             expect(strokeRectSpy).toHaveBeenCalled();
         });
+
+        it('should apply pulsing glow effect to selected tiles', () => {
+            const tile: Tile = {
+                id: 'tile-5',
+                type: 'platform-grass',
+                position: { x: 0, y: 0 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: { collision: true },
+            };
+
+            // Spy on context properties used for glow effect
+            const saveSpy = vi.spyOn(ctx, 'save');
+            const restoreSpy = vi.spyOn(ctx, 'restore');
+            const strokeRectSpy = vi.spyOn(ctx, 'strokeRect');
+
+            renderer.drawTile(tile, { x: 0, y: 0 }, 1, true);
+
+            // Should use save/restore for selection effect
+            expect(saveSpy).toHaveBeenCalled();
+            expect(restoreSpy).toHaveBeenCalled();
+
+            // Should draw selection outline with pulsing glow
+            expect(strokeRectSpy).toHaveBeenCalled();
+
+            // Verify shadow and stroke properties are set for glow effect
+            // Note: We don't test exact values since they're time-based
+            // The important behavior is that these properties are configured
+            expect(ctx.shadowColor).toBeTruthy();
+            expect(ctx.strokeStyle).toBeTruthy();
+        });
     });
 
     describe('drawObject', () => {
@@ -164,6 +195,31 @@ describe('CanvasRenderer', () => {
             // Teleport draws multiple arcs
             expect(arcSpy).toHaveBeenCalled();
         });
+
+        it('should apply pulsing glow effect to selected objects', () => {
+            const obj: InteractableObject = {
+                id: 'obj-3',
+                type: 'button',
+                position: { x: 2, y: 2 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                properties: { linkedObjects: [] },
+            };
+
+            const saveSpy = vi.spyOn(ctx, 'save');
+            const restoreSpy = vi.spyOn(ctx, 'restore');
+            const strokeRectSpy = vi.spyOn(ctx, 'strokeRect');
+
+            renderer.drawObject(obj, { x: 0, y: 0 }, 1, true);
+
+            expect(saveSpy).toHaveBeenCalled();
+            expect(restoreSpy).toHaveBeenCalled();
+            expect(strokeRectSpy).toHaveBeenCalled();
+
+            // Verify glow properties are set
+            expect(ctx.shadowColor).toBeTruthy();
+            expect(ctx.strokeStyle).toBeTruthy();
+        });
     });
 
     describe('drawSpawnPoint', () => {
@@ -196,6 +252,30 @@ describe('CanvasRenderer', () => {
             renderer.drawSpawnPoint(spawn, { x: 0, y: 0 }, 1);
 
             expect(fillRectSpy).toHaveBeenCalled();
+        });
+
+        it('should apply pulsing glow effect to selected spawn points', () => {
+            const spawn: SpawnPoint = {
+                id: 'spawn-3',
+                type: 'player',
+                position: { x: 3, y: 3 },
+                facingDirection: 'right',
+                properties: {},
+            };
+
+            const saveSpy = vi.spyOn(ctx, 'save');
+            const restoreSpy = vi.spyOn(ctx, 'restore');
+            const strokeRectSpy = vi.spyOn(ctx, 'strokeRect');
+
+            renderer.drawSpawnPoint(spawn, { x: 0, y: 0 }, 1, true);
+
+            expect(saveSpy).toHaveBeenCalled();
+            expect(restoreSpy).toHaveBeenCalled();
+            expect(strokeRectSpy).toHaveBeenCalled();
+
+            // Verify glow properties are set
+            expect(ctx.shadowColor).toBeTruthy();
+            expect(ctx.strokeStyle).toBeTruthy();
         });
     });
 

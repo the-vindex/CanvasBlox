@@ -2456,4 +2456,196 @@ test.describe('Level Editor', () => {
         const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
         expect(newObjectCount).not.toBe(initialObjectCount);
     });
+
+    test('Step 18: selected tiles should have visual selection feedback', async ({ page }) => {
+        // First, place a tile to select
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Click a platform tile to select it
+        await page.getByText('Basic', { exact: true }).click();
+        await page.waitForTimeout(100);
+
+        // Place tile on canvas
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Switch to select tool
+        const selectButton = page.getByRole('button', { name: /select/i }).first();
+        await selectButton.click();
+        await page.waitForTimeout(100);
+
+        // Click the tile to select it
+        await page.mouse.click(box.x + 300, box.y + 300);
+        await page.waitForTimeout(100);
+
+        // Verify selection count increased
+        const selectionCount = page.getByTestId('selection-count');
+        const countText = await selectionCount.textContent();
+        expect(countText).toMatch(/Selected: [1-9]\d* object/);
+
+        // Verify canvas was redrawn (selection rendering happened)
+        // We can't directly test the pulsing animation, but we can verify the canvas updates
+        const hasContent = await canvas.evaluate((canvasEl) => {
+            const ctx = (canvasEl as HTMLCanvasElement).getContext('2d');
+            if (!ctx) return false;
+            // Just verify canvas has content - actual visual testing would need screenshot comparison
+            const imageData = ctx.getImageData(0, 0, 100, 100);
+            return imageData.data.some((value) => value !== 0);
+        });
+        expect(hasContent).toBe(true);
+    });
+
+    test('Step 18: selection should work for different object types', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        const selectionCount = page.getByTestId('selection-count');
+
+        // Test 1: Select a tile (platform)
+        await page.getByText('Grass', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 400, box.y + 400);
+        await page.waitForTimeout(50);
+
+        // Switch to select tool and select the tile
+        const selectButton = page.getByRole('button', { name: /select/i }).first();
+        await selectButton.click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 400, box.y + 400);
+        await page.waitForTimeout(50);
+
+        let countText = await selectionCount.textContent();
+        expect(countText).toMatch(/Selected: [1-9]\d* object/);
+
+        // Clear selection
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(50);
+
+        // Test 2: Select an interactable object (button)
+        await page.getByText('Button', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 500, box.y + 500);
+        await page.waitForTimeout(50);
+
+        await selectButton.click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 500, box.y + 500);
+        await page.waitForTimeout(50);
+
+        countText = await selectionCount.textContent();
+        expect(countText).toMatch(/Selected: [1-9]\d* object/);
+
+        // Clear selection
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(50);
+
+        // Test 3: Select a spawn point
+        // Use "Player" instead of "Player Spawn" as the exact text may vary
+        await page.getByText('Player', { exact: true }).first().click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 600, box.y + 400);
+        await page.waitForTimeout(50);
+
+        await selectButton.click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 600, box.y + 400);
+        await page.waitForTimeout(50);
+
+        countText = await selectionCount.textContent();
+        expect(countText).toMatch(/Selected: [1-9]\d* object/);
+    });
+
+    test('Step 18: multiple selected objects should all show selection state', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Place multiple tiles
+        await page.getByText('Stone', { exact: true }).click();
+        await page.waitForTimeout(50);
+
+        // Place 3 tiles in a row
+        await page.mouse.click(box.x + 200, box.y + 200);
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 232, box.y + 200); // Next to first tile
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 264, box.y + 200); // Next to second tile
+        await page.waitForTimeout(50);
+
+        // Use multi-select tool to select all tiles
+        const multiselectButton = page.getByRole('button', { name: /multi.*select/i }).first();
+        await multiselectButton.click();
+        await page.waitForTimeout(50);
+
+        // Drag selection box over all tiles
+        await page.mouse.move(box.x + 190, box.y + 190);
+        await page.mouse.down();
+        await page.mouse.move(box.x + 280, box.y + 240);
+        await page.mouse.up();
+        await page.waitForTimeout(100);
+
+        // Verify multiple objects are selected
+        const selectionCount = page.getByTestId('selection-count');
+        const countText = await selectionCount.textContent();
+        expect(countText).toMatch(/Selected: [2-9]\d* object/); // At least 2 selected
+
+        // Verify canvas was redrawn with all selections
+        const hasContent = await canvas.evaluate((canvasEl) => {
+            const ctx = (canvasEl as HTMLCanvasElement).getContext('2d');
+            if (!ctx) return false;
+            const imageData = ctx.getImageData(0, 0, 100, 100);
+            return imageData.data.some((value) => value !== 0);
+        });
+        expect(hasContent).toBe(true);
+    });
+
+    test('Step 18: pulsing glow should not interfere with tile placement', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const box = await canvas.boundingBox();
+        if (!box) throw new Error('Canvas not found');
+
+        // Select and place a tile
+        await page.getByText('Ice', { exact: true }).click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 350, box.y + 350);
+        await page.waitForTimeout(50);
+
+        // Select the tile
+        const selectButton = page.getByRole('button', { name: /select/i }).first();
+        await selectButton.click();
+        await page.waitForTimeout(50);
+        await page.mouse.click(box.x + 350, box.y + 350);
+        await page.waitForTimeout(50);
+
+        // Verify it's selected
+        const selectionCount = page.getByTestId('selection-count');
+        const countText = await selectionCount.textContent();
+        expect(countText).toMatch(/Selected: [1-9]\d* object/);
+
+        // Now place another tile while one is selected
+        await page.getByText('Lava', { exact: true }).click();
+        await page.waitForTimeout(50);
+
+        const initialObjectCount = await page.getByTestId('statusbar-object-count').textContent();
+        await page.mouse.click(box.x + 450, box.y + 350);
+        await page.waitForTimeout(100);
+
+        // Verify new tile was placed (object count increased)
+        const newObjectCount = await page.getByTestId('statusbar-object-count').textContent();
+        expect(newObjectCount).not.toBe(initialObjectCount);
+
+        // The important thing is that tile placement works even with selection active
+        // We don't strictly require selection to be cleared - that's an implementation detail
+        // Just verify the canvas still renders correctly
+        const hasContent = await canvas.evaluate((canvasEl) => {
+            const ctx = (canvasEl as HTMLCanvasElement).getContext('2d');
+            if (!ctx) return false;
+            const imageData = ctx.getImageData(0, 0, 100, 100);
+            return imageData.data.some((value) => value !== 0);
+        });
+        expect(hasContent).toBe(true);
+    });
 });

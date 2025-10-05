@@ -214,3 +214,37 @@ Review this file after the auto-implementation is complete.
 **Next Step:** Step 18 - Selection Animations (Pulsing Glow)
 
 ---
+
+## Step 18: Selection Animations (Pulsing Glow)
+
+**Question:** Is the pulsing glow animation already implemented in CanvasRenderer?
+**Assumption/Decision:** Yes! The pulsing glow is fully implemented in CanvasRenderer.ts:
+- Lines 243-262: Pulsing glow for selected tiles
+- Lines 627-646: Pulsing glow for selected objects
+- Lines 864-883: Pulsing glow for selected spawn points
+The implementation uses `Date.now() / 1000` and `Math.sin(time * Math.PI)` to create oscillating opacity.
+**Reasoning:** Reviewed the CanvasRenderer code and found complete pulsing glow implementation with proper shadow blur, opacity animation, and blue outline stroke.
+
+**Question:** What tests should I write for the pulsing glow animation?
+**Assumption/Decision:** Will write E2E tests that verify:
+1. Selected objects have visual selection indicators (can't directly test animation in E2E)
+2. Selection works for tiles, objects, and spawn points
+3. Multiple objects can be selected and all show selection state
+4. Will NOT write unit tests for the animation timing/math since it's a visual effect
+**Reasoning:** E2E tests should verify the selection behavior works. Testing the exact pulsing animation would be brittle and implementation-specific. The important behavior is that selected objects are visually distinct.
+
+**Question:** Should I test the actual pulsing animation frame-by-frame?
+**Assumption/Decision:** No, will not test animation frames. Will test that:
+- Selection state updates correctly
+- Multiple selections work
+- Canvas redraws when selection changes
+**Reasoning:** Testing animation timing (Date.now(), Math.sin) is fragile and tests implementation details rather than user-facing behavior. The observable behavior is "selected objects look different" which is already tested via selection functionality tests.
+
+**Question:** Since selection tests already exist in Step 11, what new tests should I add?
+**Assumption/Decision:** Will add focused tests that specifically verify:
+1. Visual selection feedback exists (test that canvas redraws on selection)
+2. Selection works for all object types (tiles, interactables, spawn points)
+3. Pulsing glow doesn't interfere with other rendering
+**Reasoning:** Step 11 tests selection mechanics. Step 18 should test the visual animation aspect specifically.
+
+---
