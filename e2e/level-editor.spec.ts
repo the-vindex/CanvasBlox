@@ -1330,17 +1330,11 @@ test.describe('Level Editor', () => {
         await expect(redoButton).toBeVisible();
     });
 
-    // TODO: Fix this test - Ctrl+Z keyboard shortcut is not working in E2E tests
-    // The undo button works, but Ctrl+Z doesn't reduce object count after placing a tile
-    // Issue: After placing tile (count: 12), pressing Ctrl+Z doesn't undo (count stays: 12)
-    // This might be a real bug or a test timing issue. Need to investigate:
-    // 1. Whether Ctrl+Z works in manual testing
-    // 2. Whether there's a focus issue preventing keyboard shortcuts
-    // 3. Whether the undo history is being populated correctly
-    test.skip('Step 12: should undo with Ctrl+Z and button', async ({ page }) => {
+    test('Step 12: should undo with Ctrl+Z and button', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const objectCount = page.getByTestId('statusbar-object-count');
+        const undoButton = page.getByRole('button', { name: /Undo/ });
 
         // Get initial object count
         const initialCountText = await objectCount.textContent();
@@ -1349,10 +1343,10 @@ test.describe('Level Editor', () => {
         // Place a tile
         await grassTile.click();
         await page.waitForTimeout(50);
-        const box = await canvas.boundingBox();
-        if (!box) throw new Error('Canvas not found');
-        await page.mouse.click(box.x + 200, box.y + 200);
-        await page.waitForTimeout(200);
+        await canvas.click({ position: { x: 200, y: 200 } });
+
+        // Wait for drawing session to end and history to update
+        await expect(undoButton).toBeEnabled();
 
         // Verify tile was placed
         const afterPlaceText = await objectCount.textContent();
@@ -1371,7 +1365,6 @@ test.describe('Level Editor', () => {
         await page.waitForTimeout(200);
 
         // Test button
-        const undoButton = page.getByRole('button', { name: /Undo/ });
         await undoButton.click();
         await page.waitForTimeout(200);
         const afterButtonUndo = await objectCount.textContent();
@@ -1523,21 +1516,24 @@ test.describe('Level Editor', () => {
     });
 
     test('Step 12: should disable undo button when at start of history', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const grassTile = page.getByTestId('tile-platform-grass');
         const undoButton = page.getByRole('button', { name: /Undo/ });
 
-        // At the start of history (after potential previous test actions)
-        // We can't reliably test disabled state without resetting history
-        // So we'll just verify the button exists and is interactable
-        await expect(undoButton).toBeVisible();
+        // Undo button should be disabled at initial state
+        await expect(undoButton).toBeDisabled();
 
-        // Try clicking it multiple times to get to start of history
-        for (let i = 0; i < 20; i++) {
-            await undoButton.click();
-            await page.waitForTimeout(50);
-        }
+        // Place a tile to create history
+        await grassTile.click();
+        await canvas.click({ position: { x: 200, y: 200 } });
+        await expect(undoButton).toBeEnabled();
 
-        // Button should still be visible but potentially disabled
-        await expect(undoButton).toBeVisible();
+        // Undo to go back to initial state
+        await undoButton.click();
+        await page.waitForTimeout(200);
+
+        // Button should be disabled again at start of history
+        await expect(undoButton).toBeDisabled();
     });
 
     test('Step 12: should disable redo button when at end of history', async ({ page }) => {

@@ -223,30 +223,28 @@ Work through chapters sequentially. After implementing each chapter:
 
 ### Phase 2: Consolidate Interaction Tests (Medium Priority)
 
-#### 13.3 Merge undo keyboard and button tests ⚠️ BLOCKED
-- **Status:** ⚠️ BLOCKED - Ctrl+Z keyboard shortcut not working in E2E tests
-- **Location:** Lines 1333-1373 (consolidated test - currently skipped)
+#### 13.3 Merge undo keyboard and button tests ✅ COMPLETE
+- **Status:** ✅ COMPLETE
+- **Location:** Line 1333 (consolidated test - now passing)
 - **What was done:**
   - Consolidated two separate undo tests into one test that checks both Ctrl+Z and button
   - Deleted old "should undo by clicking undo button" test
-  - Test marked as `.skip` due to Ctrl+Z failure
-- **Issue discovered:**
-  - Ctrl+Z keyboard shortcut doesn't reduce object count after placing a tile
-  - Test expectations: Place tile (count: 10→12), press Ctrl+Z (count should: 12→10, actual: stays 12)
-  - Undo button works correctly, but keyboard shortcut fails
-- **Possible causes:**
-  1. Real bug: Ctrl+Z keyboard handler not working in application
-  2. Test timing issue: Need to wait longer for keyboard events to process
-  3. Focus issue: Keyboard events not reaching the right element
-  4. Undo history not populated: Tile placement not adding to undo stack
-- **Next steps:**
-  1. Manual testing: Verify if Ctrl+Z works in browser (not E2E)
-  2. Check keyboard event handlers in `client/src/pages/LevelEditor.tsx`
-  3. Check undo history state in `client/src/hooks/useLevelEditor.ts`
-  4. Add focus management or longer waits to test
-  5. Consider testing Ctrl+Z in isolation first
-- **Files modified:** `e2e/level-editor.spec.ts` (test at line 1340 marked with test.skip)
-- **Impact:** -1 test deleted, but consolidated test currently skipped (0 net change)
+  - Fixed root cause: History initialization bug
+- **Root cause discovered:**
+  - History was starting empty (`historyIndex = -1`)
+  - First action created `history[0]`, set `historyIndex = 0`
+  - Undo logic required `historyIndex > 0` to work, but with only one entry, this was FALSE
+  - **Fix:** Initialize history with initial state on load (`history[0] = initial state`, `historyIndex = 0`)
+  - Now first action creates `history[1]`, sets `historyIndex = 1`, and undo works (goes back to `history[0]`)
+- **Changes made:**
+  - Added initial history entry in `useLevelEditor.ts` when level first loads
+  - Updated undo button test to expect disabled state initially
+  - Test now passes without `.skip`
+- **Files modified:**
+  - `client/src/hooks/useLevelEditor.ts` - Added history initialization
+  - `e2e/level-editor.spec.ts` - Consolidated test (line 1333), updated disabled button test (line 1518)
+  - `client/src/hooks/useLevelEditor.test.ts` - Updated unit test expectations
+- **Impact:** -1 test, consolidated test passing, undo/redo now works correctly
 
 #### 13.4 Merge redo keyboard shortcuts and button tests
 - **Location:** Lines 1470-1498 (Ctrl+Y), Lines 1500-1528 (Ctrl+Shift+Z), Lines 1557-1587 (Button)

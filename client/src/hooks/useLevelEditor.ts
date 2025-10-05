@@ -34,9 +34,22 @@ export function useLevelEditor() {
         deletingObjects: [],
     });
     const [history, setHistory] = useState<HistoryEntry[]>([]);
-    const [historyIndex, setHistoryIndex] = useState(-1);
+    const [historyIndex, setHistoryIndex] = useState(0);
 
     const currentLevel = levels[currentLevelIndex];
+
+    // Initialize history with current level state when level first loads (only once)
+    useEffect(() => {
+        if (currentLevel && history.length === 0) {
+            const initialEntry: HistoryEntry = {
+                timestamp: Date.now(),
+                levelData: JSON.parse(JSON.stringify(currentLevel)),
+                action: 'Initial state',
+            };
+            setHistory([initialEntry]);
+            setHistoryIndex(0);
+        }
+    }, [currentLevel, history.length]);
 
     // Auto-save functionality
     useEffect(() => {
@@ -79,6 +92,13 @@ export function useLevelEditor() {
             };
 
             setHistory((prev) => {
+                // If history is empty (shouldn't happen now), create initial entry
+                if (prev.length === 0) {
+                    setHistoryIndex(0);
+                    return [entry];
+                }
+
+                // Remove any history after current index and add new entry
                 const newHistory = prev.slice(0, historyIndex + 1);
                 newHistory.push(entry);
                 const trimmedHistory = newHistory.slice(-100); // Keep last 100 entries

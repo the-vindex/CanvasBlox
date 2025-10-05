@@ -73,11 +73,12 @@ describe('useLevelEditor', () => {
             });
         });
 
-        it('should initialize history as empty', () => {
+        it('should initialize history with initial state', () => {
             const { result } = renderHook(() => useLevelEditor());
 
-            expect(result.current.history).toEqual([]);
-            expect(result.current.historyIndex).toBe(-1);
+            expect(result.current.history).toHaveLength(1);
+            expect(result.current.history[0].action).toBe('Initial state');
+            expect(result.current.historyIndex).toBe(0);
         });
     });
 
