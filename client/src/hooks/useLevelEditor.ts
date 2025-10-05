@@ -68,12 +68,13 @@ export function useLevelEditor() {
     }, []);
 
     const addToHistory = useCallback(
-        (action: string) => {
-            if (!currentLevel) return;
+        (action: string, levelData?: LevelData) => {
+            const dataToSave = levelData || currentLevel;
+            if (!dataToSave) return;
 
             const entry: HistoryEntry = {
                 timestamp: Date.now(),
-                levelData: JSON.parse(JSON.stringify(currentLevel)),
+                levelData: JSON.parse(JSON.stringify(dataToSave)),
                 action,
             };
 
@@ -97,12 +98,18 @@ export function useLevelEditor() {
 
     const updateCurrentLevel = useCallback(
         (updater: (level: LevelData) => LevelData, action: string = 'Level updated') => {
+            let updatedLevel!: LevelData;
+
+            // Update the levels state and capture the updated level
             setLevels((prev) => {
                 const newLevels = [...prev];
-                newLevels[currentLevelIndex] = updater(newLevels[currentLevelIndex]);
+                updatedLevel = updater(newLevels[currentLevelIndex]);
+                newLevels[currentLevelIndex] = updatedLevel;
                 return newLevels;
             });
-            addToHistory(action);
+
+            // Add to history with the updated level data (updatedLevel is captured synchronously in the setter above)
+            addToHistory(action, updatedLevel);
         },
         [currentLevelIndex, addToHistory]
     );

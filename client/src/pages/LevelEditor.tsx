@@ -470,6 +470,48 @@ export default function LevelEditor() {
                     </button>
                     <button
                         type="button"
+                        onClick={() => {
+                            _undo();
+                            triggerUndoRedoFlash();
+                        }}
+                        disabled={historyIndex === 0}
+                        style={{
+                            padding: '8px 16px',
+                            background: historyIndex === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            color: historyIndex === 0 ? 'rgba(255, 255, 255, 0.4)' : 'white',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            cursor: historyIndex === 0 ? 'not-allowed' : 'pointer',
+                            border: 'none',
+                            backdropFilter: 'blur(10px)',
+                        }}
+                    >
+                        Undo
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            _redo();
+                            triggerUndoRedoFlash();
+                        }}
+                        disabled={historyIndex === history.length - 1}
+                        style={{
+                            padding: '8px 16px',
+                            background: historyIndex === history.length - 1 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
+                            borderRadius: '6px',
+                            color: historyIndex === history.length - 1 ? 'rgba(255, 255, 255, 0.4)' : 'white',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            cursor: historyIndex === history.length - 1 ? 'not-allowed' : 'pointer',
+                            border: 'none',
+                            backdropFilter: 'blur(10px)',
+                        }}
+                    >
+                        Redo
+                    </button>
+                    <button
+                        type="button"
                         style={{
                             padding: '8px 16px',
                             background: 'rgba(255, 255, 255, 0.2)',
@@ -567,6 +609,7 @@ export default function LevelEditor() {
                         {/* Undo/Redo Flash Overlay */}
                         {showUndoRedoFlash && (
                             <div
+                                className="undo-redo-flash"
                                 style={{
                                     position: 'absolute',
                                     top: 0,
