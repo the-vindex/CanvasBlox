@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { EditorState, LevelData } from '@/types/level';
+import type { EditorState, InteractableObject, LevelData, SpawnPoint, Tile } from '@/types/level';
 
 interface PropertiesPanelProps {
     levelData: LevelData;
@@ -31,10 +31,10 @@ export function PropertiesPanel({
           )
         : null;
 
-    const handleLevelPropertyChange = (property: string, value: any) => {
+    const handleLevelPropertyChange = (property: string, value: string | object) => {
         onLevelUpdate((level) => {
             if (property === 'levelName') {
-                return { ...level, levelName: value };
+                return { ...level, levelName: value as string };
             }
             return {
                 ...level,
@@ -43,29 +43,42 @@ export function PropertiesPanel({
         });
     };
 
-    const handleObjectPropertyChange = (property: string, value: any) => {
+    const handleObjectPropertyChange = (property: string, value: string | boolean | number | object) => {
         if (!selectedObject) return;
 
         onLevelUpdate((level) => {
-            const updateObject = (obj: any) => {
+            const updateTile = (obj: Tile): Tile => {
                 if (obj.id !== selectedObjectId) return obj;
-
                 if (property.startsWith('properties.')) {
                     const propKey = property.replace('properties.', '');
-                    return {
-                        ...obj,
-                        properties: { ...obj.properties, [propKey]: value },
-                    };
+                    return { ...obj, properties: { ...obj.properties, [propKey]: value } };
                 }
+                return { ...obj, [property]: value };
+            };
 
+            const updateObject = (obj: InteractableObject): InteractableObject => {
+                if (obj.id !== selectedObjectId) return obj;
+                if (property.startsWith('properties.')) {
+                    const propKey = property.replace('properties.', '');
+                    return { ...obj, properties: { ...obj.properties, [propKey]: value } };
+                }
+                return { ...obj, [property]: value };
+            };
+
+            const updateSpawn = (obj: SpawnPoint): SpawnPoint => {
+                if (obj.id !== selectedObjectId) return obj;
+                if (property.startsWith('properties.')) {
+                    const propKey = property.replace('properties.', '');
+                    return { ...obj, properties: { ...obj.properties, [propKey]: value } };
+                }
                 return { ...obj, [property]: value };
             };
 
             return {
                 ...level,
-                tiles: level.tiles.map(updateObject),
+                tiles: level.tiles.map(updateTile),
                 objects: level.objects.map(updateObject),
-                spawnPoints: level.spawnPoints.map(updateObject),
+                spawnPoints: level.spawnPoints.map(updateSpawn),
             };
         });
     };

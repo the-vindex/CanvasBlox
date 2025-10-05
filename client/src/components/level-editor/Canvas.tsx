@@ -1,14 +1,14 @@
 import { useId } from 'react';
 import { TILE_SIZE } from '@/constants/editor';
 import { useCanvas } from '@/hooks/useCanvas';
-import type { EditorState, LevelData } from '@/types/level';
+import type { EditorState, LevelData, Position } from '@/types/level';
 
 interface CanvasProps {
     levelData: LevelData;
     editorState: EditorState;
-    onMouseMove: (position: any) => void;
-    onCanvasClick: (position: any, event: MouseEvent) => void;
-    onTilePlaced: (position: any, tileType: string, isDrawing?: boolean) => void;
+    onMouseMove: (position: Position) => void;
+    onCanvasClick: (position: Position, event: MouseEvent) => void;
+    onTilePlaced: (position: Position, tileType: string, isDrawing?: boolean) => void;
     onDrawingSessionEnd?: () => void;
     onZoom?: (delta: number, mouseX: number, mouseY: number) => void;
 }

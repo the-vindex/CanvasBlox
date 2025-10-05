@@ -86,12 +86,6 @@ export function Toolbar({
     const showGridId = useId();
     const showScanlinesId = useId();
 
-    const _ToolGroupLabel = ({ children }: { children: React.ReactNode }) => (
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium px-1">
-            {children}
-        </span>
-    );
-
     return (
         <div className="h-12 bg-[#252525] border-b border-[#333] flex items-center px-3 gap-2" data-testid="toolbar">
             {/* Selection Tools */}

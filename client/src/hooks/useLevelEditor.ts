@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type {
     EditorState,
@@ -17,6 +17,7 @@ const AUTOSAVE_INTERVAL = 5000; // 5 seconds
 
 export function useLevelEditor() {
     const { toast } = useToast();
+    const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const [levels, setLevels] = useState<LevelData[]>([]);
     const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
@@ -281,22 +282,29 @@ export function useLevelEditor() {
     const deleteSelectedObjects = useCallback(() => {
         if (editorState.selectedObjects.length === 0) return;
 
+        const objectsToDelete = [...editorState.selectedObjects];
+
+        // Clear any existing timeout
+        if (deleteTimeoutRef.current) {
+            clearTimeout(deleteTimeoutRef.current);
+        }
+
         // Mark objects as deleting for animation
         setEditorState((prev) => ({
             ...prev,
-            deletingObjects: [...editorState.selectedObjects],
+            deletingObjects: objectsToDelete,
         }));
 
         // After animation completes (250ms), actually delete the objects
-        setTimeout(() => {
+        deleteTimeoutRef.current = setTimeout(() => {
             updateCurrentLevel(
                 (level) => ({
                     ...level,
-                    tiles: level.tiles.filter((tile) => !editorState.selectedObjects.includes(tile.id)),
-                    objects: level.objects.filter((obj) => !editorState.selectedObjects.includes(obj.id)),
-                    spawnPoints: level.spawnPoints.filter((spawn) => !editorState.selectedObjects.includes(spawn.id)),
+                    tiles: level.tiles.filter((tile) => !objectsToDelete.includes(tile.id)),
+                    objects: level.objects.filter((obj) => !objectsToDelete.includes(obj.id)),
+                    spawnPoints: level.spawnPoints.filter((spawn) => !objectsToDelete.includes(spawn.id)),
                 }),
-                `Deleted ${editorState.selectedObjects.length} objects`
+                `Deleted ${objectsToDelete.length} objects`
             );
 
             setEditorState((prev) => ({
@@ -304,6 +312,7 @@ export function useLevelEditor() {
                 selectedObjects: [],
                 deletingObjects: [],
             }));
+            deleteTimeoutRef.current = null;
         }, 250);
     }, [editorState.selectedObjects, updateCurrentLevel]);
 
@@ -377,6 +386,15 @@ export function useLevelEditor() {
         },
         [addToHistory]
     );
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (deleteTimeoutRef.current) {
+                clearTimeout(deleteTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return {
         levels,

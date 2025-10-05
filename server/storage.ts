@@ -1,6 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type IStorage = Record<string, never>;
+export interface IStorage {
+    [key: string]: never;
+}
 
-export class MemStorage implements IStorage {}
+export class MemStorage implements IStorage {
+    [key: string]: never;
+}
 
 export const storage = new MemStorage();

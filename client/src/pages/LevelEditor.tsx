@@ -180,103 +180,107 @@ export default function LevelEditor() {
         setTimeout(() => setShowUndoRedoFlash(false), 400);
     }, []);
 
+    // Helper: Check if target is an input element
+    const isInputElement = useCallback((target: HTMLElement) => {
+        return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+    }, []);
+
+    // Helper: Handle tool shortcuts
+    const handleToolShortcut = useCallback(
+        (key: string) => {
+            const toolMap: Record<string, EditorState['selectedTool']> = {
+                v: 'select',
+                m: 'multiselect',
+                h: 'move',
+                l: 'line',
+                r: 'rectangle',
+                k: 'link',
+            };
+            if (toolMap[key]) {
+                handleToolChange(toolMap[key]);
+                return true;
+            }
+            return false;
+        },
+        [handleToolChange]
+    );
+
+    // Helper: Handle editor shortcuts
+    const handleEditorShortcut = useCallback(
+        (key: string) => {
+            if (key === 'p') {
+                setShowPropertiesPanel((prev) => !prev);
+                return true;
+            }
+            if (key === 'escape') {
+                setEditorState((prev) => ({
+                    ...prev,
+                    selectedTool: null,
+                    selectedObjects: [],
+                }));
+                return true;
+            }
+            if (key === 'delete') {
+                _deleteSelectedObjects();
+                return true;
+            }
+            return false;
+        },
+        [_deleteSelectedObjects]
+    );
+
+    // Helper: Handle Ctrl/Cmd shortcuts
+    const handleModifierShortcut = useCallback(
+        (key: string, shiftKey: boolean) => {
+            if (key === 'z') {
+                if (shiftKey) {
+                    _redo();
+                } else {
+                    _undo();
+                }
+                triggerUndoRedoFlash();
+                return true;
+            }
+            if (key === 'y') {
+                _redo();
+                triggerUndoRedoFlash();
+                return true;
+            }
+            if (key === 'c') {
+                _copySelectedObjects();
+                return true;
+            }
+            if (key === 'v') {
+                _pasteObjects();
+                return true;
+            }
+            return false;
+        },
+        [_undo, _redo, _copySelectedObjects, _pasteObjects, triggerUndoRedoFlash]
+    );
+
     // Keyboard shortcut handlers
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Don't trigger shortcuts when typing in input fields
             const target = e.target as HTMLElement;
-            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-                return;
-            }
+            if (isInputElement(target)) return;
 
-            // Tool shortcuts (single keys)
-            if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
-                switch (e.key.toLowerCase()) {
-                    case 'v':
-                        e.preventDefault();
-                        handleToolChange('select');
-                        break;
-                    case 'm':
-                        e.preventDefault();
-                        handleToolChange('multiselect');
-                        break;
-                    case 'h':
-                        e.preventDefault();
-                        handleToolChange('move');
-                        break;
-                    case 'l':
-                        e.preventDefault();
-                        handleToolChange('line');
-                        break;
-                    case 'r':
-                        e.preventDefault();
-                        handleToolChange('rectangle');
-                        break;
-                    case 'k':
-                        e.preventDefault();
-                        handleToolChange('link');
-                        break;
-                    case 'p':
-                        e.preventDefault();
-                        setShowPropertiesPanel((prev) => !prev);
-                        break;
-                    case 'escape':
-                        e.preventDefault();
-                        setEditorState((prev) => ({
-                            ...prev,
-                            selectedTool: null,
-                            selectedObjects: [],
-                        }));
-                        break;
-                    case 'delete':
-                        e.preventDefault();
-                        _deleteSelectedObjects();
-                        break;
-                }
-            }
+            const key = e.key.toLowerCase();
+            const hasModifiers = e.ctrlKey || e.metaKey;
+            const noModifiers = !hasModifiers && !e.shiftKey && !e.altKey;
 
-            // Ctrl/Cmd shortcuts
-            if (e.ctrlKey || e.metaKey) {
-                switch (e.key.toLowerCase()) {
-                    case 'z':
-                        e.preventDefault();
-                        if (e.shiftKey) {
-                            _redo();
-                            triggerUndoRedoFlash();
-                        } else {
-                            _undo();
-                            triggerUndoRedoFlash();
-                        }
-                        break;
-                    case 'y':
-                        e.preventDefault();
-                        _redo();
-                        triggerUndoRedoFlash();
-                        break;
-                    case 'c':
-                        e.preventDefault();
-                        _copySelectedObjects();
-                        break;
-                    case 'v':
-                        e.preventDefault();
-                        _pasteObjects();
-                        break;
-                }
+            const handled =
+                (noModifiers && (handleToolShortcut(key) || handleEditorShortcut(key))) ||
+                (hasModifiers && handleModifierShortcut(key, e.shiftKey));
+
+            if (handled) {
+                e.preventDefault();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [
-        handleToolChange,
-        setEditorState,
-        _deleteSelectedObjects,
-        _undo,
-        _redo,
-        _copySelectedObjects,
-        _pasteObjects,
-        triggerUndoRedoFlash,
-    ]);
+    }, [isInputElement, handleToolShortcut, handleEditorShortcut, handleModifierShortcut]);
 
     // Don't render until we have a current level
     if (!currentLevel) {
@@ -427,7 +431,7 @@ export default function LevelEditor() {
                             borderRadius: '4px',
                         }}
                     >
-                        <span>42 Objects</span>
+                        <span>{currentLevel.objects.length + currentLevel.spawnPoints.length} Objects</span>
                     </div>
                 </div>
             </header>
@@ -553,11 +557,13 @@ export default function LevelEditor() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>Objects:</span>
-                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>42</span>
+                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>
+                            {currentLevel.objects.length + currentLevel.spawnPoints.length}
+                        </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>Tiles:</span>
-                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>156</span>
+                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>{currentLevel.tiles.length}</span>
                     </div>
                 </div>
 

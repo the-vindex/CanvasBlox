@@ -103,13 +103,11 @@ e2e/                                    # End-to-end tests
 1. Write failing test first (BOTH unit AND e2e)
 2. Implement feature to make test pass
 3. Verify all tests pass (`npm test && npm run test:e2e`)
-4. **Review test quality:** Run `/review-tests [scope]` to check for:
-   - Tests outside the feature's scope
-   - Implementation coupling instead of behavior testing
-   - Redundant or duplicate test coverage
-   - Missing test coverage
-5. Refactor tests based on review feedback
-6. Commit code + tests together
+4. **Review code quality:** Run `/review-react [scope]` (see Code Review Commands section)
+5. **Review test quality:** Run `/review-tests [scope]` (see Code Review Commands section)
+6. Refactor code and tests based on review feedback
+7. Run linter: `npm run lint:fix` before committing
+8. Commit code + tests together
 
 **⚠️ IMPORTANT:** When implementing features, write E2E tests as you build, not after!
 
@@ -149,6 +147,59 @@ await page.mouse.move(box.x + 100, box.y + 100);
 ```
 
 For more examples and patterns: `docs/E2E_TESTING.md`
+
+## Code Review Commands
+
+Slash commands for automated code quality review during development:
+
+### `/review-react [scope]`
+Reviews React code quality against modern best practices.
+
+**When to use:**
+- After implementing new React components or features
+- After major refactoring
+- When you want to ensure code follows React best practices
+- Before creating a pull request
+
+**What it checks:**
+- Component design (functional components, composition, separation of concerns)
+- Hooks usage (rules of hooks, dependencies, custom hooks)
+- TypeScript (explicit types, no `any`, proper event handlers)
+- Performance (useMemo/useCallback, stable references, list keys)
+- Anti-patterns (components in components, mutations, unstable dependencies)
+- Accessibility (ARIA attributes, semantic HTML, keyboard navigation)
+
+**Examples:**
+```bash
+/review-react LevelEditor    # Review LevelEditor component
+/review-react hooks          # Review all custom hooks
+/review-react                # Review changed React files (uses git diff)
+```
+
+**Output:** Detailed report with issues prioritized by severity (Critical/High/Medium/Low), specific fixes with code examples, and actionable next steps.
+
+### `/review-tests [scope]`
+Reviews test quality and coverage.
+
+**When to use:**
+- After writing new tests
+- When tests feel brittle or too coupled to implementation
+- To identify redundant or missing test coverage
+
+**What it checks:**
+- Tests outside the feature's scope
+- Implementation coupling vs behavior testing
+- Redundant or duplicate coverage
+- Missing test scenarios
+
+**Examples:**
+```bash
+/review-tests LevelEditor    # Review LevelEditor tests
+/review-tests hooks          # Review hook tests
+```
+
+**Workflow Integration:**
+Both commands are integrated into the TDD workflow (see step 4-5 above) to ensure quality before committing.
 
 ## Database
 

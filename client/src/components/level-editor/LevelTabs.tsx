@@ -19,7 +19,7 @@ export function LevelTabs({ levels, currentLevelIndex, onLevelSelect, onLevelClo
             <div className="flex items-center gap-1" role="tablist">
                 {levels.map((level, index) => (
                     <div
-                        key={level.id}
+                        key={`${level.levelName}-${index}`}
                         className={cn(
                             'level-tab px-4 py-1.5 flex items-center gap-2 text-sm cursor-pointer transition-all duration-150',
                             index === currentLevelIndex
