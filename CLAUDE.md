@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides quick-reference guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+**📋 For detailed implementation workflow, testing strategy, and task structure:** See `docs/TASK_MANAGEMENT.md`
 
 ## CanvasBlox - Level Editor for Young Game Designers
 
@@ -69,137 +71,47 @@ npm run db:push      # Push database schema changes with Drizzle
 
 ## Testing
 
-**Unit & Integration Testing:**
-- **Vitest** - Fast unit test runner with Vite integration
-- **React Testing Library** - Component testing with user-centric queries
-- **@testing-library/jest-dom** - Custom matchers for DOM assertions
-- **@testing-library/user-event** - User interaction simulation
-- **jsdom** - DOM environment for Node.js
-
-**E2E Testing:**
-- **Playwright** - End-to-end browser testing
-- Tests full user workflows in real browser
-- Visual regression testing capabilities
+**Frameworks:**
+- **Vitest** - Unit/integration tests (`npm test`)
+- **Playwright** - E2E tests (`npm run test:e2e`)
+- **React Testing Library** - Component testing
 
 **Test Organization:**
-Tests live **next to the code** they test (modern convention):
+Tests live **next to the code** they test:
 ```
-client/src/
-  ├── hooks/
-  │   ├── useLevelEditor.ts
-  │   └── useLevelEditor.test.ts        # ← Test next to source
-  ├── utils/
-  │   ├── canvasRenderer.ts
-  │   └── canvasRenderer.test.ts        # ← Test next to source
-  └── components/
-      ├── TilePalette.tsx
-      └── TilePalette.test.tsx          # ← Test next to source
-
-e2e/                                    # End-to-end tests
-  └── level-editor.spec.ts              # Main editor workflows
+client/src/hooks/useLevelEditor.ts
+client/src/hooks/useLevelEditor.test.ts  # ← Test next to source
 ```
 
-**TDD Workflow:**
-1. Write failing test first (BOTH unit AND e2e)
-2. Implement feature to make test pass
-3. Verify all tests pass (`npm test && npm run test:e2e`)
-4. **Review code quality:** Run `/review-react [scope]` (see Code Review Commands section)
-5. **Review test quality:** Run `/review-tests [scope]` (see Code Review Commands section)
-6. Refactor code and tests based on review feedback
-7. Run linter: `npm run lint:fix` before committing
-8. Commit code + tests together
+**TDD Workflow (Critical - Don't Forget!):**
+1. ✅ Write failing test FIRST (unit + e2e)
+2. ✅ Implement to make it pass
+3. ✅ Run all tests: `npm test && npm run test:e2e`
+4. ✅ Run linter: `npm run lint:fix`
+5. ✅ Commit code + tests together
 
-**⚠️ IMPORTANT:** When implementing features, write E2E tests as you build, not after!
+**During long sessions, remember:**
+- Write tests BEFORE implementation, not after
+- Run BOTH unit and e2e tests before committing
+- Don't skip linting
 
-**TDD Principles:**
-See `docs/TDD_PRINCIPLES.md` for detailed TDD guidelines including:
-- Red-Green-Refactor cycle
-- How to add, remove, and change features with tests
-- Common anti-patterns to avoid
-- Practical examples
-
-**E2E Testing Quick Reference:**
-
-When writing Playwright tests, follow this selector priority:
-1. `getByRole()` - Buttons, headings, interactive elements
-2. `getByLabel()` - Form inputs
-3. `getByTestId()` - Dynamic content, custom components
-4. Avoid CSS/XPath selectors
-
-Adding test IDs to components:
-- ✅ ADD `data-testid` FOR: Dynamic values (zoom %, coordinates), status displays, custom components
-- ❌ DON'T ADD FOR: Buttons with text, headings, labeled inputs
-- Naming: Use kebab-case with semantic names: `data-testid="statusbar-zoom-display"`
-
-Common patterns:
-```typescript
-// Dynamic content
-const zoom = page.getByTestId('statusbar-zoom-display');
-await expect(zoom).toHaveText('100%');
-
-// Buttons (use role, not testid)
-await page.getByRole('button', { name: 'Save' }).click();
-
-// Canvas interaction
-const canvas = page.getByTestId('level-canvas');
-const box = await canvas.boundingBox();
-await page.mouse.move(box.x + 100, box.y + 100);
-```
-
-For more examples and patterns: `docs/E2E_TESTING.md`
+**Detailed guides:**
+- `docs/TASK_MANAGEMENT.md` - Full TDD workflow and task structure
+- `docs/TDD_PRINCIPLES.md` - Red-Green-Refactor cycle
+- `docs/E2E_TESTING.md` - Playwright patterns and selectors
 
 ## Code Review Commands
 
-Slash commands for automated code quality review during development:
-
-### `/review-react [scope]`
-Reviews React code quality against modern best practices.
-
-**When to use:**
-- After implementing new React components or features
-- After major refactoring
-- When you want to ensure code follows React best practices
-- Before creating a pull request
-
-**What it checks:**
-- Component design (functional components, composition, separation of concerns)
-- Hooks usage (rules of hooks, dependencies, custom hooks)
-- TypeScript (explicit types, no `any`, proper event handlers)
-- Performance (useMemo/useCallback, stable references, list keys)
-- Anti-patterns (components in components, mutations, unstable dependencies)
-- Accessibility (ARIA attributes, semantic HTML, keyboard navigation)
-
-**Examples:**
-```bash
-/review-react LevelEditor    # Review LevelEditor component
-/review-react hooks          # Review all custom hooks
-/review-react                # Review changed React files (uses git diff)
-```
-
-**Output:** Detailed report with issues prioritized by severity (Critical/High/Medium/Low), specific fixes with code examples, and actionable next steps.
-
-### `/review-tests [scope]`
-Reviews test quality and coverage.
+**Available slash commands:**
+- `/review-react [scope]` - Review React code quality (components, hooks, performance, a11y)
+- `/review-tests [scope]` - Review test quality and coverage
 
 **When to use:**
-- After writing new tests
-- When tests feel brittle or too coupled to implementation
-- To identify redundant or missing test coverage
+- After implementing features
+- Before committing major changes
+- When code feels complex or brittle
 
-**What it checks:**
-- Tests outside the feature's scope
-- Implementation coupling vs behavior testing
-- Redundant or duplicate coverage
-- Missing test scenarios
-
-**Examples:**
-```bash
-/review-tests LevelEditor    # Review LevelEditor tests
-/review-tests hooks          # Review hook tests
-```
-
-**Workflow Integration:**
-Both commands are integrated into the TDD workflow (see step 4-5 above) to ensure quality before committing.
+See `.claude/commands/` for full documentation of each command.
 
 ## Database
 
@@ -207,67 +119,35 @@ PostgreSQL via Neon Database with Drizzle ORM. Schema defined but storage layer 
 
 ## Engineering Practices
 
-This app is vibe coded - built for fun and creativity - but still follows best practices:
+This app is vibe coded - built for fun and creativity - but follows best practices:
 
-- **Test-Driven Development (TDD)** - Tests written before implementation
-- **Automated Testing** - Good test coverage with Vitest
-- **Type Safety** - TypeScript for catching bugs early
-- **Modular Architecture** - Clean code organization with hooks and utilities
-- **Code Quality** - Type checking with `npm run check` and linting with `npm run lint`
-- **Code Formatting** - Consistent style with Biome formatter (4-space indentation, IntelliJ style)
+- **Test-Driven Development (TDD)** - Write tests before implementation
+- **Type Safety** - TypeScript with strict mode, avoid `any`
+- **Code Quality** - Run `npm run lint:fix` and `npm run check` before commits
+- **Code Formatting** - Biome (4-space indentation, IntelliJ style)
 
 ## Linting & Formatting Workflow
 
-**When to run linting:**
-1. **Before committing** - Always run `npm run lint:fix` before creating a commit
-2. **After major refactoring** - Check for unused imports, variables, or other issues
-3. **When tests fail mysteriously** - Sometimes lint errors cause runtime issues
-4. **Periodically during development** - Run `npm run lint` to catch issues early
-
-**What Biome checks that TypeScript doesn't:**
-- Code style and formatting (indentation, quotes, spacing)
-- Unused variables and imports (warnings)
-- Code complexity and best practices
-- Import organization and sorting
-- Potential bugs that aren't type errors
-
-**What TypeScript checks (not Biome):**
-- Type correctness and inference
-- Interface implementations
-- Generics and type parameters
-- Module resolution
-
-**Workflow:**
+**Before every commit:**
 ```bash
-# During development - check for issues
-npm run lint
-
-# Before commit - fix auto-fixable issues
-npm run lint:fix
-
-# Verify formatting
-npm run format:check
-
-# Fix formatting
-npm run format
-
-# Always run type check separately
-npm run check
+npm run lint:fix    # Fix auto-fixable issues
+npm run check       # Type check (TypeScript)
 ```
 
-## Development Principles
+**Biome checks:** Code style, unused imports, complexity
+**TypeScript checks:** Type correctness, interfaces, generics
 
-**Test Infrastructure as Product:**
-- Testing tools are part of the stack - configure them properly from day one
-- Automation should run silently; humans review failures, not successes
-- Test output must be actionable (screenshots > logs)
+Run `npm run lint` during development to catch issues early.
 
-**Code Locality:**
-- Keep related things together - tests live next to source
-- Modern patterns over legacy conventions
-- Make the codebase easy to navigate
+## Development Principles (Don't Forget!)
 
-**Quality Ownership:**
-- Claude owns test quality - reads failures, analyzes screenshots, fixes issues
-- Temporary tests are acceptable when they prove integration (mark for cleanup)
-- User-facing details matter: correct app names, real data display
+**Critical reminders for long sessions:**
+- **Tests first** - Write tests before implementation, always
+- **Run all tests** - Both unit (`npm test`) and e2e (`npm run test:e2e`) before commits
+- **Code locality** - Tests live next to source files
+- **Type safety** - No `any`, explicit types, strict mode
+- **Small commits** - Focused changes with clear messages
+- **Quality ownership** - Claude owns test quality, reads failures, fixes issues
+- **Preserve working features** - Don't break what works (e.g., scrollbars)
+
+**See also:** `docs/TASK_MANAGEMENT.md` for detailed workflow and implementation strategy
