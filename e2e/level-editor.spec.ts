@@ -2998,3 +2998,69 @@ test.describe('Step 22: Update Header with Dropdown Menu', () => {
         await expect(newLevelItem).not.toBeVisible();
     });
 });
+
+test.describe('Step 23: Update Status Bar with Live Data', () => {
+    test('status bar should display live canvas dimensions', async ({ page }) => {
+        await page.goto('http://localhost:3000');
+        await page.waitForTimeout(500);
+
+        // Get canvas dimensions display
+        const canvasDimensions = page.getByTestId('statusbar-canvas-dimensions');
+
+        // Should show current level's canvas dimensions (not hardcoded)
+        await expect(canvasDimensions).toBeVisible();
+
+        // The dimensions should match the pattern "width × height px"
+        const dimensionsText = await canvasDimensions.textContent();
+        expect(dimensionsText).toMatch(/\d+ × \d+ px/);
+
+        // Default level should be 1920 × 960 px
+        expect(dimensionsText).toBe('1920 × 960 px');
+    });
+
+    test('status bar should display live grid dimensions', async ({ page }) => {
+        await page.goto('http://localhost:3000');
+        await page.waitForTimeout(500);
+
+        // Get grid dimensions display
+        const gridDimensions = page.getByTestId('statusbar-grid-dimensions');
+
+        // Should show calculated grid dimensions (not hardcoded)
+        await expect(gridDimensions).toBeVisible();
+
+        // The dimensions should match the pattern "width × height tiles"
+        const dimensionsText = await gridDimensions.textContent();
+        expect(dimensionsText).toMatch(/\d+ × \d+ tiles/);
+
+        // Default level (1920 × 960 px) should have 60 × 30 tiles (1920/32 = 60, 960/32 = 30)
+        expect(dimensionsText).toBe('60 × 30 tiles');
+    });
+
+    test('all status bar values should be live data', async ({ page }) => {
+        await page.goto('http://localhost:3000');
+        await page.waitForTimeout(500);
+
+        // Verify all status bar elements are present and show live data
+        const canvasDimensions = page.getByTestId('statusbar-canvas-dimensions');
+        const gridDimensions = page.getByTestId('statusbar-grid-dimensions');
+        const objectCount = page.getByTestId('statusbar-object-count');
+        const zoomDisplay = page.getByTestId('statusbar-zoom-display');
+        const historyDisplay = page.getByTestId('statusbar-history');
+
+        // All should be visible
+        await expect(canvasDimensions).toBeVisible();
+        await expect(gridDimensions).toBeVisible();
+        await expect(objectCount).toBeVisible();
+        await expect(zoomDisplay).toBeVisible();
+        await expect(historyDisplay).toBeVisible();
+
+        // Should show data (not empty)
+        const canvasText = await canvasDimensions.textContent();
+        const gridText = await gridDimensions.textContent();
+
+        expect(canvasText).toBeTruthy();
+        expect(gridText).toBeTruthy();
+        expect(canvasText).toMatch(/\d+ × \d+ px/);
+        expect(gridText).toMatch(/\d+ × \d+ tiles/);
+    });
+});

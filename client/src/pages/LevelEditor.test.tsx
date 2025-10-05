@@ -13,7 +13,7 @@ vi.mock('@/hooks/useLevelEditor', () => ({
                     createdAt: new Date().toISOString(),
                     author: 'Test',
                     description: 'Test level',
-                    dimensions: { width: 60, height: 30 },
+                    dimensions: { width: 60, height: 30 }, // Level size in tiles
                     backgroundColor: '#87CEEB',
                 },
                 tiles: [],
@@ -28,7 +28,7 @@ vi.mock('@/hooks/useLevelEditor', () => ({
                 createdAt: new Date().toISOString(),
                 author: 'Test',
                 description: 'Test level',
-                dimensions: { width: 60, height: 30 },
+                dimensions: { width: 60, height: 30 }, // Level size in tiles
                 backgroundColor: '#87CEEB',
             },
             tiles: [],
@@ -187,5 +187,42 @@ describe('LevelEditor - Step 15: Auto-Save and Unsaved Changes Indicator', () =>
         render(<LevelEditor />);
         const saveIcon = screen.getByTestId('save-indicator').querySelector('i.fa-save');
         expect(saveIcon).toHaveClass('text-green-500');
+    });
+});
+
+describe('LevelEditor - Step 23: Update Status Bar with Live Data', () => {
+    it('should display live canvas dimensions from currentLevel', () => {
+        render(<LevelEditor />);
+        const canvasDimensions = screen.getByTestId('statusbar-canvas-dimensions');
+        // 60 tiles × 32px = 1920px, 30 tiles × 32px = 960px
+        expect(canvasDimensions).toHaveTextContent('1920 × 960 px');
+    });
+
+    it('should display calculated grid dimensions', () => {
+        render(<LevelEditor />);
+        const gridDimensions = screen.getByTestId('statusbar-grid-dimensions');
+        // Grid dimensions are stored in tiles in metadata
+        expect(gridDimensions).toHaveTextContent('60 × 30 tiles');
+    });
+
+    it('should display live object count', () => {
+        render(<LevelEditor />);
+        const objectCount = screen.getByTestId('statusbar-object-count');
+        // Mock has 0 tiles, 0 objects, 0 spawn points = 0 total
+        expect(objectCount).toHaveTextContent('0');
+    });
+
+    it('should display live zoom percentage', () => {
+        render(<LevelEditor />);
+        const zoomDisplay = screen.getByTestId('statusbar-zoom-display');
+        // Mock has zoom: 1 = 100%
+        expect(zoomDisplay).toHaveTextContent('100%');
+    });
+
+    it('should display live history position', () => {
+        render(<LevelEditor />);
+        const historyDisplay = screen.getByTestId('statusbar-history');
+        // Mock has history: [{ levels: [], description: 'Initial state' }] and historyIndex: 0, so should show 1/1
+        expect(historyDisplay).toHaveTextContent('1/1');
     });
 });

@@ -441,8 +441,7 @@ export default function LevelEditor() {
             const toolbarHeight = toolbar?.clientHeight || 60;
             const footerHeight = footer?.clientHeight || 32;
 
-            const viewportHeight =
-                window.innerHeight - headerHeight - tabsHeight - toolbarHeight - footerHeight;
+            const viewportHeight = window.innerHeight - headerHeight - tabsHeight - toolbarHeight - footerHeight;
 
             if (viewportHeight <= 0) return;
 
@@ -821,11 +820,16 @@ export default function LevelEditor() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>Canvas:</span>
-                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>1920 × 960 px</span>
+                        <span data-testid="statusbar-canvas-dimensions" style={{ color: '#e0e0e0', fontWeight: 500 }}>
+                            {currentLevel.metadata.dimensions.width * 32} ×{' '}
+                            {currentLevel.metadata.dimensions.height * 32} px
+                        </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>Grid:</span>
-                        <span style={{ color: '#e0e0e0', fontWeight: 500 }}>60 × 30 tiles</span>
+                        <span data-testid="statusbar-grid-dimensions" style={{ color: '#e0e0e0', fontWeight: 500 }}>
+                            {currentLevel.metadata.dimensions.width} × {currentLevel.metadata.dimensions.height} tiles
+                        </span>
                     </div>
                 </div>
 
