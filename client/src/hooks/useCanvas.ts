@@ -216,12 +216,11 @@ export function useCanvas({
 
     const handleMouseDown = useCallback(
         (e: MouseEvent) => {
-            // Prevent duplicate events from canvas bubbling to wrapper
-            // Only process canvas events directly, not bubbled events on wrapper
+            // Prevent event from bubbling to wrapper to avoid duplicate handling
+            // This is only done when the event originates from the canvas itself
             const canvas = canvasRef.current;
-            if (canvas && e.currentTarget !== canvas && e.target === canvas) {
-                // Event bubbled from canvas to wrapper - ignore it
-                return;
+            if (e.currentTarget === canvas) {
+                e.stopPropagation();
             }
 
             // Middle mouse button (button === 1) for panning
