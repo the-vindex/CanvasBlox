@@ -373,6 +373,26 @@ export function PropertiesPanel({
                                 data-testid="input-object-delay"
                             />
                         </div>
+
+                        {/* Linked Objects */}
+                        {selectedObject.properties.linkedObjects &&
+                            selectedObject.properties.linkedObjects.length > 0 && (
+                                <div>
+                                    <Label className="text-sm text-muted-foreground mb-1">Linked Objects</Label>
+                                    <div className="text-sm text-muted-foreground">
+                                        {selectedObject.properties.linkedObjects.map((linkedId) => {
+                                            const linkedObj = levelData.objects.find((obj) => obj.id === linkedId);
+                                            return (
+                                                <div key={linkedId} className="py-1">
+                                                    {linkedObj
+                                                        ? `${linkedObj.type} (${linkedObj.position.x}, ${linkedObj.position.y})`
+                                                        : 'Unknown'}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                     </div>
                 )}
 

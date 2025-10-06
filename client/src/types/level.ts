@@ -84,6 +84,7 @@ export interface EditorState {
     mousePosition: Position;
     deletingObjects: string[];
     deletionStartTimes?: Map<string, number>; // Object ID -> deletion start timestamp
+    linkSourceId?: string | null; // ID of object selected as link source
     selectionBox?: {
         start: Position;
         end: Position;

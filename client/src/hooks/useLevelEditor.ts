@@ -10,6 +10,7 @@ import type {
     Tile,
 } from '@/types/level';
 import { createDefaultLevel } from '@/utils/levelSerializer';
+import { canLinkObjects, canObjectBeLinked, createLink } from '@/utils/linkingLogic';
 
 const STORAGE_KEY = 'levelEditor_levels';
 const AUTOSAVE_KEY = 'levelEditor_autosave';
@@ -494,6 +495,56 @@ export function useLevelEditor() {
         [addToHistory]
     );
 
+    const linkObjects = useCallback(
+        (sourceId: string, targetId: string) => {
+            const sourceObj = currentLevel.objects.find((obj) => obj.id === sourceId);
+            const targetObj = currentLevel.objects.find((obj) => obj.id === targetId);
+
+            if (!sourceObj || !targetObj) {
+                toast({
+                    title: 'Link Error',
+                    description: 'Source or target object not found',
+                    variant: 'destructive',
+                });
+                return;
+            }
+
+            // Validate if objects can be linked
+            const validation = canLinkObjects(sourceObj, targetObj);
+            if (!validation.valid) {
+                toast({
+                    title: 'Cannot Link',
+                    description: validation.reason,
+                    variant: 'destructive',
+                });
+                return;
+            }
+
+            // Create the link
+            const { source: updatedSource, target: updatedTarget } = createLink(sourceObj, targetObj);
+
+            // Update the level with the linked objects
+            updateCurrentLevel((level) => {
+                const updatedObjects = level.objects.map((obj) => {
+                    if (obj.id === sourceId) return updatedSource;
+                    if (obj.id === targetId) return updatedTarget;
+                    return obj;
+                });
+
+                return {
+                    ...level,
+                    objects: updatedObjects,
+                };
+            }, `Linked ${sourceObj.type} to ${targetObj.type}`);
+
+            toast({
+                title: 'Link Created',
+                description: `${sourceObj.type} linked to ${targetObj.type}`,
+            });
+        },
+        [currentLevel, updateCurrentLevel, toast]
+    );
+
     // Cleanup timeout on unmount
     useEffect(() => {
         return () => {
@@ -528,6 +579,7 @@ export function useLevelEditor() {
         copySelectedObjects,
         pasteObjects,
         moveSelectedObjects,
+        linkObjects,
         undo,
         redo,
         commitBatchToHistory,

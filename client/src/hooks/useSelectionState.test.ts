@@ -43,6 +43,7 @@ describe('useSelectionState', () => {
             expect(state).toEqual({
                 selectedTool: 'select',
                 selectedTileType: null,
+                linkSourceId: null,
             });
         });
 
@@ -52,11 +53,13 @@ describe('useSelectionState', () => {
             expect(result.current.selectTool('multiselect')).toEqual({
                 selectedTool: 'multiselect',
                 selectedTileType: null,
+                linkSourceId: null,
             });
 
             expect(result.current.selectTool('move')).toEqual({
                 selectedTool: 'move',
                 selectedTileType: null,
+                linkSourceId: null,
             });
         });
 
@@ -66,11 +69,13 @@ describe('useSelectionState', () => {
             // Line tool should NOT clear tile (it needs both)
             expect(result.current.selectTool('line')).toEqual({
                 selectedTool: 'line',
+                linkSourceId: null,
             });
 
             // Rectangle tool should NOT clear tile (it needs both)
             expect(result.current.selectTool('rectangle')).toEqual({
                 selectedTool: 'rectangle',
+                linkSourceId: null,
             });
         });
 
@@ -88,6 +93,7 @@ describe('useSelectionState', () => {
             expect(state).toEqual({
                 selectedTool: null,
                 selectedTileType: null,
+                linkSourceId: null,
             });
         });
     });

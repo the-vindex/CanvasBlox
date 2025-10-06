@@ -66,6 +66,7 @@ export function useSelectionState() {
         return {
             selectedTool: tool,
             ...(isDrawingTool ? {} : { selectedTileType: null }), // Only clear tile for non-drawing tools
+            linkSourceId: null, // Clear link source when changing tools
             // selectedObjects preserved for multi-step workflows
         };
     };

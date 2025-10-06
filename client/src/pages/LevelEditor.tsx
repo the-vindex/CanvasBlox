@@ -51,6 +51,7 @@ export default function LevelEditor() {
         copySelectedObjects: _copySelectedObjects,
         pasteObjects: _pasteObjects,
         moveSelectedObjects: _moveSelectedObjects,
+        linkObjects,
         undo: _undo,
         redo: _redo,
         commitBatchToHistory,
@@ -86,9 +87,34 @@ export default function LevelEditor() {
                     // Clear selection when clicking empty space
                     setEditorState((prev) => ({ ...prev, ...selectionState.clearObjects() }));
                 }
+            } else if (editorState.selectedTool === 'link' && currentLevel) {
+                // Find object at clicked position (only interactable objects)
+                const clickedObj = currentLevel.objects.find(
+                    (obj) => obj.position.x === position.x && obj.position.y === position.y
+                );
+
+                if (clickedObj) {
+                    if (!editorState.linkSourceId) {
+                        // First click - set as link source
+                        setEditorState((prev) => ({ ...prev, linkSourceId: clickedObj.id }));
+                    } else {
+                        // Second click - create link from source to target
+                        linkObjects(editorState.linkSourceId, clickedObj.id);
+                        // Clear link source to allow creating another link
+                        setEditorState((prev) => ({ ...prev, linkSourceId: null }));
+                    }
+                }
             }
         },
-        [editorState.selectedTool, currentLevel, _selectObject, setEditorState, selectionState]
+        [
+            editorState.selectedTool,
+            editorState.linkSourceId,
+            currentLevel,
+            _selectObject,
+            setEditorState,
+            selectionState,
+            linkObjects,
+        ]
     );
 
     const drawingSessionTileCount = useRef(0);
@@ -849,6 +875,7 @@ export default function LevelEditor() {
                             onMoveObjectsComplete={handleMoveObjectsComplete}
                             onLineComplete={handleLineComplete}
                             onRectangleComplete={handleRectangleComplete}
+                            onLinkComplete={linkObjects}
                         />
 
                         {/* Undo/Redo Flash Overlay */}

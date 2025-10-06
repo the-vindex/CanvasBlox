@@ -17,6 +17,7 @@ interface UseCanvasProps {
     onMoveObjectsComplete?: (delta: Position) => void;
     onLineComplete?: (positions: Position[], tileType: string) => void;
     onRectangleComplete?: (positions: Position[], tileType: string) => void;
+    onLinkComplete?: (sourceId: string, targetId: string) => void;
 }
 
 export function useCanvas({
@@ -31,6 +32,7 @@ export function useCanvas({
     onMoveObjectsComplete,
     onLineComplete,
     onRectangleComplete,
+    onLinkComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -270,7 +272,14 @@ export function useCanvas({
                 onCanvasClick(worldPos, e);
             }
         },
-        [getWorldPosition, onCanvasClick, onTilePlaced, editorState.selectedTileType, editorState.selectedTool]
+        [
+            getWorldPosition,
+            onCanvasClick,
+            onTilePlaced,
+            editorState.selectedTileType,
+            editorState.selectedTool,
+            editorState.selectedObjects.length,
+        ]
     );
 
     const handleMouseUp = useCallback(() => {

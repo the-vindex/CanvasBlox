@@ -24,3 +24,18 @@ When one Claude instance is running `/next` (actively working on tasks), it read
 - **Target position:** Task 11.5 (push current 11.5-11.9 down to 11.6-11.10)
 - **Reason:** Foundational logic needed before other drawing tools, already noted as priority in Chapter 11
 - **Note:** Task 11.2 (rectangle tool) currently being worked on - don't renumber 11.0-11.4
+
+### [2025-10-06 17:30] Investigate HTML-to-plaintext tool for MCP browser fetches
+- **Priority:** P1
+- **Suggested chapter:** New chapter or AI config improvements
+- **Notes:** MCP browser calls (e.g., mcp__playwright__browser_navigate) return full HTML snapshots that consume massive tokens. The Medium article fetch used ~23k tokens just for HTML structure. Need pre-filtering tool that:
+  - Converts HTML to clean plaintext/markdown
+  - Strips navigation, ads, boilerplate
+  - Preserves article content only
+  - Integrates with MCP or as post-processing step
+- **Potential solutions:**
+  - Readability algorithm (Mozilla's parser)
+  - html2text library
+  - Playwright content extraction before snapshot
+  - Custom MCP tool wrapper
+- **Impact:** Could reduce web fetch token usage by 80-90%

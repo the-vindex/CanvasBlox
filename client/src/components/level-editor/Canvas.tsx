@@ -15,6 +15,7 @@ interface CanvasProps {
     onMoveObjectsComplete?: (delta: Position) => void;
     onLineComplete?: (positions: Position[], tileType: string) => void;
     onRectangleComplete?: (positions: Position[], tileType: string) => void;
+    onLinkComplete?: (sourceId: string, targetId: string) => void;
 }
 
 export function Canvas({
@@ -29,6 +30,7 @@ export function Canvas({
     onMoveObjectsComplete,
     onLineComplete,
     onRectangleComplete,
+    onLinkComplete,
 }: CanvasProps) {
     const canvasId = useId();
     const { canvasRef, wrapperRef } = useCanvas({
@@ -43,6 +45,7 @@ export function Canvas({
         onMoveObjectsComplete,
         onLineComplete,
         onRectangleComplete,
+        onLinkComplete,
     });
 
     // Calculate canvas pixel size from tile dimensions
