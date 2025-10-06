@@ -232,25 +232,92 @@ Press ESC                      → null            | null               ❌ clea
   - `client/src/components/level-editor/PropertiesPanel.tsx` (rotation UI if keeping)
 - **Note:** User requested decision on rotation tool - needs clarification on intended use case
 
-#### 11.9 Implement button numbering system (coordinate with linking tool)
-- **Location:** `client/src/utils/canvasRenderer.ts` - drawObject method (button rendering), `client/src/types/level.ts`
-- **Current:** Buttons are drawn with generic appearance, no visual identification system
-- **Purpose:** Add visual numbering to buttons on canvas so users can identify which button links to which door
-- **Implementation:**
-  - Add optional `buttonNumber` or `label` property to InteractableObject type
-  - Auto-assign numbers when buttons are created (e.g., Button 1, Button 2, etc.)
-  - Render number/label on button visual in canvasRenderer.ts drawButton method
-  - Display as white text or small badge on the button graphic
-- **Integration with linking:**
-  - When linking button to door, could optionally label door with same number
-  - Show button number in Properties Panel when selected
-  - Show linked button numbers on linked doors
-- **Files to modify:**
-  - `client/src/types/level.ts` (add label/number property to InteractableObject)
-  - `client/src/utils/canvasRenderer.ts` (drawButton method - add text rendering)
-  - `client/src/hooks/useLevelEditor.ts` (addObject - auto-assign button numbers)
-  - `client/src/components/level-editor/PropertiesPanel.tsx` (display button number/label)
-- **Note:** Should be implemented together with Task 11.5 (linking tool) for coherent UX
+#### 11.9 Implement button numbering system ⏸️ Not Started
+- **Location:** `client/src/utils/canvasRenderer.ts`, `client/src/types/level.ts`, `client/src/components/level-editor/PropertiesPanel.tsx`
+- **Current:** Buttons have no visual identification system - hard to track which button links to which door
+- **Purpose:** Add auto-numbered badges to buttons and doors so users can visually identify puzzle connections
+- **Status:** ⏸️ Not Started
+- **Dependencies:** Should be implemented after Task 11.5 (linking tool) for coherent UX
+
+**Design Decisions (User-Approved):**
+- ✅ Auto-numbering with user editing capability (1-99 range)
+- ✅ Only buttons get numbered (not levers/pressure plates)
+- ✅ Badge displayed at top-center of sprite
+- ✅ Constant screen size (does not scale with zoom)
+- ✅ Adaptive contrast: Two color schemes based on background luminance
+- ✅ Always visible
+- ✅ Doors show linked button number (single) or "×N" for multiple buttons
+- ✅ Allow duplicate numbers with yellow warning in Properties Panel
+
+**Subtasks:**
+
+**11.9.1 Data model and auto-numbering**
+- Add `buttonNumber?: number` property to InteractableObject (only for type: 'button')
+- Implement auto-numbering in `useLevelEditor.addObject`: find max existing number, assign max + 1
+- Persist button numbers in localStorage
+- Update level import/export to preserve button numbers
+
+**11.9.2 Adaptive contrast color scheme**
+- Implement luminance calculation: `0.299*R + 0.587*G + 0.114*B`
+- Create two schemes:
+  - Light scheme (dark bg): White text, black background (70% opacity)
+  - Dark scheme (light bg): Black text, white background (80% opacity)
+- Switch scheme based on background luminance > 0.5
+
+**11.9.3 Render button badges**
+- Draw number badge in `canvasRenderer.drawButton()`
+- Badge style: circular background, bold number centered
+- Position: top-center of button sprite
+- Constant screen size regardless of zoom level
+- Use adaptive color scheme
+
+**11.9.4 Render door badges**
+- Single button linked: Show button's number in matching badge
+- Multiple buttons linked: Show "×N" where N = count (e.g., "×3")
+- Helper function to find buttons linking to door (via `linkedFrom` array)
+- Same badge style and positioning as buttons
+
+**11.9.5 Properties Panel integration**
+- Add "Button Number" input field when button selected
+- Number input type, range 1-99, validation
+- Detect duplicates: If number exists on another button, show yellow warning
+- Allow duplicates (don't prevent, just warn)
+- Update button properties on change
+
+**11.9.6 Documentation**
+- Create `docs/BUTTON_NUMBERING_SYSTEM.md` with:
+  - Overview and features
+  - Auto-numbering behavior
+  - Adaptive contrast system
+  - Usage workflow for level designers
+  - Technical details (data model, rendering)
+  - Design rationale
+- Update `docs/ARCHITECTURE.md` to reference button numbering system
+
+**Files to modify:**
+- `client/src/types/level.ts` - Add buttonNumber property
+- `client/src/hooks/useLevelEditor.ts` - Auto-numbering logic
+- `client/src/utils/canvasRenderer.ts` - Badge rendering (buttons + doors)
+- `client/src/components/level-editor/PropertiesPanel.tsx` - Button number editing
+- `docs/BUTTON_NUMBERING_SYSTEM.md` - New documentation file
+- `docs/ARCHITECTURE.md` - Reference new system
+
+**Tests:**
+- Unit tests (`client/src/utils/buttonNumbering.test.ts`):
+  - Auto-numbering logic (max + 1, reset to 1)
+  - Luminance calculation
+  - Color scheme selection
+  - Number validation (1-99 range)
+- E2E tests (`e2e/button-numbering.spec.ts`):
+  - Button shows auto-assigned number after placement
+  - Number editable in Properties Panel
+  - Duplicate number shows warning
+  - Door shows single button's number
+  - Door shows "×N" for multiple linked buttons
+  - Badge uses correct contrast on light/dark backgrounds
+  - Badge maintains constant size at different zoom levels
+
+**Visual Reference:** Clear, bold badges like Mario Maker - immediately visible and readable
 
 #### 11.10 Implement tile overlap logic - newest tile wins
 - **Location:** `client/src/hooks/useLevelEditor.ts` - addTile function, `client/src/utils/levelSerializer.ts` - deserialize/import functions
@@ -286,8 +353,82 @@ Press ESC                      → null            | null               ❌ clea
   - Unit test: Verify zoom calculation for various object layouts
 - **Note:** Makes zoom reset more intelligent and useful for level design workflow
 
+#### 11.13 Improve selection outline visibility on blue backgrounds
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/utils/canvasRenderer.ts` - selection rendering
+- **Current:** Selection outline around tiles not visible when background is blue (default background color)
+- **Change:** Implement higher contrast selection indicator that works on any background color
+- **Implementation:**
+  - Consider white outline with dark border/stroke for maximum contrast
+  - Or implement adaptive color based on background (similar to button numbering system Task 11.9.2)
+  - Make selection outline thicker/bolder for better visibility
+  - Test on various background colors (blue, red, black, white)
+- **Files to modify:**
+  - `client/src/utils/canvasRenderer.ts` - Update selection rendering logic
+- **Tests:**
+  - E2E test: Select object on blue background → verify outline visible
+  - E2E test: Select object on various backgrounds → verify contrast
+- **Note:** Critical for usability - users need to see what's selected
+
+#### 11.14 Move Select All button to toolbar
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/pages/LevelEditor.tsx`
+- **Current:** "Select All" is in Edit menu, requires menu navigation
+- **Change:** Move "Select All" button to toolbar near other selection tools (Select, Multi-select)
+- **Implementation:**
+  - Remove "Select All" from Edit menu dropdown
+  - Add button to toolbar in selection tools group
+  - Create icon for Select All button (e.g., dotted box with all corners highlighted)
+  - Keep Ctrl+A keyboard shortcut working
+  - Add tooltip: "Select All (Ctrl+A)"
+- **Files to modify:**
+  - `client/src/components/level-editor/Toolbar.tsx` - Add Select All button
+  - `client/src/pages/LevelEditor.tsx` - Remove from Edit menu
+- **Tests:**
+  - E2E test: Click Select All button → verify all objects selected
+  - E2E test: Ctrl+A still works
+- **Note:** User requirement - no discussion needed
+
+#### 11.15 Move Copy/Paste buttons to toolbar
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/pages/LevelEditor.tsx`
+- **Current:** Copy and Paste buttons are in Edit menu
+- **Change:** Move Copy and Paste buttons to toolbar as new group near selection tools
+- **Implementation:**
+  - Remove Copy and Paste from Edit menu dropdown
+  - Add new toolbar group for clipboard operations
+  - Position near selection tools (after Select All)
+  - Add icons for both buttons (standard copy/paste icons)
+  - Keep keyboard shortcuts working (Ctrl+C, Ctrl+V)
+  - Add tooltips: "Copy (Ctrl+C)", "Paste (Ctrl+V)"
+  - Maintain disabled state when no selection (Copy) or empty clipboard (Paste)
+- **Files to modify:**
+  - `client/src/components/level-editor/Toolbar.tsx` - Add Copy/Paste buttons
+  - `client/src/pages/LevelEditor.tsx` - Remove from Edit menu
+- **Tests:**
+  - E2E test: Copy/Paste buttons work same as keyboard shortcuts
+  - E2E test: Buttons show correct disabled state
+- **Note:** Improves discoverability and workflow efficiency
+
+#### 11.16 Improve close level dialog message
+- **Priority:** 3 (Feature)
+- **Location:** Close level confirmation dialog component
+- **Current:** Close level dialog message is generic or unclear about data loss
+- **Change:** Dialog should clearly state: "Are you sure you want to close 'New Level 3'? Any unsaved changes will be lost."
+- **Implementation:**
+  - Include level name in dialog message
+  - Emphasize data loss and that undo is not possible
+  - Make message clear and user-friendly for kids
+  - Consider red/warning styling for destructive action
+- **Files to modify:**
+  - Level close confirmation dialog component (likely in `client/src/components/level-editor/` or `LevelEditor.tsx`)
+- **Tests:**
+  - E2E test: Close level → verify dialog shows level name
+  - E2E test: Verify warning message is clear
+- **Note:** Prevents accidental data loss
+
 **Dependencies:** None - core selection/move tools already complete
-**Notes:** 8 tasks remaining. Priority: Tile overlap (11.10), Link/Unlink tools (11.5-11.6), Drawing tools (11.1-11.2), Button numbering (11.9), Rotation decision (11.7), Zoom fit-to-view (11.12)
+**Notes:** 13 tasks remaining (was 8, added 5 from inbox). Priority: Tile overlap (11.10), Link/Unlink tools (11.5-11.6), Drawing tools (11.1-11.2), Button numbering (11.9), Rotation decision (11.7), Zoom fit-to-view (11.12), UI improvements (11.13-11.16)
 
 ---
 
@@ -665,8 +806,31 @@ Press ESC                      → null            | null               ❌ clea
   - No behavioral changes - pure refactoring
 - **Note:** This improves code maintainability and makes future changes easier
 
+#### 15.2 Remove duplicate level button
+- **Priority:** 3 (Feature - UI cleanup)
+- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx` or wherever duplicate level button exists
+- **Current:** "Duplicate Level" button exists in UI
+- **Change:** Remove the button - redundant with Ctrl+A + Ctrl+C workflow
+- **Rationale:**
+  - Ctrl+A selects all objects in level
+  - Ctrl+C copies them to clipboard
+  - After Chapter 18 (paste rework), paste will be even more intuitive
+  - Button is redundant and clutters UI
+- **Implementation:**
+  - Remove "Duplicate Level" button from UI
+  - Remove associated handler function
+  - Update any tests that reference the button
+- **Files to modify:**
+  - Properties Panel or wherever button is located
+  - Remove handler function
+  - Update E2E tests if they reference this button
+- **Tests:**
+  - Verify button is removed from UI
+  - Verify Ctrl+A + Ctrl+C workflow still works for duplicating level content
+- **Note:** Simplifies UI, encourages using standard copy/paste workflow
+
 **Dependencies:** None
-**Notes:** Can be done incrementally - start with highest complexity functions first
+**Notes:** Can be done incrementally - start with highest complexity functions first (15.1), then UI cleanup (15.2)
 
 ---
 
@@ -827,6 +991,24 @@ Press ESC                      → null            | null               ❌ clea
   - Copy from one level, paste to another (should work seamlessly)
   - Undo/redo state preservation during paste mode
   - Paste cancellation (ESC key, tool change, level switch)
+  - **CRITICAL: Ctrl+A, Ctrl+C, Ctrl+V whole level scenario:**
+    - User selects all objects (potentially 100+ objects)
+    - Copies entire level to clipboard
+    - Presses Ctrl+V to paste
+    - **Problem:** Ghost preview of 100+ objects following cursor
+    - **Performance:** Rendering hundreds of ghost objects every frame
+    - **UX:** Massive ghost preview covering entire canvas - confusing
+    - **Solution options:**
+      1. **Limit ghost preview:** Show max 10-20 objects in ghost, display count badge "×127 objects"
+      2. **Bounding box preview:** Show just an outline box indicating total size of pasted content
+      3. **Smart detection:** If clipboard has >50 objects, show warning "Paste large selection? (127 objects)" → confirm → paste immediately at center or offset
+      4. **Disable ghost for large pastes:** Fallback to immediate paste with offset for >X objects
+    - **Recommended approach:** Option 3 (smart detection with confirmation)
+      - Threshold: 20-30 objects (configurable)
+      - Show modal: "Paste 127 objects at center of viewport?" [Cancel] [Paste]
+      - On confirm: Paste immediately at calculated position
+      - Avoids performance issues and unclear UX
+    - **Alternative for power users:** If user holds Shift while pasting large selection, bypass confirmation and paste immediately
 - **Files to modify:**
   - `client/src/hooks/useLevelEditor.ts` (add pasteMode state)
   - `client/src/hooks/useCanvas.ts` (paste interaction logic)
@@ -876,7 +1058,198 @@ Press ESC                      → null            | null               ❌ clea
 - **Result:** Each level now maintains its own isolated undo/redo stack. Switching between levels preserves all history.
 
 **Dependencies:** None
-**Notes:** Discovered during E2E test run on 2025-10-06. Currently blocking 1 E2E test.
+**Notes:** Discovered during E2E test run on 2025-10-06. Fixed - all E2E tests now passing.
+
+---
+
+## Chapter 20: Advanced Selection Modifiers
+
+**Status:** ⏸️ Not Started
+**Files:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/pages/LevelEditor.tsx`
+**Priority:** Medium
+
+**Goal:** Implement industry-standard modifier key patterns for advanced selection workflows (Shift for multi-select, Ctrl for additive selection).
+
+### Tasks:
+
+#### 20.1 Research industry patterns for modifier-based selection
+- **Priority:** 3 (Feature - Research phase)
+- **Location:** Research document or design doc
+- **Current:** No modifier key support for selection
+- **Change:** Research how industry tools handle modifier keys (Photoshop, Figma, Illustrator, Tiled)
+- **Research areas:**
+  - Shift key behavior (typically multi-select/box selection)
+  - Ctrl/Cmd key behavior (typically additive selection)
+  - Temporary tool override patterns
+  - Visual feedback for modifier states
+  - Interaction with active tools (especially Move tool)
+- **Deliverable:** Design document with recommendations for CanvasBlox
+- **Note:** Research-heavy task - foundation for 20.2-20.5
+
+#### 20.2 Implement Shift+Drag for temporary multi-select
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`
+- **Current:** Multi-select requires selecting Multi-select tool from toolbar
+- **Change:** Holding Shift temporarily engages multi-select tool (box selection)
+- **Behavior:**
+  - Press and hold Shift key
+  - Drag to create selection box
+  - Release mouse - objects in box are selected (replaces current selection, non-additive)
+  - Release Shift - return to previous tool
+- **Implementation:**
+  - Track Shift key state in useCanvas
+  - On Shift down: Store current tool, temporarily activate multi-select
+  - On Shift up: Restore previous tool
+  - Visual feedback: Cursor changes, status bar shows "Multi-select (Shift)"
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` - Shift key handling
+  - `client/src/hooks/useSelectionState.ts` - Temporary tool state
+- **Tests:**
+  - E2E: Shift+Drag creates selection box
+  - E2E: Release Shift returns to previous tool
+  - E2E: Selection replaces current selection (non-additive)
+
+#### 20.3 Implement Ctrl+Click for additive selection
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/hooks/useCanvas.ts`
+- **Current:** Clicking object replaces current selection
+- **Change:** Ctrl+Click adds individual objects to selection (additive)
+- **Behavior:**
+  - Hold Ctrl key
+  - Click object - adds to selection if not selected, removes if already selected (toggle)
+  - Click empty space - does nothing (preserves selection)
+- **Implementation:**
+  - Track Ctrl key state in useCanvas
+  - On Ctrl+Click object: Toggle object in selection array
+  - Visual feedback: Cursor shows "+" icon, status bar shows "Add to selection (Ctrl)"
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` - Ctrl key handling, click logic
+  - `client/src/hooks/useLevelEditor.ts` - toggleObjectSelection function
+- **Tests:**
+  - E2E: Ctrl+Click adds object to selection
+  - E2E: Ctrl+Click selected object removes it from selection
+  - E2E: Ctrl+Click empty space preserves selection
+
+#### 20.4 Implement temporary tool override for Move tool
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`
+- **Current:** Modifier keys disengage Move tool
+- **Change:** When Move tool active, Shift/Ctrl temporarily override without disengaging Move
+- **Behavior:**
+  - User has Move tool selected
+  - Press Shift - Move tool becomes inactive, multi-select engaged
+  - Release Shift - Move tool re-activates
+  - Same for Ctrl - temporary additive selection mode
+- **Special case:** This is an exception to normal tool behavior - requires careful state management
+- **Implementation:**
+  - Add "suspended tool" state (tool that will resume after modifier release)
+  - When modifier pressed with Move active: Suspend Move, activate selection mode
+  - When modifier released: Restore Move tool
+  - Visual feedback: Toolbar shows both Move (dimmed) and current modifier mode
+- **Files to modify:**
+  - `client/src/hooks/useSelectionState.ts` - Suspended tool state
+  - `client/src/components/level-editor/Toolbar.tsx` - Visual feedback for suspended state
+- **Tests:**
+  - E2E: Move tool + Shift → multi-select works, release → Move resumes
+  - E2E: Move tool + Ctrl → additive selection works, release → Move resumes
+
+#### 20.5 Visual feedback for modifier states
+- **Priority:** 3 (Feature)
+- **Location:** `client/src/utils/canvasRenderer.ts`, `client/src/components/level-editor/Toolbar.tsx`, status bar
+- **Current:** No visual indication when modifier keys are held
+- **Change:** Clear visual feedback for all modifier states
+- **Visual indicators:**
+  - **Cursor changes:**
+    - Shift held: Box selection cursor (crosshair or dotted box)
+    - Ctrl held: Plus (+) cursor for additive selection
+  - **Status bar:**
+    - "Multi-select (Shift)" when Shift held
+    - "Add to selection (Ctrl)" when Ctrl held
+  - **Toolbar:**
+    - Active tool highlighted
+    - Suspended tool shown dimmed/grayed
+    - Modifier mode indicator badge
+- **Implementation:**
+  - Custom cursor CSS for each modifier state
+  - Status bar component updates based on modifier state
+  - Toolbar component shows suspended state
+- **Files to modify:**
+  - `client/src/utils/canvasRenderer.ts` - Cursor rendering
+  - `client/src/components/level-editor/Toolbar.tsx` - Suspended tool UI
+  - Status bar component - Modifier state display
+  - `client/src/index.css` - Cursor styles
+- **Tests:**
+  - E2E: Shift held → cursor changes, status bar updates
+  - E2E: Ctrl held → cursor changes, status bar updates
+  - E2E: Move suspended → toolbar shows dimmed Move + active modifier
+
+#### 20.6 Rethink selection tool buttons (if needed)
+- **Priority:** 4 (Idea/enhancement)
+- **Location:** `client/src/components/level-editor/Toolbar.tsx`
+- **Current:** Separate Select and Multi-select tool buttons
+- **Change:** Potentially consolidate or rethink based on modifier key implementation
+- **Questions:**
+  - With Shift+Drag for multi-select, do we still need Multi-select button?
+  - Should Select button be default tool, or just use modifier keys?
+  - Keep buttons for discoverability, or remove for cleaner UI?
+- **Decision:** Defer until 20.2-20.5 implemented, then evaluate based on UX testing
+- **Note:** Low priority - might not be needed
+
+**Dependencies:**
+- 20.1 (research) should be completed before implementing 20.2-20.5
+- 20.2-20.4 can be implemented independently after research
+- 20.5 (visual feedback) should be last, after behavior is working
+
+**Notes:**
+- High implementation complexity - requires state machine refactoring
+- Extensive testing needed for all modifier combinations
+- User research needed after initial implementation
+
+---
+
+## Chapter 21: Multi-Select Properties Panel
+
+**Status:** ⏸️ Not Started
+**Files:** `client/src/components/level-editor/PropertiesPanel.tsx`
+**Priority:** Low (P4 - Idea/enhancement)
+
+**Goal:** Redesign Properties Panel to handle multiple selected objects gracefully.
+
+### Tasks:
+
+#### 21.1 Rethink Properties Panel for multi-select
+- **Priority:** 4 (Idea/enhancement)
+- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`
+- **Current:** Properties Panel doesn't work well when multiple objects are selected
+- **Change:** Redesign to handle batch editing and property differences
+- **Requirements:**
+  - Show count of selected objects (e.g., "3 objects selected")
+  - Display common properties across all selected objects
+  - Indicate when properties differ (e.g., "Mixed" for position, "—" for different values)
+  - Enable batch editing (change one property, applies to all selected)
+  - Show object type mix if different types selected (e.g., "2 buttons, 1 door")
+- **Design patterns to research:**
+  - Figma's properties panel (shows "Mixed" for different values)
+  - Photoshop's layers panel (batch property editing)
+  - Unity's Inspector (multi-object editing)
+- **Implementation:**
+  - Detect when multiple objects selected
+  - Calculate common properties and differences
+  - Render appropriate UI for batch editing
+  - Apply changes to all selected objects
+  - Add undo/redo support for batch edits
+- **Files to modify:**
+  - `client/src/components/level-editor/PropertiesPanel.tsx` - Complete redesign
+  - `client/src/hooks/useLevelEditor.ts` - Batch property update functions
+- **Tests:**
+  - E2E: Select 3 objects → Properties Panel shows "3 objects selected"
+  - E2E: Common property edited → all selected objects updated
+  - E2E: Property with different values shows "Mixed"
+  - E2E: Batch edit can be undone in one step
+- **Note:** Low priority - current behavior is acceptable for now, but this would be a nice UX improvement
+
+**Dependencies:** None - standalone enhancement
+**Notes:** Consider implementing after Chapter 20 (Advanced Selection Modifiers) is complete, as better selection UX will make multi-select more common
 
 ---
 
@@ -920,14 +1293,16 @@ Press ESC                      → null            | null               ❌ clea
 | 8. Color & Theme | ✅ Completed | ✓ | Shadow system, tile borders |
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
-| 11. Drawing Tools | 🔄 In Progress | ❌ | 5/12 complete, 7 tasks remaining |
+| 11. Drawing Tools | 🔄 In Progress | ❌ | 5/17 complete, 12 tasks remaining (added 5 UI tasks from inbox) |
 | 13. E2E Test Simplification | ✅ Completed | ✓ | Phase 1-3 complete (-9 tests, -527 lines), 7 files refactored |
 | 14. E2E Test Organization | ✅ Completed | ✓ | Split monolithic test file into 13 focused files |
-| 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, reduce linter warnings |
+| 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, UI cleanup (2 tasks) |
 | 16. Bug Fixes | ✅ Completed | ✓ | All 3 bugs fixed (import/export/toast selector) |
 | 17. E2E Test Optimization | ⏸️ Not Started | ❌ | Phase 3 continuation - auto-save test merge |
 | 18. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
 | 19. Undo/Redo History | ✅ Completed | ✓ | Per-level history implemented - 126/126 E2E tests passing |
+| 20. Advanced Selection Modifiers | ⏸️ Not Started | ❌ | Shift/Ctrl modifier keys, temporary tool override (6 tasks) |
+| 21. Multi-Select Properties Panel | ⏸️ Not Started | ❌ | Batch editing, property differences UI (1 task, P4) |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
