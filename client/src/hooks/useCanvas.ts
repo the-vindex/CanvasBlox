@@ -203,8 +203,12 @@ export function useCanvas({
             }
 
             // Handle pen tool painting
+            // Only allow continuous placement for platform tiles, not for objects (buttons, doors, etc.)
             if (isPaintingRef.current && editorState.selectedTool === 'pen' && editorState.selectedTileType) {
-                onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
+                const isPlatform = editorState.selectedTileType.includes('platform');
+                if (isPlatform) {
+                    onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
+                }
             }
         },
         [getWorldPosition, onMouseMove, onTilePlaced, editorState, levelData]
