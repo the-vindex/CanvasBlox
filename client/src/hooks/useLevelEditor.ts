@@ -9,7 +9,7 @@ import type {
     SpawnPoint,
     Tile,
 } from '@/types/level';
-import { createDefaultLevel } from '@/utils/levelSerializer';
+import { createDefaultLevel, removeOverlappingTiles } from '@/utils/levelSerializer';
 import { canLinkObjects, canObjectBeLinked, createLink, removeLink } from '@/utils/linkingLogic';
 
 const STORAGE_KEY = 'levelEditor_levels';
@@ -72,7 +72,12 @@ export function useLevelEditor() {
         if (saved) {
             try {
                 const savedLevels = JSON.parse(saved);
-                setLevels(savedLevels);
+                // Clean up overlapping tiles in all loaded levels
+                const cleanedLevels = savedLevels.map((level: LevelData) => ({
+                    ...level,
+                    tiles: removeOverlappingTiles(level.tiles),
+                }));
+                setLevels(cleanedLevels);
             } catch (error) {
                 console.error('Failed to load saved levels:', error);
                 // Create default level
@@ -240,20 +245,51 @@ export function useLevelEditor() {
                 // Update level without adding to history (for batched operations)
                 setLevels((prev) => {
                     const newLevels = [...prev];
+                    const currentLevel = newLevels[currentLevelIndex];
+
+                    // Remove overlapping tiles (newest tile wins)
+                    // Exception: Keep door if placing button on top
+                    const filteredTiles = currentLevel.tiles.filter((tile) => {
+                        const samePosition = tile.position.x === position.x && tile.position.y === position.y;
+                        if (!samePosition) return true;
+
+                        // Keep door if new tile is button (puzzle mechanic exception)
+                        if (tileType === 'button' && tile.type === 'door') {
+                            return true;
+                        }
+
+                        // Remove overlapping tile
+                        return false;
+                    });
+
                     newLevels[currentLevelIndex] = {
-                        ...newLevels[currentLevelIndex],
-                        tiles: [...newLevels[currentLevelIndex].tiles, newTile],
+                        ...currentLevel,
+                        tiles: [...filteredTiles, newTile],
                     };
                     return newLevels;
                 });
             } else {
-                updateCurrentLevel(
-                    (level) => ({
+                updateCurrentLevel((level) => {
+                    // Remove overlapping tiles (newest tile wins)
+                    // Exception: Keep door if placing button on top
+                    const filteredTiles = level.tiles.filter((tile) => {
+                        const samePosition = tile.position.x === position.x && tile.position.y === position.y;
+                        if (!samePosition) return true;
+
+                        // Keep door if new tile is button (puzzle mechanic exception)
+                        if (tileType === 'button' && tile.type === 'door') {
+                            return true;
+                        }
+
+                        // Remove overlapping tile
+                        return false;
+                    });
+
+                    return {
                         ...level,
-                        tiles: [...level.tiles, newTile],
-                    }),
-                    `Added ${tileType} tile`
-                );
+                        tiles: [...filteredTiles, newTile],
+                    };
+                }, `Added ${tileType} tile`);
             }
         },
         [updateCurrentLevel, currentLevelIndex]

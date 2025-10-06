@@ -1,8 +1,48 @@
 import { DEFAULT_GRASS_Y } from '@/constants/editor';
-import type { LevelData } from '@/types/level';
+import type { LevelData, Tile } from '@/types/level';
 
 export function serialize(levelData: LevelData): string {
     return JSON.stringify(levelData, null, 2);
+}
+
+/**
+ * Remove overlapping tiles from a tiles array (newest tile wins)
+ * Exception: Keep door if button is placed on top (puzzle mechanic)
+ */
+export function removeOverlappingTiles(tiles: Tile[]): Tile[] {
+    const result: Tile[] = [];
+    const positionMap = new Map<string, Tile[]>();
+
+    // Group tiles by position
+    for (const tile of tiles) {
+        const key = `${tile.position.x},${tile.position.y}`;
+        if (!positionMap.has(key)) {
+            positionMap.set(key, []);
+        }
+        positionMap.get(key)!.push(tile);
+    }
+
+    // For each position, keep only the newest tile (or both if button + door)
+    for (const tilesAtPosition of positionMap.values()) {
+        if (tilesAtPosition.length === 1) {
+            result.push(tilesAtPosition[0]);
+        } else {
+            // Multiple tiles at same position - newest wins
+            const latestTile = tilesAtPosition[tilesAtPosition.length - 1];
+
+            // Exception: Keep door if placing button on top
+            if (latestTile.type === 'button') {
+                const doorTile = tilesAtPosition.find((t) => t.type === 'door');
+                if (doorTile) {
+                    result.push(doorTile);
+                }
+            }
+
+            result.push(latestTile);
+        }
+    }
+
+    return result;
 }
 
 export function deserialize(jsonString: string): LevelData {
@@ -19,7 +59,13 @@ export function deserialize(jsonString: string): LevelData {
             throw new Error('Invalid metadata format');
         }
 
-        return data as LevelData;
+        // Clean up overlapping tiles (newest wins)
+        const cleanedTiles = removeOverlappingTiles(data.tiles);
+
+        return {
+            ...data,
+            tiles: cleanedTiles,
+        } as LevelData;
     } catch (error) {
         throw new Error(`Failed to parse level data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

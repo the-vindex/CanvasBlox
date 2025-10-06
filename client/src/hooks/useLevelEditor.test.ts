@@ -328,6 +328,77 @@ describe('useLevelEditor', () => {
             expect(newTile.position).toEqual({ x: 10, y: 10 });
         });
 
+        it('should remove old tile when new tile is placed at same position', () => {
+            const { result } = renderHook(() => useLevelEditor());
+
+            // Add first tile
+            act(() => {
+                result.current.addTile({ x: 5, y: 5 }, 'platform-basic', false);
+            });
+
+            const tilesAfterFirst = result.current.currentLevel.tiles.length;
+
+            // Add second tile at same position
+            act(() => {
+                result.current.addTile({ x: 5, y: 5 }, 'platform-ice', false);
+            });
+
+            // Should have same count (old tile replaced)
+            expect(result.current.currentLevel.tiles).toHaveLength(tilesAfterFirst);
+
+            // Should have the new tile type
+            const tilesAtPosition = result.current.currentLevel.tiles.filter(
+                (t) => t.position.x === 5 && t.position.y === 5
+            );
+            expect(tilesAtPosition).toHaveLength(1);
+            expect(tilesAtPosition[0].type).toBe('platform-ice');
+        });
+
+        it('should keep both tiles when button is placed on top of door', () => {
+            const { result } = renderHook(() => useLevelEditor());
+
+            // Add door first
+            act(() => {
+                result.current.addTile({ x: 7, y: 7 }, 'door', false);
+            });
+
+            const tilesAfterDoor = result.current.currentLevel.tiles.length;
+
+            // Add button at same position
+            act(() => {
+                result.current.addTile({ x: 7, y: 7 }, 'button', false);
+            });
+
+            // Should have both tiles (exception case)
+            expect(result.current.currentLevel.tiles).toHaveLength(tilesAfterDoor + 1);
+
+            // Both tiles should exist at same position
+            const tilesAtPosition = result.current.currentLevel.tiles.filter(
+                (t) => t.position.x === 7 && t.position.y === 7
+            );
+            expect(tilesAtPosition).toHaveLength(2);
+            expect(tilesAtPosition.some((t) => t.type === 'door')).toBe(true);
+            expect(tilesAtPosition.some((t) => t.type === 'button')).toBe(true);
+        });
+
+        it('should handle multiple overlapping tiles at same position', () => {
+            const { result } = renderHook(() => useLevelEditor());
+
+            // Add three tiles at same position
+            act(() => {
+                result.current.addTile({ x: 8, y: 8 }, 'platform-basic', false);
+                result.current.addTile({ x: 8, y: 8 }, 'platform-ice', false);
+                result.current.addTile({ x: 8, y: 8 }, 'platform-lava', false);
+            });
+
+            // Should only have the last tile (lava)
+            const tilesAtPosition = result.current.currentLevel.tiles.filter(
+                (t) => t.position.x === 8 && t.position.y === 8
+            );
+            expect(tilesAtPosition).toHaveLength(1);
+            expect(tilesAtPosition[0].type).toBe('platform-lava');
+        });
+
         it('should add object to current level', () => {
             const { result } = renderHook(() => useLevelEditor());
 
