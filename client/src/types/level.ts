@@ -30,6 +30,7 @@ export interface ObjectProperties {
     actionType?: 'toggle' | 'one-time' | 'delayed' | 'continuous';
     delay?: number;
     state?: string;
+    buttonNumber?: number; // Auto-assigned number for buttons (1-99)
     [key: string]: any;
 }
 

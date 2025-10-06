@@ -9,6 +9,7 @@ import type {
     SpawnPoint,
     Tile,
 } from '@/types/level';
+import { assignButtonNumber } from '@/utils/buttonNumbering';
 import { createDefaultLevel, removeOverlappingTiles } from '@/utils/levelSerializer';
 import { canLinkObjects, canObjectBeLinked, createLink, removeLink } from '@/utils/linkingLogic';
 
@@ -325,6 +326,12 @@ export function useLevelEditor() {
                     };
                 }, `Added ${objectType}`);
             } else {
+                // For buttons, auto-assign button number
+                const properties: any = { interactable: true };
+                if (objectType === 'button') {
+                    properties.buttonNumber = assignButtonNumber(currentLevel?.objects || []);
+                }
+
                 newObject = {
                     id: `obj_${Date.now()}_${Math.random()}`,
                     type: objectType,
@@ -332,7 +339,7 @@ export function useLevelEditor() {
                     dimensions: { width: 1, height: 1 }, // Dimensions in tiles
                     rotation: 0,
                     layer: 1,
-                    properties: { interactable: true },
+                    properties,
                 } as InteractableObject;
 
                 updateCurrentLevel(

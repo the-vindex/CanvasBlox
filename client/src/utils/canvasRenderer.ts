@@ -1,5 +1,6 @@
 import { TILE_SIZE } from '@/constants/editor';
 import type { EditorState, InteractableObject, LevelData, Position, SpawnPoint, Tile } from '@/types/level';
+import { calculateLuminance, getBadgeColorScheme, getButtonsLinkingToDoor } from './buttonNumbering';
 import { getLinePositions } from './lineDrawing';
 import { getRectanglePositions } from './rectangleDrawing';
 
@@ -7,6 +8,7 @@ export class CanvasRenderer {
     private ctx: CanvasRenderingContext2D;
     private gridSize = TILE_SIZE;
     private editorState?: EditorState;
+    private levelData?: LevelData;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
@@ -594,6 +596,122 @@ export class CanvasRenderer {
         this.ctx.fill();
     }
 
+    /**
+     * Draw a numbered badge (for buttons)
+     * Badge maintains constant screen size regardless of zoom
+     */
+    private drawBadge(buttonNumber: number, width: number, height: number, zoom: number, objectType: string) {
+        // Calculate background color of button for adaptive contrast
+        // Red button: #dc2626 -> RGB(220, 38, 38)
+        const bgLuminance = calculateLuminance(220, 38, 38);
+        const scheme = getBadgeColorScheme(bgLuminance);
+
+        // Badge size in screen pixels (constant regardless of zoom)
+        const badgeSize = 24; // Diameter in pixels
+        const badgeRadius = badgeSize / 2;
+
+        // Get current transformation to calculate screen position
+        // We're already translated to object center, so transform (0, -height/2) to get top-center
+        const topCenterLocal = { x: 0, y: -height / 2 };
+        const transform = this.ctx.getTransform();
+        const screenX = transform.a * topCenterLocal.x + transform.c * topCenterLocal.y + transform.e;
+        const screenY = transform.b * topCenterLocal.x + transform.d * topCenterLocal.y + transform.f;
+
+        // Save current transformation state
+        this.ctx.save();
+
+        // Reset transformations to draw in screen space (constant size)
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Draw badge circle
+        this.ctx.fillStyle = scheme.bg;
+        this.ctx.globalAlpha = scheme.opacity;
+        this.ctx.beginPath();
+        this.ctx.arc(screenX, screenY - badgeRadius, badgeRadius, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Draw badge border
+        this.ctx.strokeStyle = scheme.text;
+        this.ctx.lineWidth = 2;
+        this.ctx.globalAlpha = 1;
+        this.ctx.beginPath();
+        this.ctx.arc(screenX, screenY - badgeRadius, badgeRadius, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        // Draw number text
+        this.ctx.fillStyle = scheme.text;
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(buttonNumber.toString(), screenX, screenY - badgeRadius);
+
+        // Restore transformation
+        this.ctx.restore();
+    }
+
+    /**
+     * Draw door badge showing linked button count
+     * Shows single button number or "×N" for multiple buttons
+     */
+    private drawDoorBadge(linkedButtons: InteractableObject[], width: number, height: number, zoom: number) {
+        // Calculate background color of door for adaptive contrast
+        // Orange door: #d97706 -> RGB(217, 119, 6)
+        const bgLuminance = calculateLuminance(217, 119, 6);
+        const scheme = getBadgeColorScheme(bgLuminance);
+
+        // Badge size in screen pixels (constant regardless of zoom)
+        const badgeSize = 24; // Diameter in pixels
+        const badgeRadius = badgeSize / 2;
+
+        // Determine badge text
+        let badgeText: string;
+        if (linkedButtons.length === 1) {
+            // Show single button number
+            badgeText = (linkedButtons[0]?.properties.buttonNumber ?? '?').toString();
+        } else {
+            // Show count with "×" prefix
+            badgeText = `×${linkedButtons.length}`;
+        }
+
+        // Get current transformation to calculate screen position
+        // We're already translated to object center, so transform (0, -height/2) to get top-center
+        const topCenterLocal = { x: 0, y: -height / 2 };
+        const transform = this.ctx.getTransform();
+        const screenX = transform.a * topCenterLocal.x + transform.c * topCenterLocal.y + transform.e;
+        const screenY = transform.b * topCenterLocal.x + transform.d * topCenterLocal.y + transform.f;
+
+        // Save current transformation state
+        this.ctx.save();
+
+        // Reset transformations to draw in screen space (constant size)
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Draw badge circle
+        this.ctx.fillStyle = scheme.bg;
+        this.ctx.globalAlpha = scheme.opacity;
+        this.ctx.beginPath();
+        this.ctx.arc(screenX, screenY - badgeRadius, badgeRadius, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Draw badge border
+        this.ctx.strokeStyle = scheme.text;
+        this.ctx.lineWidth = 2;
+        this.ctx.globalAlpha = 1;
+        this.ctx.beginPath();
+        this.ctx.arc(screenX, screenY - badgeRadius, badgeRadius, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        // Draw badge text
+        this.ctx.fillStyle = scheme.text;
+        this.ctx.font = 'bold 12px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(badgeText, screenX, screenY - badgeRadius);
+
+        // Restore transformation
+        this.ctx.restore();
+    }
+
     drawObject(obj: InteractableObject, pan: Position, zoom: number, isSelected = false, isDeleting = false) {
         // Convert tile position to pixel position
         const x = obj.position.x * TILE_SIZE * zoom + pan.x;
@@ -655,6 +773,20 @@ export class CanvasRenderer {
             case 'checkpoint':
                 this.drawCheckpoint(width, height);
                 break;
+        }
+
+        // Draw badge for buttons and doors (after object rendering, before selection outline)
+        if (!isDeleting) {
+            if (obj.type === 'button' && obj.properties.buttonNumber !== undefined) {
+                // Draw button number badge
+                this.drawBadge(obj.properties.buttonNumber, width, height, zoom, obj.type);
+            } else if (obj.type === 'door') {
+                // Draw door badge showing linked button numbers
+                const linkedButtons = getButtonsLinkingToDoor(obj, this.levelData?.objects || []);
+                if (linkedButtons.length > 0) {
+                    this.drawDoorBadge(linkedButtons, width, height, zoom);
+                }
+            }
         }
 
         // Draw selection outline with pulsing glow
@@ -1155,6 +1287,7 @@ export class CanvasRenderer {
 
     render(levelData: LevelData, editorState: EditorState) {
         this.editorState = editorState; // Store for use in draw methods
+        this.levelData = levelData; // Store for use in draw methods
         this.clear();
         this.drawBackground(levelData.metadata.backgroundColor);
         this.drawGrid(editorState.pan, editorState.zoom, editorState.showGrid);

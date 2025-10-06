@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { EditorState, InteractableObject, LevelData, SpawnPoint, Tile } from '@/types/level';
+import { validateButtonNumber } from '@/utils/buttonNumbering';
 
 interface PropertiesPanelProps {
     levelData: LevelData;
@@ -341,6 +342,42 @@ export function PropertiesPanel({
                 {selectedObject && 'properties' in selectedObject && 'interactable' in selectedObject.properties && (
                     <div className="space-y-3 pt-4 border-t border-border">
                         <h3 className="text-xs font-semibold text-muted-foreground uppercase">Interactable Settings</h3>
+
+                        {/* Button Number - only for buttons */}
+                        {selectedObject.type === 'button' && (
+                            <div>
+                                <Label className="text-sm text-muted-foreground mb-1">Button Number</Label>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    max="99"
+                                    value={selectedObject.properties.buttonNumber || 1}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value, 10);
+                                        if (validateButtonNumber(value)) {
+                                            handleObjectPropertyChange('properties.buttonNumber', value);
+                                        }
+                                    }}
+                                    className="text-sm"
+                                    aria-label="Button Number"
+                                    data-testid="input-button-number"
+                                />
+                                {(() => {
+                                    const currentNumber = selectedObject.properties.buttonNumber;
+                                    const hasDuplicate = levelData.objects.some(
+                                        (obj) =>
+                                            obj.id !== selectedObject.id &&
+                                            obj.type === 'button' &&
+                                            obj.properties.buttonNumber === currentNumber
+                                    );
+                                    return hasDuplicate ? (
+                                        <p className="text-xs text-yellow-600 mt-1">
+                                            ⚠ Warning: Button number {currentNumber} is already used by another button
+                                        </p>
+                                    ) : null;
+                                })()}
+                            </div>
+                        )}
 
                         <div>
                             <Label className="text-sm text-muted-foreground mb-1">Action Type</Label>
