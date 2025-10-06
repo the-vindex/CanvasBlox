@@ -153,7 +153,7 @@ Press ESC                      → null            | null               ❌ clea
   - Mark as complete after manual testing
 
 #### 11.2 Implement rectangle drawing tool ✅ Complete
-- **Status:** ✅ COMPLETE - Commit 593549d - Filled rectangle tool implemented
+- **Status:** ✅ COMPLETE + TESTED - Commits: 593549d (feat), dec24e8 (refactor), fb5b9f5 (bugfix)
 - **Location:** `client/src/hooks/useCanvas.ts`, `client/src/utils/rectangleDrawing.ts`, `client/src/utils/canvasRenderer.ts`
 - **What was implemented:**
   1. ✅ **Rectangle drawing algorithm** (`client/src/utils/rectangleDrawing.ts`)
@@ -178,15 +178,24 @@ Press ESC                      → null            | null               ❌ clea
   - User requested filled rectangles
   - `getRectanglePositions(start, end, true)` with `filled=true`
   - Can toggle to outline in future if needed
+- **Refactoring (commit dec24e8):**
+  - ✅ Generalized preview rendering with `drawPreviewShape()` method
+  - ✅ Extracted `handleDrawingToolComplete()` generic handler
+  - ✅ Removed 4 redundant E2E tests (from 8 to 4 tests, same coverage)
+  - ✅ 67% code reduction in preview rendering
+- **Bugfix (commit fb5b9f5):**
+  - ✅ Fixed critical undo/redo history bug (affected both line and rectangle tools)
+  - ✅ Root cause: Race condition between async state updates and history capture
+  - ✅ Solution: Atomic single-operation update via `updateCurrentLevel()`
 - **Tests:**
   - ✅ 12 unit tests (rectangleDrawing.test.ts) - All passing
   - ✅ 4 E2E tests (e2e/drawing-tools.spec.ts) - All passing
-  - ✅ Created new drawing-tools.spec.ts file (moved line tests from selection.spec.ts)
-- **Manual Test:**
-  - Select tile → press 'R' for rectangle tool → drag to draw filled rectangle
-  - Preview shows during drag
-  - ESC cancels drawing
-  - Undo/redo works as single batch operation
+  - ✅ Total: 155 unit + 126 E2E = 281 tests passing
+- **Manual Test:** ✅ TESTED & VERIFIED by user
+  - ✅ Rectangle drawing works correctly
+  - ✅ Preview shows during drag
+  - ✅ ESC cancels drawing
+  - ✅ Undo/redo works correctly (bugfix verified)
 - **Note:** Works as part of drawing mode tools group following same patterns as pen and line tools
 
 #### 11.5 Implement linking tool for interactable objects
