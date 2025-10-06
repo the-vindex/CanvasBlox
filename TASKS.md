@@ -131,29 +131,26 @@ Press ESC                      → null            | null               ❌ clea
   - Press 'B' → verify pen tool selects
 - **Note:** Foundation for entire drawing tools UX - 11.1 (line) and 11.2 (rectangle) now properly integrated
 
-#### 11.1 Implement line drawing tool ⚠️ Algorithm Complete, Needs Interaction Model Integration
-- **Status:** Partially complete - Algorithm done, needs Task 11.0 refactor
-- **Commit:** 2f0247e (algorithm implementation)
-- **What's Working:**
+#### 11.1 Implement line drawing tool ✅ Complete
+- **Status:** ✅ Complete - Commits: 2f0247e (algorithm), ca6e7c5 (overlap fix)
+- **What was implemented:**
   - ✅ Bresenham's line algorithm (`lineDrawing.ts`)
   - ✅ Line preview rendering (`drawPreviewLine()` in canvasRenderer)
-  - ✅ Mouse handlers for line drawing
+  - ✅ Mouse handlers for line drawing (drag to draw)
   - ✅ Real-time preview while dragging
   - ✅ Batch tile placement with single undo/redo
   - ✅ ESC cancellation during drag
-  - ✅ Tests: 4 E2E + 10 unit (all passing)
-- **What Needs Refactoring** (blocked by Task 11.0):
-  - ⚠️ Interaction model - currently uses old mutual exclusion logic
-  - ⚠️ Should be part of drawing mode tools group
-  - ⚠️ Should preserve tile when switching to/from line tool
-  - ⚠️ Current `useSelectionState` logic needs updating
-- **After Task 11.0 Complete:**
-  - Update tests to reflect new interaction model
-  - Verify line tool works in drawing mode tools group
-  - Mark as complete after manual testing
+  - ✅ Interaction model integrated (Task 11.0 complete)
+  - ✅ Drawing mode tools group (preserves tile selection with pen/rectangle)
+  - ✅ Tile overlap detection (newest tile wins)
+  - ✅ Button-on-door exception support
+- **Tests:**
+  - ✅ 5 E2E tests (drawing-tools.spec.ts) - All passing
+  - ✅ 10 unit tests (lineDrawing.test.ts) - All passing
+- **Manual Test:** ✅ User confirmed working
 
 #### 11.2 Implement rectangle drawing tool ✅ Complete
-- **Status:** ✅ COMPLETE + TESTED - Commits: 593549d (feat), dec24e8 (refactor), fb5b9f5 (bugfix)
+- **Status:** ✅ COMPLETE + TESTED - Commits: 593549d (feat), dec24e8 (refactor), fb5b9f5 (bugfix), ca6e7c5 (overlap fix)
 - **Location:** `client/src/hooks/useCanvas.ts`, `client/src/utils/rectangleDrawing.ts`, `client/src/utils/canvasRenderer.ts`
 - **What was implemented:**
   1. ✅ **Rectangle drawing algorithm** (`client/src/utils/rectangleDrawing.ts`)
@@ -187,6 +184,11 @@ Press ESC                      → null            | null               ❌ clea
   - ✅ Fixed critical undo/redo history bug (affected both line and rectangle tools)
   - ✅ Root cause: Race condition between async state updates and history capture
   - ✅ Solution: Atomic single-operation update via `updateCurrentLevel()`
+- **Bugfix (commit ca6e7c5):**
+  - ✅ Added tile overlap detection to drawing tools
+  - ✅ `handleDrawingToolComplete()` now uses `removeOverlappingTiles()`
+  - ✅ Newest tile wins, button-on-door exception preserved
+  - ✅ Fixes issue where crossing lines/rectangles created duplicate tiles
 - **Tests:**
   - ✅ 12 unit tests (rectangleDrawing.test.ts) - All passing
   - ✅ 4 E2E tests (e2e/drawing-tools.spec.ts) - All passing
@@ -243,26 +245,43 @@ Press ESC                      → null            | null               ❌ clea
   - Removed implementation-coupled tests
 - **Final commits:** 4a74244 (initial), 47e3a58, 96180c9, 38e65f7, 67bd960, 960eb0b, 1ee3e7d, b7571a8
 
-#### 11.6 Implement unlinking tool for removing object links
-- **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/components/level-editor/PropertiesPanel.tsx`
-- **Current:** No UI or functionality exists to remove links between objects
-- **Purpose:** Allow users to remove unwanted links between interactable objects
-- **Implementation options:**
-  1. **Properties Panel approach:** Show list of linked objects in properties panel, add "X" button to remove each link
-  2. **Selection-based:** Select linked object → keyboard shortcut (e.g., 'U' for unlink) → click link to remove
-  3. **Context menu:** Right-click on object → "Manage Links" → show dialog with checkboxes for each link
-- **Recommended approach:** Properties Panel (option 1) - most discoverable
-- **Implementation:**
-  - In PropertiesPanel, display `properties.linkedObjects` array as clickable list
-  - Add delete/remove button next to each linked object ID
-  - On click: Remove object ID from `properties.linkedObjects` array
-  - Also remove reverse link from target object's `properties.linkedFrom` array
-  - Update level state and trigger re-render
-  - Add to undo/redo history
-- **Files to modify:**
-  - `client/src/components/level-editor/PropertiesPanel.tsx` (add links UI section)
-  - `client/src/hooks/useLevelEditor.ts` (add unlinkObjects function)
-- **Note:** Currently there's no way to remove links once created - important for fixing mistakes
+#### 11.6 Implement unlinking tool for removing object links ✅ Complete
+- **Status:** ✅ User Testing COMPLETE - Commits: 003f07b, 1689708, 3810911, f92c5ed, 90e1eb7, 6aa5855
+- **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/components/level-editor/Toolbar.tsx`, `client/src/pages/LevelEditor.tsx`
+- **Chosen approach:** Dedicated unlink tool (option 2) - better discoverability than properties panel
+- **What was implemented:**
+  1. ✅ **Dedicated unlink tool** (`client/src/components/level-editor/Toolbar.tsx`)
+     - Added unlink tool button to toolbar (purple group with link tool)
+     - Created broken link icon (unlink.svg) to visually distinguish from link tool
+     - Tool shows active state when selected
+  2. ✅ **Click-based workflow** (`client/src/pages/LevelEditor.tsx`)
+     - Press 'U' key or click unlink tool button
+     - Click source object (shows selection feedback)
+     - Click linked target object to remove link
+     - ESC key cancels unlink mode
+  3. ✅ **Bidirectional link removal** (`client/src/utils/linkingLogic.ts`, `client/src/hooks/useLevelEditor.ts`)
+     - `removeLink()` utility function removes link from both objects
+     - `unlinkObjects()` checks both link directions - order doesn't matter when clicking
+     - Toast notifications for success/errors
+     - Undo/redo support
+  4. ✅ **State management** (`client/src/types/level.ts`, `client/src/hooks/useSelectionState.ts`)
+     - Added `unlinkSourceId` to track selected source in unlink mode
+     - Auto-clears when switching tools
+- **Tests:**
+  - ✅ 5 unit tests (removeLink utility with immutability checks)
+  - ✅ 4 E2E tests (unlink workflow, keyboard shortcut)
+  - ✅ Test quality: Removed 7 implementation-coupled tests, fixed 3 weak assertions
+  - ⏸️ 1 E2E test skipped (undo/redo timing issue - follow-up needed)
+- **Manual Test:** ✅ User testing COMPLETE
+  - ✅ Unlink workflow works in both directions (order doesn't matter)
+  - ✅ Icon design: Separated chain pieces with visible gap (broken link appearance)
+  - ✅ Toast notifications working correctly
+  - ✅ ESC key cancels unlink mode
+  - ✅ Undo/redo functionality confirmed
+- **Bug fixes applied:**
+  - Fixed bidirectional unlinking (checks both link directions)
+  - Icon design iterations: 4 versions → final uses separated chain pieces
+  - Parameters renamed to firstId/secondId to clarify bidirectionality
 
 #### 11.7 Decide on rotation tool approach or remove it
 - **Location:** `client/src/pages/LevelEditor.tsx` - Rotate left/right buttons in toolbar
@@ -379,22 +398,35 @@ Press ESC                      → null            | null               ❌ clea
 
 **Visual Reference:** Clear, bold badges like Mario Maker - immediately visible and readable
 
-#### 11.10 Implement tile overlap logic - newest tile wins
+#### 11.10 Implement tile overlap logic - newest tile wins ✅ Complete
+- **Status:** ✅ Complete - Commit: 0e8c6dc
 - **Location:** `client/src/hooks/useLevelEditor.ts` - addTile function, `client/src/utils/levelSerializer.ts` - deserialize/import functions
-- **Current:** Tiles can be placed on top of each other without removing old tiles, creating overlapping tiles at same position
-- **Change:** When a new tile is placed at a position where another tile exists, remove the old tile(s) at that position
-- **Exception:** Button placed on top of door should NOT delete the door (special case for puzzle mechanics)
-- **Implementation:**
-  - In `addTile` function: Before adding new tile, check for existing tiles at same position
-  - Remove existing tiles at that position (filter out tiles with matching x,y coordinates)
-  - Exception: If new tile is 'button' type and existing tile is 'door' type, keep both
-  - Apply same logic when importing JSON levels (`deserialize` function)
-  - Apply same logic when loading from localStorage (on initial load)
-- **Files to modify:**
-  - `client/src/hooks/useLevelEditor.ts` (addTile function - add overlap detection and removal)
-  - `client/src/utils/levelSerializer.ts` (deserialize - clean up overlapping tiles on import)
-  - `client/src/hooks/useLevelEditor.ts` (useEffect for localStorage load - clean up overlaps)
-- **Note:** This prevents unintended tile stacking and keeps the level clean. Button-on-door exception supports puzzle design patterns.
+- **What was implemented:**
+  1. ✅ **Overlap detection in addTile** (`client/src/hooks/useLevelEditor.ts:227-296`)
+     - Filter out tiles at same position before adding new tile
+     - Works in both skipHistory and normal modes
+     - Exception: Keep door when button is placed on top
+  2. ✅ **Overlap cleanup utility** (`client/src/utils/levelSerializer.ts:12-46`)
+     - `removeOverlappingTiles()` function for cleaning tile arrays
+     - Groups tiles by position, keeps newest (last in array)
+     - Handles button-on-door exception
+  3. ✅ **JSON import cleanup** (`client/src/utils/levelSerializer.ts:48-72`)
+     - Deserialize function cleans up overlaps on import
+     - Ensures imported levels don't have stacked tiles
+  4. ✅ **LocalStorage load cleanup** (`client/src/hooks/useLevelEditor.ts:70-89`)
+     - Maps over loaded levels to clean up overlapping tiles
+     - Applies to all levels on initial load
+- **Tests:**
+  - ✅ 3 unit tests added (useLevelEditor.test.ts:331-400)
+    - Test: Remove old tile when new tile placed at same position
+    - Test: Keep both tiles when button placed on door
+    - Test: Handle multiple overlapping tiles at same position
+  - ✅ Total: 167 unit + 134 E2E = 301 tests passing
+- **Manual Test:** Ready for testing
+  - Place tile → place another tile at same position → verify old tile removed
+  - Place door → place button on top → verify both tiles exist
+  - Import JSON with overlapping tiles → verify cleaned up
+  - Reload page → verify localStorage tiles cleaned up
 
 #### 11.12 Enhance zoom reset to fit all content
 - **Location:** Zoom reset function in `client/src/hooks/useCanvas.ts` or zoom control handlers
