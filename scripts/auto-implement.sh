@@ -33,40 +33,25 @@ for i in $(seq 1 $MAX_ITERATIONS); do
 
     # Create prompt for this iteration
     PROMPT=$(cat << 'PROMPT'
-You are running in FULL AUTO MODE. Your goal is to complete the next task from TASKS.md without ANY user interaction.
+You are running in FULL AUTO MODE. Complete the next task from TASKS.md autonomously.
 
-CRITICAL INSTRUCTIONS:
-1. Run /next command to get the next incomplete step
-2. DO NOT ask the user ANY questions - make reasonable assumptions
-3. Log ALL questions, assumptions, and decisions to docs/OPEN_QUESTIONS.md in this format:
+CRITICAL RULES:
+1. Run /next to get next incomplete task (skip ⏭️ SKIPPED tasks)
+2. DO NOT ask questions - make reasonable assumptions
+3. Log ALL decisions to docs/OPEN_QUESTIONS.md:
    ```
-   ## Step [N]: [Step Name]
-
+   ## Task [N.X]: [Task Name]
    **Question:** [What you would have asked]
-   **Assumption/Decision:** [What you decided to do and why]
-   **Reasoning:** [Your reasoning]
-
+   **Assumption/Decision:** [What you decided and why]
    ---
    ```
-4. Mark the step as "✅ Complete (auto-accepted)" when done (not just "Complete")
-5. Implement the feature fully following TDD:
-   - Write tests FIRST
-   - Implement the feature
-   - Run all tests (npm test && npm run test:e2e)
-   - Fix any failures
-   - Commit with descriptive message
-6. If you encounter any blockers or the step is already complete, log it to docs/OPEN_QUESTIONS.md
-7. Use your best judgment for:
-   - Implementation details
-   - Test coverage
-   - Code organization
-   - UI/UX decisions
-8. Follow the existing code patterns and conventions in the codebase
-9. After completing the step, YOU MUST EXIT THE CLAUDE CODE SESSION
+4. Follow docs/TASK_MANAGEMENT.md workflow (TDD, testing, commits)
+5. Follow docs/TDD_PRINCIPLES.md (Red-Green-Refactor cycle)
+6. Run npm test && npm run test:e2e before committing
+7. Mark task "✅ COMPLETE" when done
+8. After commit: EXIT session immediately
 
-FINAL STEP: After committing your work, you MUST end the session. Do NOT wait for user input.
-
-BEGIN AUTO-IMPLEMENTATION NOW. Run /next and complete the step autonomously. After committing, EXIT.
+BEGIN NOW. Run /next and complete task. After commit, EXIT.
 PROMPT
 )
 
@@ -97,9 +82,10 @@ PROMPT
     echo ""
 
     # Check if there are more tasks to complete
-    # Look for "⏸️ Not Started" in TASKS.md
-    if ! grep -q "⏸️ Not Started" TASKS.md 2>/dev/null; then
-        echo "🎉 All steps completed!"
+    # Look for "⏸️ Not Started" or "🔄 In Progress" in TASKS.md
+    # Ignore "⏭️ Skipped" tasks as they should be skipped
+    if ! grep -q -E "⏸️ Not Started|🔄 In Progress" TASKS.md 2>/dev/null; then
+        echo "🎉 All tasks completed or skipped!"
         echo "📝 Review $OPEN_QUESTIONS_FILE for questions and decisions"
         exit 0
     fi
