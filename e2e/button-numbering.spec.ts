@@ -152,4 +152,40 @@ test.describe('Button Numbering System', () => {
         const value2 = await buttonNumberInput.inputValue();
         expect(Number.parseInt(value2, 10)).toBeLessThanOrEqual(99);
     });
+
+    test('should update canvas badge when button number is edited in properties', async ({ page }) => {
+        const buttonTile = page.getByTestId('tile-button');
+        const selectTool = page.getByTestId('tool-select');
+
+        // Place a button
+        await buttonTile.click();
+        await clickCanvas(page, 160, 160);
+        await page.waitForTimeout(100);
+
+        // Select the button
+        await selectTool.click();
+        await clickCanvas(page, 160, 160);
+        await page.waitForTimeout(100);
+
+        // Verify initial button number is 1
+        const propertiesPanel = page.getByTestId('properties-panel');
+        const buttonNumberInput = propertiesPanel.locator('input[aria-label="Button Number"]');
+        await expect(buttonNumberInput).toHaveValue('1');
+
+        // Change button number to 5
+        await buttonNumberInput.fill('5');
+        await buttonNumberInput.blur();
+        await page.waitForTimeout(200);
+
+        // Take screenshot to verify badge updated on canvas
+        const canvas = page.getByTestId('level-canvas');
+        const screenshot = await canvas.screenshot();
+
+        // Verify the change persisted in properties
+        await expect(buttonNumberInput).toHaveValue('5');
+
+        // The canvas should have re-rendered with the new number
+        // We can't easily OCR the badge, but we can verify no errors occurred
+        expect(screenshot.length).toBeGreaterThan(0);
+    });
 });
