@@ -33,7 +33,7 @@ This document defines the detailed workflow, implementation strategy, and testin
 
 #### N.1 Task Title
 - **Status:** ✅ COMPLETE | 🔄 In Progress | ⏸️ Not Started
-- **Priority:** 3 (Feature)
+- **Priority:** P3
 - **Location:** File paths
 - **Implementation:** Details
 - **Tests:** Test descriptions

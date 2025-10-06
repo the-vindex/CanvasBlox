@@ -19,7 +19,7 @@ All chapters require HTML comment markers:
 
 ### Tasks:
 #### 11.1 Task title
-- **Priority:** 3 (Feature)
+- **Priority:** P3
 ...
 <!-- CHAPTER_END: 11 -->
 ```
