@@ -6,6 +6,7 @@ import MultiselectIcon from '@/assets/icons/multiselect.svg?react';
 import PenIcon from '@/assets/icons/pen.svg?react';
 import RectangleIcon from '@/assets/icons/rectangle.svg?react';
 import SelectIcon from '@/assets/icons/select.svg?react';
+import UnlinkIcon from '@/assets/icons/unlink.svg?react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -157,7 +158,7 @@ export function Toolbar({
                 />
                 <ToolButton
                     tool="unlink"
-                    icon={LinkIcon}
+                    icon={UnlinkIcon}
                     title="Unlink Objects (U)"
                     testId="tool-unlink"
                     isActive={editorState.selectedTool === 'unlink'}

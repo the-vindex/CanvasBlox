@@ -1,0 +1,8 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left broken chain piece -->
+  <path d="M10 13a5 5 0 0 0 7.54.54l1.5-1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right broken chain piece -->
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Break indicator - diagonal slash -->
+  <line x1="11" y1="13" x2="13" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
