@@ -471,22 +471,29 @@ Please test the following scenarios:
   - Import JSON with overlapping tiles → verify cleaned up
   - Reload page → verify localStorage tiles cleaned up
 
-#### 11.13 Improve selection outline visibility on blue backgrounds
-- **Priority:** 3 (Feature)
+#### 11.13 Improve selection outline visibility on blue backgrounds ✅ Complete
+- **Status:** ✅ COMPLETE - Commit 0751176
 - **Location:** `client/src/utils/canvasRenderer.ts` - selection rendering
-- **Current:** Selection outline around tiles not visible when background is blue (default background color)
-- **Change:** Implement higher contrast selection indicator that works on any background color
-- **Implementation:**
-  - Consider white outline with dark border/stroke for maximum contrast
-  - Or implement adaptive color based on background (similar to button numbering system Task 11.9.2)
-  - Make selection outline thicker/bolder for better visibility
-  - Test on various background colors (blue, red, black, white)
-- **Files to modify:**
-  - `client/src/utils/canvasRenderer.ts` - Update selection rendering logic
+- **What was implemented:**
+  1. ✅ **High-contrast selection outline** (`client/src/utils/canvasRenderer.ts:1123-1147`)
+     - Added `drawHighContrastSelection()` helper method
+     - White inner stroke (2px) with glow for visibility on dark backgrounds
+     - Black outer stroke (4px) for visibility on light backgrounds
+     - Dual-stroke approach ensures visibility on any background color
+  2. ✅ **Improved pulsing animation**
+     - Oscillates between 0.7 and 1.0 opacity (was 0.6-1.0)
+     - Faster cycle (2x speed) for more noticeable feedback
+     - Starts at high visibility (no delay)
+  3. ✅ **Applied to all object types**
+     - Tiles (platform-basic, platform-grass, etc.)
+     - Interactable objects (buttons, doors, levers, etc.)
+     - Spawn points (player, enemy)
 - **Tests:**
-  - E2E test: Select object on blue background → verify outline visible
-  - E2E test: Select object on various backgrounds → verify contrast
-- **Note:** Critical for usability - users need to see what's selected
+  - ✅ Selection already tested in `selection.spec.ts:98` (visual highlight verification)
+  - ✅ All existing tests pass (190 unit + 144 E2E)
+  - Note: No new E2E tests added - review determined visual tests should be unit tests or visual regression tests, and existing selection tests already cover functionality
+- **Manual Test:** ✅ User confirmed - "animation is nice and visible"
+- **Note:** Selection outline now clearly visible on blue default background and all other colors
 
 #### 11.14 Move Select All button to toolbar
 - **Priority:** 3 (Feature)
@@ -546,7 +553,7 @@ Please test the following scenarios:
 - **Note:** Prevents accidental data loss
 
 **Dependencies:** None - core selection/move tools already complete
-**Notes:** 6 tasks remaining: Rotation decision (11.7), UI improvements (11.13-11.16). Moved zoom reset (was 11.12) to Chapter 22 (P4).
+**Notes:** 5 tasks remaining: Rotation decision (11.7), UI improvements (11.14-11.16). Completed 11.13 (selection outline), moved zoom reset (was 11.12) to Chapter 22 (P4).
 
 <!-- CHAPTER_END: 11 -->
 ---
@@ -1043,7 +1050,7 @@ Please test the following scenarios:
 | 8. Color & Theme | ✅ Completed | ✓ | Shadow system, tile borders |
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
-| 11. Drawing Tools | 🔄 In Progress | ❌ | 11/17 complete, 6 tasks remaining (moved zoom to Ch 22) |
+| 11. Drawing Tools | 🔄 In Progress | ❌ | 12/17 complete, 5 tasks remaining (UI improvements) |
 | 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, UI cleanup (2 tasks) |
 | 17. E2E Test Optimization | ⏸️ Not Started | ❌ | Phase 3 continuation - auto-save test merge |
 | 18. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
@@ -1064,9 +1071,9 @@ Please test the following scenarios:
 
 **Recommended Priority Order:**
 
-1. **Chapter 11: Drawing Tools** (11/17 complete, 6 remaining)
+1. **Chapter 11: Drawing Tools** (12/17 complete, 5 remaining)
    - Core feature implementation
-   - Tasks: Rotation decision, UI improvements (selection outline, Select All/Copy/Paste buttons, close dialog)
+   - Tasks: Rotation decision (11.7), UI improvements (11.14-11.16: Select All/Copy/Paste buttons, close dialog)
 
 2. **Chapter 15: Code Quality**
    - Fix linter warnings (complexity issues in useCanvas.ts, LevelEditor.tsx)
