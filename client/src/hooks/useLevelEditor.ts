@@ -551,11 +551,11 @@ export function useLevelEditor() {
     );
 
     const unlinkObjects = useCallback(
-        (sourceId: string, targetId: string) => {
-            const sourceObj = currentLevel.objects.find((obj) => obj.id === sourceId);
-            const targetObj = currentLevel.objects.find((obj) => obj.id === targetId);
+        (firstId: string, secondId: string) => {
+            const firstObj = currentLevel.objects.find((obj) => obj.id === firstId);
+            const secondObj = currentLevel.objects.find((obj) => obj.id === secondId);
 
-            if (!sourceObj || !targetObj) {
+            if (!firstObj || !secondObj) {
                 toast({
                     title: 'Unlink Error',
                     description: 'Source or target object not found',
@@ -564,9 +564,11 @@ export function useLevelEditor() {
                 return;
             }
 
-            // Check if link exists
-            const hasLink = sourceObj.properties.linkedObjects?.includes(targetId);
-            if (!hasLink) {
+            // Check both directions to find the link (direction shouldn't matter for unlinking)
+            const firstLinksToSecond = firstObj.properties.linkedObjects?.includes(secondId);
+            const secondLinksToFirst = secondObj.properties.linkedObjects?.includes(firstId);
+
+            if (!firstLinksToSecond && !secondLinksToFirst) {
                 toast({
                     title: 'No Link Found',
                     description: 'These objects are not linked',
@@ -575,14 +577,18 @@ export function useLevelEditor() {
                 return;
             }
 
+            // Determine actual source/target based on which direction the link exists
+            const actualSource = firstLinksToSecond ? firstObj : secondObj;
+            const actualTarget = firstLinksToSecond ? secondObj : firstObj;
+
             // Remove the link
-            const { source: updatedSource, target: updatedTarget } = removeLink(sourceObj, targetObj);
+            const { source: updatedSource, target: updatedTarget } = removeLink(actualSource, actualTarget);
 
             // Update the level with the unlinked objects
             updateCurrentLevel((level) => {
                 const updatedObjects = level.objects.map((obj) => {
-                    if (obj.id === sourceId) return updatedSource;
-                    if (obj.id === targetId) return updatedTarget;
+                    if (obj.id === actualSource.id) return updatedSource;
+                    if (obj.id === actualTarget.id) return updatedTarget;
                     return obj;
                 });
 
@@ -590,11 +596,11 @@ export function useLevelEditor() {
                     ...level,
                     objects: updatedObjects,
                 };
-            }, `Unlinked ${sourceObj.type} from ${targetObj.type}`);
+            }, `Unlinked ${actualSource.type} from ${actualTarget.type}`);
 
             toast({
                 title: 'Link Removed',
-                description: `${sourceObj.type} unlinked from ${targetObj.type}`,
+                description: `${actualSource.type} unlinked from ${actualTarget.type}`,
             });
         },
         [currentLevel, updateCurrentLevel, toast]

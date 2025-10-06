@@ -1,8 +1,10 @@
+<!--
+  Broken link icon - Two separated chain pieces showing disconnection
+  Based on link icon design pattern, modified to show separation
+-->
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Top-left chain piece (from original link icon, shifted up-left) -->
-  <path d="M9 12a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Bottom-right chain piece (from original link icon, shifted down-right) -->
-  <path d="M15 12a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Diagonal slash crossing through both pieces -->
-  <line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <!-- Upper-right chain piece (shifted up and right to create gap) -->
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" transform="translate(-1.5, -1.5)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Lower-left chain piece (shifted down and left to create gap) -->
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" transform="translate(1.5, 1.5)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
