@@ -49,6 +49,34 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 20.3: Implement Ctrl+Click for additive selection
+
+**Question:** How should Ctrl+Click interact with existing selection? Should it toggle individual objects, or just add them?
+
+**Assumption/Decision:**
+- Ctrl+Click toggles object in selection (add if not selected, remove if already selected)
+- Ctrl+Click on empty space does nothing (preserves current selection)
+- Works from any tool except drawing tools (pen/line/rectangle)
+- Does not change the active tool - purely modifies selection behavior
+- Follows industry pattern from Photoshop, Figma (see docs/MODIFIER_KEY_SELECTION_PATTERNS.md)
+
+**Question:** Should visual feedback show when Ctrl is held?
+
+**Assumption/Decision:**
+- Defer visual feedback (cursor changes, status bar updates) to Task 20.5
+- For Task 20.3, focus only on behavior implementation
+- This keeps the task focused and testable
+
+**Question:** Should there be a helper function to toggle selection, or modify existing functions?
+
+**Assumption/Decision:**
+- Create new `toggleObjectSelection` function in useLevelEditor.ts
+- This keeps logic separate from existing `selectObject` and `selectMultipleObjects` functions
+- Function should handle undo/redo history
+- Function should work with individual objects only (not arrays)
+
+---
+
 ## Task 15.1: Fix all linter issues
 
 **Question:** What refactoring approach should I use for complex functions (handleMouseMove, handleMouseDown, handleMouseUp, handleCanvasClick, getRectanglePositions)?

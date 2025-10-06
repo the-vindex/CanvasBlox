@@ -365,6 +365,13 @@ export function useLevelEditor() {
         }));
     }, []);
 
+    const toggleObjectSelection = useCallback(
+        (objectId: string) => {
+            selectObject(objectId, true);
+        },
+        [selectObject]
+    );
+
     const selectAllObjects = useCallback(() => {
         const currentLevel = levels[currentLevelIndex];
         if (!currentLevel) return;
@@ -790,6 +797,7 @@ export function useLevelEditor() {
         addTile,
         addObject,
         selectObject,
+        toggleObjectSelection,
         selectAllObjects,
         deleteSelectedObjects,
         copySelectedObjects,

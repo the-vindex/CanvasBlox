@@ -56,6 +56,7 @@ export default function LevelEditor() {
         addTile,
         addObject,
         selectObject: _selectObject,
+        toggleObjectSelection: _toggleObjectSelection,
         selectAllObjects: _selectAllObjects,
         deleteSelectedObjects: _deleteSelectedObjects,
         copySelectedObjects: _copySelectedObjects,
@@ -106,16 +107,23 @@ export default function LevelEditor() {
 
     // Helper: Handle select tool click
     const handleSelectToolClick = useCallback(
-        (position: Position) => {
+        (position: Position, ctrlKey: boolean) => {
             const clickedItem = findItemAtPosition(position);
 
             if (clickedItem) {
-                _selectObject(clickedItem.id);
+                if (ctrlKey) {
+                    _toggleObjectSelection(clickedItem.id);
+                } else {
+                    _selectObject(clickedItem.id);
+                }
             } else {
-                setEditorState((prev) => ({ ...prev, ...selectionState.clearObjects() }));
+                // Only clear selection on empty click if Ctrl is not held
+                if (!ctrlKey) {
+                    setEditorState((prev) => ({ ...prev, ...selectionState.clearObjects() }));
+                }
             }
         },
-        [findItemAtPosition, _selectObject, setEditorState, selectionState]
+        [findItemAtPosition, _selectObject, _toggleObjectSelection, setEditorState, selectionState]
     );
 
     // Helper: Handle link tool click
@@ -199,7 +207,7 @@ export default function LevelEditor() {
     );
 
     const handleCanvasClick = useCallback(
-        (position: Position, _event: MouseEvent) => {
+        (position: Position, event: MouseEvent) => {
             if (!currentLevel) return;
 
             // Handle paste preview click-to-place
@@ -208,8 +216,15 @@ export default function LevelEditor() {
                 return;
             }
 
+            // Ctrl+Click for additive selection works from any tool (except drawing tools)
+            const isDrawingTool = ['pen', 'line', 'rectangle'].includes(editorState.selectedTool || '');
+            if ((event.ctrlKey || event.metaKey) && !isDrawingTool) {
+                handleSelectToolClick(position, true);
+                return;
+            }
+
             if (editorState.selectedTool === 'select') {
-                handleSelectToolClick(position);
+                handleSelectToolClick(position, false);
             } else if (editorState.selectedTool === 'link') {
                 handleLinkToolClick(position);
             } else if (editorState.selectedTool === 'unlink') {
