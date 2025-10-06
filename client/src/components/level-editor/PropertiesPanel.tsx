@@ -290,26 +290,6 @@ export function PropertiesPanel({
                         </div>
 
                         <div>
-                            <Label className="text-sm text-muted-foreground mb-1">Rotation</Label>
-                            <Select
-                                value={selectedObject.rotation.toString()}
-                                onValueChange={(value) =>
-                                    handleObjectPropertyChange('rotation', parseInt(value, 10) as 0 | 90 | 180 | 270)
-                                }
-                            >
-                                <SelectTrigger className="text-sm" data-testid="select-object-rotation">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="0">0°</SelectItem>
-                                    <SelectItem value="90">90°</SelectItem>
-                                    <SelectItem value="180">180°</SelectItem>
-                                    <SelectItem value="270">270°</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div>
                             <Label className="text-sm text-muted-foreground mb-1">Layer</Label>
                             <Input
                                 type="number"
@@ -417,7 +397,7 @@ export function PropertiesPanel({
                                 <div>
                                     <Label className="text-sm text-muted-foreground mb-1">Linked Objects</Label>
                                     <div className="text-sm text-muted-foreground">
-                                        {selectedObject.properties.linkedObjects.map((linkedId) => {
+                                        {selectedObject.properties.linkedObjects.map((linkedId: string) => {
                                             const linkedObj = levelData.objects.find((obj) => obj.id === linkedId);
                                             return (
                                                 <div key={linkedId} className="py-1">

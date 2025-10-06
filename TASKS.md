@@ -284,33 +284,24 @@ Press ESC                      → null            | null               ❌ clea
   - Icon design iterations: 4 versions → final uses separated chain pieces
   - Parameters renamed to firstId/secondId to clarify bidirectionality
 
-#### 11.7 Decide on rotation tool approach or remove it
-- **Location:** `client/src/pages/LevelEditor.tsx` - Rotate left/right buttons in toolbar
-- **Current:** Rotate left/right buttons exist in header but unclear how rotation should work
-- **Decision needed:**
-  1. **Keep rotation - apply to selected objects:** When object(s) selected, rotate buttons rotate them (90° increments)
-  2. **Keep rotation - apply to tile being placed:** When placing tile, rotate buttons rotate preview before placement
-  3. **Remove rotation:** If rotation doesn't make sense for gameplay, remove buttons entirely
-- **Considerations:**
-  - Tiles have `rotation` property (0, 90, 180, 270) in level.ts:12
-  - Objects have `rotation` property in level.ts:40
-  - Rotation rendering already implemented in canvasRenderer.ts (tiles: 206-212, objects: 570-582)
-  - Current rotate left/right handlers exist in LevelEditor.tsx
-- **If keeping rotation:**
-  - Make buttons context-aware (only enabled when object selected or tile type selected)
-  - Add visual feedback showing rotation angle
-  - Consider keyboard shortcuts ([ and ] keys for rotate left/right)
-  - Update PropertiesPanel to show/edit rotation value
-- **If removing rotation:**
-  - Remove rotate buttons from toolbar
-  - Remove handleRotateLeft/handleRotateRight from LevelEditor.tsx
-  - Remove rotation keyboard handlers (if any)
-  - Keep rotation property in data model for future use
-- **Files to modify:**
-  - `client/src/pages/LevelEditor.tsx` (rotate button handlers)
-  - `client/src/hooks/useLevelEditor.ts` (add rotateObjects function if keeping)
-  - `client/src/components/level-editor/PropertiesPanel.tsx` (rotation UI if keeping)
-- **Note:** User requested decision on rotation tool - needs clarification on intended use case
+#### 11.7 Decide on rotation tool approach or remove it ✅ Complete
+- **Status:** ✅ COMPLETE
+- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`
+- **Decision:** Removed rotation UI
+- **What was removed:**
+  - Rotation dropdown selector from Properties Panel (lines 292-310)
+  - User can no longer change rotation values via UI
+- **What was kept:**
+  - Rotation property in data model (Tile and InteractableObject types)
+  - Rotation rendering logic in canvasRenderer.ts (for future use or imported levels)
+  - Default rotation value (0°) when creating new objects
+- **Rationale:**
+  - Rotation feature was unclear and not essential for core level design workflow
+  - Keeping data model support allows future enhancement if needed
+  - Simplifies UI and reduces cognitive load for users
+- **Files modified:**
+  - `client/src/components/level-editor/PropertiesPanel.tsx` - Removed rotation Select component
+- **Tests:** No test changes needed (no tests referenced rotation selector)
 
 #### 11.9 Implement button numbering system ✅ Complete
 - **Status:** ✅ Complete - Commits: c5e1e37, 501fba0, 77809c6, eafcbc2, d4e593f, 44855e0
@@ -523,26 +514,41 @@ Please test the following scenarios:
   - Place object → verify button becomes enabled
   - Ctrl+A keyboard shortcut still works (existing coverage)
 
-#### 11.15 Move Copy/Paste buttons to toolbar
+#### 11.15 Move Copy/Paste buttons to toolbar ✅ Complete
+- **Status:** ✅ COMPLETE - Commit 2047cd2
 - **Priority:** 3 (Feature)
 - **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/pages/LevelEditor.tsx`
-- **Current:** Copy and Paste buttons are in Edit menu
-- **Change:** Move Copy and Paste buttons to toolbar as new group near selection tools
-- **Implementation:**
-  - Remove Copy and Paste from Edit menu dropdown
-  - Add new toolbar group for clipboard operations
-  - Position near selection tools (after Select All)
-  - Add icons for both buttons (standard copy/paste icons)
-  - Keep keyboard shortcuts working (Ctrl+C, Ctrl+V)
-  - Add tooltips: "Copy (Ctrl+C)", "Paste (Ctrl+V)"
-  - Maintain disabled state when no selection (Copy) or empty clipboard (Paste)
-- **Files to modify:**
-  - `client/src/components/level-editor/Toolbar.tsx` - Add Copy/Paste buttons
-  - `client/src/pages/LevelEditor.tsx` - Remove from Edit menu
+- **What was implemented:**
+  1. ✅ **Created copy.svg and paste.svg icons** (`client/src/assets/icons/`)
+     - Two overlapping squares for copy icon
+     - Clipboard with document lines for paste icon
+     - Match existing toolbar icon style (24x24, currentColor stroke)
+  2. ✅ **Added Copy/Paste buttons to Toolbar** (`client/src/components/level-editor/Toolbar.tsx`)
+     - Positioned in selection tools group (after Select All)
+     - Added tooltips: "Copy (Ctrl+C)", "Paste (Ctrl+V)"
+     - Added aria-labels for accessibility
+     - Wired up props: onCopy, onPaste, hasSelection, hasClipboard
+  3. ✅ **Removed Copy/Paste from header** (`client/src/pages/LevelEditor.tsx`)
+     - Kept Undo/Redo buttons in header
+     - Removed standalone Copy/Paste buttons
+     - Passed copy/paste handlers to Toolbar component
+  4. ✅ **Updated tests**
+     - Updated unit test descriptions: "in toolbar" instead of "in header"
+     - Updated mocked Toolbar to include Copy/Paste buttons
+     - Added clipboard to mocked editorState
+     - All tests passing: 190 unit + 143 E2E
 - **Tests:**
-  - E2E test: Copy/Paste buttons work same as keyboard shortcuts
-  - E2E test: Buttons show correct disabled state
-- **Note:** Improves discoverability and workflow efficiency
+  - ✅ E2E tests use semantic selectors (getByRole) - work regardless of location
+  - ✅ Unit tests verify buttons render in toolbar
+  - ✅ Disabled states tested (no selection, empty clipboard)
+- **Test quality review:** ✅ Excellent - semantic selectors, behavioral testing, proper scope
+- **Manual Test:**
+  - Click Copy button in toolbar → verify copies selected objects
+  - Click Paste button in toolbar → verify pastes objects
+  - Verify Copy disabled when nothing selected
+  - Verify Paste disabled when clipboard empty
+  - Verify tooltips show on hover
+  - Verify keyboard shortcuts still work (Ctrl+C, Ctrl+V)
 
 #### 11.16 Improve close level dialog message
 - **Priority:** 3 (Feature)
@@ -562,7 +568,7 @@ Please test the following scenarios:
 - **Note:** Prevents accidental data loss
 
 **Dependencies:** None - core selection/move tools already complete
-**Notes:** 5 tasks remaining: Rotation decision (11.7), UI improvements (11.14-11.16). Completed 11.13 (selection outline), moved zoom reset (was 11.12) to Chapter 22 (P4).
+**Notes:** 1 task remaining: UI improvements (11.16). Completed 11.13 (selection outline), 11.14 (Select All toolbar), 11.15 (Copy/Paste toolbar), 11.7 (removed rotation UI), moved zoom reset (was 11.12) to Chapter 22 (P4).
 
 <!-- CHAPTER_END: 11 -->
 ---
