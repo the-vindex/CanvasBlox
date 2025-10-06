@@ -781,47 +781,6 @@ export default function LevelEditor() {
                     </button>
                     <button
                         type="button"
-                        onClick={() => _selectAllObjects()}
-                        disabled={
-                            !currentLevel ||
-                            (currentLevel.tiles.length === 0 &&
-                                currentLevel.objects.length === 0 &&
-                                currentLevel.spawnPoints.length === 0)
-                        }
-                        style={{
-                            padding: '8px 16px',
-                            background:
-                                !currentLevel ||
-                                (currentLevel.tiles.length === 0 &&
-                                    currentLevel.objects.length === 0 &&
-                                    currentLevel.spawnPoints.length === 0)
-                                    ? 'rgba(255, 255, 255, 0.1)'
-                                    : 'rgba(255, 255, 255, 0.2)',
-                            borderRadius: '6px',
-                            color:
-                                !currentLevel ||
-                                (currentLevel.tiles.length === 0 &&
-                                    currentLevel.objects.length === 0 &&
-                                    currentLevel.spawnPoints.length === 0)
-                                    ? 'rgba(255, 255, 255, 0.4)'
-                                    : 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            cursor:
-                                !currentLevel ||
-                                (currentLevel.tiles.length === 0 &&
-                                    currentLevel.objects.length === 0 &&
-                                    currentLevel.spawnPoints.length === 0)
-                                    ? 'not-allowed'
-                                    : 'pointer',
-                            border: 'none',
-                            backdropFilter: 'blur(10px)',
-                        }}
-                    >
-                        Select All
-                    </button>
-                    <button
-                        type="button"
                         onClick={() => _copySelectedObjects()}
                         disabled={editorState.selectedObjects.length === 0}
                         style={{
@@ -933,6 +892,12 @@ export default function LevelEditor() {
                         onZoomReset={handleZoomReset}
                         showPropertiesPanel={showPropertiesPanel}
                         onTogglePropertiesPanel={() => setShowPropertiesPanel((prev) => !prev)}
+                        onSelectAll={_selectAllObjects}
+                        hasObjects={
+                            currentLevel.tiles.length > 0 ||
+                            currentLevel.objects.length > 0 ||
+                            currentLevel.spawnPoints.length > 0
+                        }
                     />
 
                     {/* Canvas Component with CanvasRenderer */}

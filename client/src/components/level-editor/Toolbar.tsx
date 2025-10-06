@@ -6,6 +6,7 @@ import MultiselectIcon from '@/assets/icons/multiselect.svg?react';
 import PenIcon from '@/assets/icons/pen.svg?react';
 import RectangleIcon from '@/assets/icons/rectangle.svg?react';
 import SelectIcon from '@/assets/icons/select.svg?react';
+import SelectAllIcon from '@/assets/icons/select-all.svg?react';
 import UnlinkIcon from '@/assets/icons/unlink.svg?react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,8 @@ interface ToolbarProps {
     onZoomReset: () => void;
     showPropertiesPanel?: boolean;
     onTogglePropertiesPanel?: () => void;
+    onSelectAll: () => void;
+    hasObjects: boolean;
 }
 
 // Define color scheme for tool groups
@@ -84,6 +87,8 @@ export function Toolbar({
     onZoomReset,
     showPropertiesPanel,
     onTogglePropertiesPanel,
+    onSelectAll,
+    hasObjects,
 }: ToolbarProps) {
     const showGridId = useId();
     const showScanlinesId = useId();
@@ -116,6 +121,17 @@ export function Toolbar({
                     isActive={editorState.selectedTool === 'move'}
                     onToolChange={onToolChange}
                 />
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                    onClick={onSelectAll}
+                    title="Select All (Ctrl+A)"
+                    data-testid="button-select-all"
+                    disabled={!hasObjects}
+                >
+                    <SelectAllIcon className="w-4 h-4" />
+                </Button>
             </div>
 
             {/* Drawing Tools */}
