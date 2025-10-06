@@ -1068,11 +1068,10 @@ Please test the following scenarios:
 | 22. Future Enhancements | ⏸️ Not Started | ❌ | P4 ideas - zoom fit-to-view (1 task) |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
-**Legend:**
+**Legend - use only these statuses:**
 - ⏸️ Not Started
 - 🔄 In Progress
 - ✅ Completed
-- ✓ Approved
 
 **Note:** Use "✅ COMPLETE" format (not "+ TESTED") when marking tasks complete
 
