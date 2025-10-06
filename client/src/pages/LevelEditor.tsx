@@ -135,6 +135,24 @@ export default function LevelEditor() {
         [addTile, addObject, commitBatchToHistory]
     );
 
+    const handleRectangleComplete = useCallback(
+        (positions: Position[], tileType: string) => {
+            // Place tiles in the filled rectangle
+            for (const position of positions) {
+                if (tileType.includes('platform')) {
+                    addTile(position, tileType, true); // Skip history for each individual tile
+                } else {
+                    addObject(position, tileType);
+                }
+            }
+            // Commit all tiles as a single history entry
+            commitBatchToHistory(
+                `Drew filled rectangle with ${positions.length} tile${positions.length > 1 ? 's' : ''}`
+            );
+        },
+        [addTile, addObject, commitBatchToHistory]
+    );
+
     const handleWheelZoom = useCallback(
         (delta: number, _mouseX: number, _mouseY: number) => {
             setEditorState((prev) => {
@@ -801,6 +819,7 @@ export default function LevelEditor() {
                             onMultiSelectComplete={handleMultiSelectComplete}
                             onMoveObjectsComplete={handleMoveObjectsComplete}
                             onLineComplete={handleLineComplete}
+                            onRectangleComplete={handleRectangleComplete}
                         />
 
                         {/* Undo/Redo Flash Overlay */}

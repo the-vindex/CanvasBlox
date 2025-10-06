@@ -94,6 +94,11 @@ export interface EditorState {
         end: Position;
         tileType: string;
     };
+    rectanglePreview?: {
+        start: Position;
+        end: Position;
+        tileType: string;
+    };
 }
 
 export interface HistoryEntry {

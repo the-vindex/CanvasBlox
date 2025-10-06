@@ -43,7 +43,7 @@ interface Chapter {
     endLine: number;
 }
 
-function extractChapters(tasksContent: string): { chapters: Chapter[], remainingContent: string } {
+function extractChapters(tasksContent: string): { chapters: Chapter[]; remainingContent: string } {
     const lines = tasksContent.split('\n');
     const chapters: Chapter[] = [];
     let currentChapter: Partial<Chapter> | null = null;
@@ -145,9 +145,11 @@ function appendToArchive(chapters: Chapter[]) {
     const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const archiveContent = fs.readFileSync(ARCHIVE_FILE, 'utf-8');
 
-    const newContent = chapters.map(chapter => {
-        return `## Archived: ${timestamp} - Chapter ${chapter.number}: ${chapter.title}\n\n${chapter.content}\n\n---\n`;
-    }).join('\n');
+    const newContent = chapters
+        .map((chapter) => {
+            return `## Archived: ${timestamp} - Chapter ${chapter.number}: ${chapter.title}\n\n${chapter.content}\n\n---\n`;
+        })
+        .join('\n');
 
     fs.writeFileSync(ARCHIVE_FILE, archiveContent + newContent, 'utf-8');
 }
@@ -170,7 +172,7 @@ function main() {
     console.log(`Found ${chapters.length} chapters with separators\n`);
 
     // Filter for completed and approved chapters
-    const completedChapters = chapters.filter(ch => {
+    const completedChapters = chapters.filter((ch) => {
         const isComplete = ch.status?.includes('✅ Complete');
         const isApproved = isChapterApproved(ch.number, tasksContent);
         return isComplete && isApproved;
@@ -182,7 +184,7 @@ function main() {
     }
 
     console.log(`📦 Found ${completedChapters.length} chapters ready to archive:\n`);
-    completedChapters.forEach(ch => {
+    completedChapters.forEach((ch) => {
         console.log(`   - Chapter ${ch.number}: ${ch.title}`);
     });
     console.log('');
@@ -202,7 +204,7 @@ function main() {
     }
 
     // Update Progress Tracking table
-    const archivedChapterNumbers = completedChapters.map(ch => ch.number);
+    const archivedChapterNumbers = completedChapters.map((ch) => ch.number);
     updatedContent = updateProgressTracking(updatedContent, archivedChapterNumbers);
 
     // Write updated TASKS.md

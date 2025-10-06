@@ -3,6 +3,7 @@ import { TILE_SIZE } from '@/constants/editor';
 import type { EditorState, LevelData, Position } from '@/types/level';
 import { CanvasRenderer } from '@/utils/canvasRenderer';
 import { getLinePositions } from '@/utils/lineDrawing';
+import { getRectanglePositions } from '@/utils/rectangleDrawing';
 
 interface UseCanvasProps {
     levelData: LevelData;
@@ -15,6 +16,7 @@ interface UseCanvasProps {
     onMultiSelectComplete?: (start: Position, end: Position) => void;
     onMoveObjectsComplete?: (delta: Position) => void;
     onLineComplete?: (positions: Position[], tileType: string) => void;
+    onRectangleComplete?: (positions: Position[], tileType: string) => void;
 }
 
 export function useCanvas({
@@ -28,6 +30,7 @@ export function useCanvas({
     onMultiSelectComplete,
     onMoveObjectsComplete,
     onLineComplete,
+    onRectangleComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -45,6 +48,9 @@ export function useCanvas({
     const isDrawingLineRef = useRef(false);
     const lineStartRef = useRef<Position | null>(null);
     const lineEndRef = useRef<Position | null>(null);
+    const isDrawingRectangleRef = useRef(false);
+    const rectangleStartRef = useRef<Position | null>(null);
+    const rectangleEndRef = useRef<Position | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -61,6 +67,20 @@ export function useCanvas({
             rendererRef.current.render(levelData, editorState);
         }
     }, [levelData, editorState]);
+
+    // Clear drawing refs when tool changes (e.g., ESC key pressed)
+    useEffect(() => {
+        if (editorState.selectedTool !== 'line') {
+            isDrawingLineRef.current = false;
+            lineStartRef.current = null;
+            lineEndRef.current = null;
+        }
+        if (editorState.selectedTool !== 'rectangle') {
+            isDrawingRectangleRef.current = false;
+            rectangleStartRef.current = null;
+            rectangleEndRef.current = null;
+        }
+    }, [editorState.selectedTool]);
 
     const getWorldPosition = useCallback(
         (e: MouseEvent): Position => {
@@ -117,6 +137,28 @@ export function useCanvas({
                         ...editorState,
                         linePreview: {
                             start: lineStartRef.current,
+                            end: worldPos,
+                            tileType: editorState.selectedTileType,
+                        },
+                    });
+                }
+                return;
+            }
+
+            // Handle rectangle tool preview
+            if (
+                isDrawingRectangleRef.current &&
+                editorState.selectedTool === 'rectangle' &&
+                rectangleStartRef.current &&
+                editorState.selectedTileType
+            ) {
+                rectangleEndRef.current = worldPos;
+                // Re-render to show rectangle preview
+                if (rendererRef.current) {
+                    rendererRef.current.render(levelData, {
+                        ...editorState,
+                        rectanglePreview: {
+                            start: rectangleStartRef.current,
                             end: worldPos,
                             tileType: editorState.selectedTileType,
                         },
@@ -196,6 +238,14 @@ export function useCanvas({
                 return;
             }
 
+            // Handle rectangle tool - start drawing rectangle
+            if (editorState.selectedTool === 'rectangle' && editorState.selectedTileType) {
+                isDrawingRectangleRef.current = true;
+                rectangleStartRef.current = worldPos;
+                rectangleEndRef.current = worldPos;
+                return;
+            }
+
             // Handle move tool - start dragging selected objects
             if (editorState.selectedTool === 'move' && editorState.selectedObjects.length > 0) {
                 isMovingObjectsRef.current = true;
@@ -249,6 +299,26 @@ export function useCanvas({
             }
         }
 
+        // End rectangle drawing
+        if (
+            isDrawingRectangleRef.current &&
+            rectangleStartRef.current &&
+            rectangleEndRef.current &&
+            editorState.selectedTileType
+        ) {
+            isDrawingRectangleRef.current = false;
+            const positions = getRectanglePositions(rectangleStartRef.current, rectangleEndRef.current, true); // filled=true
+            if (onRectangleComplete) {
+                onRectangleComplete(positions, editorState.selectedTileType);
+            }
+            rectangleStartRef.current = null;
+            rectangleEndRef.current = null;
+            // Re-render without preview
+            if (rendererRef.current) {
+                rendererRef.current.render(levelData, editorState);
+            }
+        }
+
         // End move drag
         if (isMovingObjectsRef.current) {
             isMovingObjectsRef.current = false;
@@ -285,7 +355,15 @@ export function useCanvas({
                 onDrawingSessionEnd();
             }
         }
-    }, [onDrawingSessionEnd, onMultiSelectComplete, onMoveObjectsComplete, onLineComplete, levelData, editorState]);
+    }, [
+        onDrawingSessionEnd,
+        onMultiSelectComplete,
+        onMoveObjectsComplete,
+        onLineComplete,
+        onRectangleComplete,
+        levelData,
+        editorState,
+    ]);
 
     const handleClick = useCallback(
         (e: MouseEvent) => {

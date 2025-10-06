@@ -1,6 +1,7 @@
 import { TILE_SIZE } from '@/constants/editor';
 import type { EditorState, InteractableObject, LevelData, Position, SpawnPoint, Tile } from '@/types/level';
 import { getLinePositions } from './lineDrawing';
+import { getRectanglePositions } from './rectangleDrawing';
 
 export class CanvasRenderer {
     private ctx: CanvasRenderingContext2D;
@@ -1084,6 +1085,20 @@ export class CanvasRenderer {
         this.ctx.restore();
     }
 
+    drawPreviewRectangle(start: Position, end: Position, tileType: string, pan: Position, zoom: number) {
+        const positions = getRectanglePositions(start, end, true); // filled=true
+
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.5;
+
+        // Draw preview for each position in the filled rectangle
+        for (const position of positions) {
+            this.drawPreviewTile(position, tileType, pan, zoom);
+        }
+
+        this.ctx.restore();
+    }
+
     private drawGhostTile(tile: Tile, delta: Position, pan: Position, zoom: number) {
         const ghostTile = {
             ...tile,
@@ -1227,7 +1242,17 @@ export class CanvasRenderer {
                 editorState.zoom
             );
         }
-        // Draw preview tile if a tile type is selected (but not in line tool mode)
+        // Draw rectangle preview if rectangle tool is active
+        else if (editorState.rectanglePreview) {
+            this.drawPreviewRectangle(
+                editorState.rectanglePreview.start,
+                editorState.rectanglePreview.end,
+                editorState.rectanglePreview.tileType,
+                editorState.pan,
+                editorState.zoom
+            );
+        }
+        // Draw preview tile if a tile type is selected (but not in line/rectangle tool mode)
         else if (editorState.selectedTileType && editorState.mousePosition) {
             this.drawPreviewTile(
                 editorState.mousePosition,
