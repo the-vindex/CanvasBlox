@@ -1074,6 +1074,8 @@ Please test the following scenarios:
 - ✅ Completed
 - ✓ Approved
 
+**Note:** Use "✅ COMPLETE" format (not "+ TESTED") when marking tasks complete
+
 ---
 
 ## Next Steps
