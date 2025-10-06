@@ -857,19 +857,31 @@ Please test the following scenarios:
 
 ### Tasks:
 
-#### 20.1 Research industry patterns for modifier-based selection
+#### 20.1 Research industry patterns for modifier-based selection ✅ COMPLETE
+- **Status:** ✅ COMPLETE
 - **Priority:** 3 (Feature - Research phase)
-- **Location:** Research document or design doc
-- **Current:** No modifier key support for selection
-- **Change:** Research how industry tools handle modifier keys (Photoshop, Figma, Illustrator, Tiled)
-- **Research areas:**
-  - Shift key behavior (typically multi-select/box selection)
-  - Ctrl/Cmd key behavior (typically additive selection)
-  - Temporary tool override patterns
-  - Visual feedback for modifier states
-  - Interaction with active tools (especially Move tool)
-- **Deliverable:** Design document with recommendations for CanvasBlox
-- **Note:** Research-heavy task - foundation for 20.2-20.5
+- **Location:** `docs/MODIFIER_KEY_SELECTION_PATTERNS.md`, `docs/OPEN_QUESTIONS.md`
+- **What was implemented:**
+  1. ✅ **Industry research completed** (Photoshop, Figma, Illustrator, Tiled Map Editor)
+     - Shift key: Primary use = additive/multi-select (universal pattern)
+     - Ctrl/Cmd key: Primary use = temporary tool override (strong pattern in Adobe tools)
+     - Alt key: Less consistent, not recommended for initial implementation
+  2. ✅ **Design document created** (`docs/MODIFIER_KEY_SELECTION_PATTERNS.md`)
+     - Comprehensive analysis of all modifier key patterns
+     - Industry pattern comparisons and consistency analysis
+     - Recommendations for CanvasBlox implementation
+     - Implementation priority: Shift+Drag (P1) > Ctrl+Click (P1) > Visual feedback (P2) > Temporary override (P3)
+  3. ✅ **Key design decisions documented** (`docs/OPEN_QUESTIONS.md`)
+     - Shift+Drag replaces selection (non-additive) - consistent with Tiled
+     - Temporary tool override is low priority (P3) - validate core patterns first
+     - Alt modifiers deferred to future enhancement (P4)
+  4. ✅ **Keyboard shortcut summary table** - Clear reference for implementation
+  5. ✅ **Next steps defined** - Clear path forward for Tasks 20.2-20.6
+- **Deliverables:**
+  - 15-page design document with industry analysis and recommendations
+  - Decision log in OPEN_QUESTIONS.md
+  - Clear implementation priorities for remaining tasks
+- **Note:** Foundation complete for Tasks 20.2-20.6 implementation
 
 #### 20.2 Implement Shift+Drag for temporary multi-select
 - **Priority:** 3 (Feature)
