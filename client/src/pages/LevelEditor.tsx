@@ -97,8 +97,15 @@ export default function LevelEditor() {
                     if (!editorState.linkSourceId) {
                         // First click - set as link source
                         setEditorState((prev) => ({ ...prev, linkSourceId: clickedObj.id }));
+                    } else if (editorState.linkSourceId === clickedObj.id) {
+                        // Clicked same object twice - clear selection and show feedback
+                        setEditorState((prev) => ({ ...prev, linkSourceId: null }));
+                        toast({
+                            title: 'Link Cancelled',
+                            description: 'Click a different object to create a link',
+                        });
                     } else {
-                        // Second click - create link from source to target
+                        // Second click on different object - create link
                         linkObjects(editorState.linkSourceId, clickedObj.id);
                         // Clear link source to allow creating another link
                         setEditorState((prev) => ({ ...prev, linkSourceId: null }));
