@@ -261,25 +261,9 @@ export class CanvasRenderer {
                 this.drawPlatformBasic(width, height);
         }
 
-        // Draw selection outline with pulsing glow
+        // Draw selection outline with high contrast
         if (isSelected) {
-            // Pulsing glow effect
-            const time = Date.now() / 1000;
-            const glowOpacity = 0.6 + 0.4 * Math.sin(time * Math.PI); // Oscillates between 0.6 and 1.0
-
-            this.ctx.shadowColor = '#3b82f6';
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowOffsetX = 0;
-            this.ctx.shadowOffsetY = 0;
-            this.ctx.globalAlpha = glowOpacity;
-
-            this.ctx.strokeStyle = '#3b82f6';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(-2, -2, width + 4, height + 4);
-
-            // Reset shadow and alpha
-            this.ctx.shadowBlur = 0;
-            this.ctx.globalAlpha = 1;
+            this.drawHighContrastSelection(-2, -2, width + 4, height + 4);
         }
 
         this.ctx.restore();
@@ -789,25 +773,9 @@ export class CanvasRenderer {
             }
         }
 
-        // Draw selection outline with pulsing glow
+        // Draw selection outline with high contrast
         if (isSelected) {
-            // Pulsing glow effect
-            const time = Date.now() / 1000;
-            const glowOpacity = 0.6 + 0.4 * Math.sin(time * Math.PI); // Oscillates between 0.6 and 1.0
-
-            this.ctx.shadowColor = '#3b82f6';
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowOffsetX = 0;
-            this.ctx.shadowOffsetY = 0;
-            this.ctx.globalAlpha = glowOpacity;
-
-            this.ctx.strokeStyle = '#3b82f6';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(-width / 2 - 2, -height / 2 - 2, width + 4, height + 4);
-
-            // Reset shadow and alpha
-            this.ctx.shadowBlur = 0;
-            this.ctx.globalAlpha = 1;
+            this.drawHighContrastSelection(-width / 2 - 2, -height / 2 - 2, width + 4, height + 4);
         }
 
         this.ctx.restore();
@@ -1044,25 +1012,9 @@ export class CanvasRenderer {
             this.drawEnemyCharacter(size, spawn.facingDirection);
         }
 
-        // Draw selection outline with pulsing glow
+        // Draw selection outline with high contrast
         if (isSelected) {
-            // Pulsing glow effect
-            const time = Date.now() / 1000;
-            const glowOpacity = 0.6 + 0.4 * Math.sin(time * Math.PI); // Oscillates between 0.6 and 1.0
-
-            this.ctx.shadowColor = '#3b82f6';
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowOffsetX = 0;
-            this.ctx.shadowOffsetY = 0;
-            this.ctx.globalAlpha = glowOpacity;
-
-            this.ctx.strokeStyle = '#3b82f6';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(-size / 2 - 2, -size / 2 - 2, size + 4, size + 4);
-
-            // Reset shadow and alpha
-            this.ctx.shadowBlur = 0;
-            this.ctx.globalAlpha = 1;
+            this.drawHighContrastSelection(-size / 2 - 2, -size / 2 - 2, size + 4, size + 4);
         }
 
         this.ctx.restore();
@@ -1110,6 +1062,40 @@ export class CanvasRenderer {
         });
 
         this.ctx.setLineDash([]);
+    }
+
+    /**
+     * Draw high-contrast selection outline that's visible on any background
+     * Uses white outline with black border for maximum visibility
+     * @param x - X coordinate of top-left corner
+     * @param y - Y coordinate of top-left corner
+     * @param width - Width of the outline
+     * @param height - Height of the outline
+     */
+    private drawHighContrastSelection(x: number, y: number, width: number, height: number) {
+        // Pulsing glow effect (starts at full brightness, oscillates between 0.7 and 1.0)
+        const time = Date.now() / 1000;
+        const glowOpacity = 0.85 + 0.15 * Math.sin(time * Math.PI * 2); // Oscillates between 0.7 and 1.0, faster cycle
+
+        // Draw black outer stroke for border (makes outline visible on light backgrounds)
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 4;
+        this.ctx.globalAlpha = glowOpacity * 0.8;
+        this.ctx.strokeRect(x, y, width, height);
+
+        // Draw white inner stroke (makes outline visible on dark backgrounds)
+        this.ctx.shadowColor = '#ffffff';
+        this.ctx.shadowBlur = 12;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 2;
+        this.ctx.globalAlpha = glowOpacity;
+        this.ctx.strokeRect(x, y, width, height);
+
+        // Reset shadow and alpha
+        this.ctx.shadowBlur = 0;
+        this.ctx.globalAlpha = 1;
     }
 
     drawSelectionBox(start: Position, end: Position, pan: Position = { x: 0, y: 0 }, zoom: number = 1) {

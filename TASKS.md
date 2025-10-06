@@ -471,23 +471,6 @@ Please test the following scenarios:
   - Import JSON with overlapping tiles → verify cleaned up
   - Reload page → verify localStorage tiles cleaned up
 
-#### 11.12 Enhance zoom reset to fit all content
-- **Location:** Zoom reset function in `client/src/hooks/useCanvas.ts` or zoom control handlers
-- **Current:** Reset zoom sets to 100% regardless of content
-- **Change:** Calculate zoom level that fits all placed content on screen (fit-to-view)
-- **Implementation:**
-  - Calculate bounding box of all placed objects (tiles, interactables, spawn points)
-  - Determine zoom level that fits entire bounding box within viewport
-  - Account for padding/margins (e.g., 10% margin around content)
-  - If no objects placed, reset to 100% (current behavior)
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` or zoom control handlers
-  - `client/src/utils/canvasRenderer.ts` (if zoom calculation logic exists there)
-- **Tests:**
-  - E2E test: Place objects → zoom reset → verify all objects visible
-  - Unit test: Verify zoom calculation for various object layouts
-- **Note:** Makes zoom reset more intelligent and useful for level design workflow
-
 #### 11.13 Improve selection outline visibility on blue backgrounds
 - **Priority:** 3 (Feature)
 - **Location:** `client/src/utils/canvasRenderer.ts` - selection rendering
@@ -563,7 +546,7 @@ Please test the following scenarios:
 - **Note:** Prevents accidental data loss
 
 **Dependencies:** None - core selection/move tools already complete
-**Notes:** 13 tasks remaining (was 8, added 5 from inbox). Priority: Tile overlap (11.10), Link/Unlink tools (11.5-11.6), Drawing tools (11.1-11.2), Button numbering (11.9), Rotation decision (11.7), Zoom fit-to-view (11.12), UI improvements (11.13-11.16)
+**Notes:** 6 tasks remaining: Rotation decision (11.7), UI improvements (11.13-11.16). Moved zoom reset (was 11.12) to Chapter 22 (P4).
 
 <!-- CHAPTER_END: 11 -->
 ---
@@ -987,6 +970,39 @@ Please test the following scenarios:
 <!-- CHAPTER_END: 21 -->
 ---
 
+<!-- CHAPTER_START: 22 -->
+## Chapter 22: Future Enhancements (P4 - Ideas)
+
+**Status:** ⏸️ Not Started
+**Files:** Various
+**Priority:** Low (P4 - Ideas)
+
+### Tasks:
+
+#### 22.1 Enhance zoom reset to fit all content
+- **Priority:** 4 (Idea/enhancement)
+- **Location:** Zoom reset function in `client/src/hooks/useCanvas.ts` or zoom control handlers
+- **Current:** Reset zoom sets to 100% regardless of content
+- **Change:** Calculate zoom level that fits all placed content on screen (fit-to-view)
+- **Implementation:**
+  - Calculate bounding box of all placed objects (tiles, interactables, spawn points)
+  - Determine zoom level that fits entire bounding box within viewport
+  - Account for padding/margins (e.g., 10% margin around content)
+  - If no objects placed, reset to 100% (current behavior)
+- **Files to modify:**
+  - `client/src/hooks/useCanvas.ts` or zoom control handlers
+  - `client/src/utils/canvasRenderer.ts` (if zoom calculation logic exists there)
+- **Tests:**
+  - E2E test: Place objects → zoom reset → verify all objects visible
+  - Unit test: Verify zoom calculation for various object layouts
+- **Note:** Makes zoom reset more intelligent and useful for level design workflow. Tricky to implement correctly.
+
+**Dependencies:** None
+**Notes:** Low priority ideas that would be nice to have but not critical for core functionality
+
+<!-- CHAPTER_END: 22 -->
+---
+
 ## Technical Context
 
 ### Current Architecture:
@@ -1027,12 +1043,13 @@ Please test the following scenarios:
 | 8. Color & Theme | ✅ Completed | ✓ | Shadow system, tile borders |
 | 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
-| 11. Drawing Tools | 🔄 In Progress | ❌ | 5/17 complete, 12 tasks remaining (added 5 UI tasks from inbox) |
+| 11. Drawing Tools | 🔄 In Progress | ❌ | 11/17 complete, 6 tasks remaining (moved zoom to Ch 22) |
 | 15. Code Quality | ⏸️ Not Started | ❌ | Refactor complex functions, UI cleanup (2 tasks) |
 | 17. E2E Test Optimization | ⏸️ Not Started | ❌ | Phase 3 continuation - auto-save test merge |
 | 18. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
 | 20. Advanced Selection Modifiers | ⏸️ Not Started | ❌ | Shift/Ctrl modifier keys, temporary tool override (6 tasks) |
 | 21. Multi-Select Properties Panel | ⏸️ Not Started | ❌ | Batch editing, property differences UI (1 task, P4) |
+| 22. Future Enhancements | ⏸️ Not Started | ❌ | P4 ideas - zoom fit-to-view (1 task) |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
@@ -1047,9 +1064,9 @@ Please test the following scenarios:
 
 **Recommended Priority Order:**
 
-1. **Chapter 11: Drawing Tools** (5/12 complete, 7 remaining)
+1. **Chapter 11: Drawing Tools** (11/17 complete, 6 remaining)
    - Core feature implementation
-   - Tasks: Tile overlap, Link/Unlink, Line/Rectangle, Button numbering, Rotation
+   - Tasks: Rotation decision, UI improvements (selection outline, Select All/Copy/Paste buttons, close dialog)
 
 2. **Chapter 15: Code Quality**
    - Fix linter warnings (complexity issues in useCanvas.ts, LevelEditor.tsx)
