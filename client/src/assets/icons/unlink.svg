@@ -1,13 +1,8 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Left chain piece (top-left) -->
-  <path d="M9 15a3 3 0 0 0 4.24 0l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="7.5" cy="16.5" r="2" stroke="currentColor" stroke-width="2"/>
-
-  <!-- Right chain piece (bottom-right) -->
-  <path d="M15 9a3 3 0 0 0-4.24 0l-1.42 1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="16.5" cy="7.5" r="2" stroke="currentColor" stroke-width="2"/>
-
-  <!-- Break indicator - X mark in the middle -->
-  <line x1="10.5" y1="10.5" x2="13.5" y2="13.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <line x1="13.5" y1="10.5" x2="10.5" y2="13.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left broken chain piece -->
+  <path d="M10 13a5 5 0 0 0 7.54.54l1-1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right broken chain piece -->
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-1 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Diagonal slash to indicate "no link" / broken -->
+  <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 </svg>
