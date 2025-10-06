@@ -948,7 +948,7 @@ Please test the following scenarios:
 - **Note:** Visual feedback (cursor changes, status bar) deferred to Task 20.5
 
 #### 20.4 Implement temporary tool override for Move tool ✅ Complete
-- **Status:** ✅ COMPLETE
+- **Status:** ✅ COMPLETE - Commit 91b53d7
 - **Priority:** 3 (Feature)
 - **Location:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`
 - **What was implemented:**
