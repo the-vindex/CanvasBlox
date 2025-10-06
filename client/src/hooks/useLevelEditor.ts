@@ -327,31 +327,28 @@ export function useLevelEditor() {
                 }, `Added ${objectType}`);
             } else {
                 // Build the new object inside the state update to avoid stale closure
-                updateCurrentLevel(
-                    (level) => {
-                        // For buttons, auto-assign button number using current level state
-                        const properties: any = { interactable: true };
-                        if (objectType === 'button') {
-                            properties.buttonNumber = assignButtonNumber(level.objects);
-                        }
+                updateCurrentLevel((level) => {
+                    // For buttons, auto-assign button number using current level state
+                    const properties: any = { interactable: true };
+                    if (objectType === 'button') {
+                        properties.buttonNumber = assignButtonNumber(level.objects);
+                    }
 
-                        const newObject: InteractableObject = {
-                            id: `obj_${Date.now()}_${Math.random()}`,
-                            type: objectType,
-                            position,
-                            dimensions: { width: 1, height: 1 }, // Dimensions in tiles
-                            rotation: 0,
-                            layer: 1,
-                            properties,
-                        };
+                    const newObject: InteractableObject = {
+                        id: `obj_${Date.now()}_${Math.random()}`,
+                        type: objectType,
+                        position,
+                        dimensions: { width: 1, height: 1 }, // Dimensions in tiles
+                        rotation: 0,
+                        layer: 1,
+                        properties,
+                    };
 
-                        return {
-                            ...level,
-                            objects: [...level.objects, newObject],
-                        };
-                    },
-                    `Added ${objectType}`
-                );
+                    return {
+                        ...level,
+                        objects: [...level.objects, newObject],
+                    };
+                }, `Added ${objectType}`);
             }
         },
         [updateCurrentLevel]
