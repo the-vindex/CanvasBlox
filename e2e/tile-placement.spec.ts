@@ -6,25 +6,6 @@ test.describe('Tile Placement', () => {
         await page.goto('/');
     });
 
-    test('should place single platform tile with click', async ({ page }) => {
-        const grassTile = page.getByTestId('tile-platform-grass');
-
-        // Get initial object count
-        const initialCount = await getObjectCount(page);
-
-        // Select grass platform tile
-        await grassTile.click();
-        await expect(grassTile).toHaveAttribute('aria-pressed', 'true');
-
-        // Click on canvas to place tile
-        await clickCanvas(page, 200, 200);
-        await page.waitForTimeout(100);
-
-        // Object count should increase
-        const finalCount = await getObjectCount(page);
-        expect(finalCount).toBeGreaterThanOrEqual(initialCount + 1);
-    });
-
     test('should place multiple platform tiles with drag (painting mode)', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');

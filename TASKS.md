@@ -697,7 +697,7 @@ Please test the following scenarios:
 <!-- CHAPTER_START: 17 -->
 ## Chapter 17: E2E Test Optimization - Phase 3
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Complete
 **Files:** `e2e/auto-save.spec.ts`, `e2e/tile-placement.spec.ts`
 **Priority:** Low
 
@@ -724,19 +724,23 @@ Please test the following scenarios:
   - ✅ All linter checks passing
 - **Impact:** -1 test, reduced E2E execution time
 
-#### 17.2 Remove redundant platform tile placement test
-- **Status:** ⏸️ Not Started
+#### 17.2 Remove redundant platform tile placement test ✅ COMPLETE
+- **Status:** ✅ COMPLETE - Commit TBD
 - **Priority:** 3 (Test cleanup)
 - **Location:** `e2e/tile-placement.spec.ts:9`
-- **Test to remove:** "should place single platform tile with click"
+- **Test removed:** "should place single platform tile with click"
 - **Reason:** Redundant coverage - single-click placement mechanics already verified by:
   - Line 62: spawn point placement (same click mechanics)
   - Line 81: button placement (same click mechanics)
   - Line 142: undo history for single-click (verifies placement works)
-- **Impact:** Reduces E2E execution time without losing coverage
+- **Impact:** -1 E2E test (149 → 148), reduced execution time without losing coverage
 - **Pattern:** Each test should verify unique behavior; object-type-specific tests already cover placement mechanics
-- **Files to modify:**
-  - `e2e/tile-placement.spec.ts`
+- **Files modified:**
+  - `e2e/tile-placement.spec.ts` - Removed lines 9-26
+- **Tests:**
+  - ✅ 189 unit tests passing
+  - ✅ 148 E2E tests passing (5 skipped)
+  - ✅ All linter checks passing
 
 <!-- CHAPTER_END: 17 -->
 ---
@@ -1079,7 +1083,7 @@ Please test the following scenarios:
 | 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
 | 11. Drawing Tools | ✅ Completed | ✓ | All tasks complete |
 | 15. Code Quality | ✅ Completed | ✓ | All tasks complete |
-| 17. E2E Test Optimization | ⏸️ Not Started | ❌ | Phase 3 continuation - auto-save test merge |
+| 17. E2E Test Optimization | ✅ Completed | ✓ | Phase 3 continuation - auto-save test merge, redundant test removal |
 | 18. Enhanced Copy/Paste | ✅ Completed | ❌ | Ghost preview paste workflow (needs user testing) |
 | 20. Advanced Selection Modifiers | ⏸️ Not Started | ❌ | Shift/Ctrl modifier keys, temporary tool override (6 tasks) |
 | 21. Multi-Select Properties Panel | ⏸️ Not Started | ❌ | Batch editing, property differences UI (1 task, P4) |
