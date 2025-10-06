@@ -73,7 +73,7 @@ export interface LevelData {
 }
 
 export interface EditorState {
-    selectedTool: 'select' | 'multiselect' | 'move' | 'pen' | 'line' | 'rectangle' | 'link' | null;
+    selectedTool: 'select' | 'multiselect' | 'move' | 'pen' | 'line' | 'rectangle' | 'link' | 'unlink' | null;
     selectedObjects: string[];
     clipboard: (Tile | InteractableObject | SpawnPoint)[];
     selectedTileType: string | null;
@@ -85,6 +85,7 @@ export interface EditorState {
     deletingObjects: string[];
     deletionStartTimes?: Map<string, number>; // Object ID -> deletion start timestamp
     linkSourceId?: string | null; // ID of object selected as link source
+    unlinkSourceId?: string | null; // ID of object selected for unlinking
     selectionBox?: {
         start: Position;
         end: Position;

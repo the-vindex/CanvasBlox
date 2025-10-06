@@ -46,3 +46,26 @@ export function createLink(
 
     return { source: updatedSource, target: updatedTarget };
 }
+
+export function removeLink(
+    source: InteractableObject,
+    target: InteractableObject
+): { source: InteractableObject; target: InteractableObject } {
+    const updatedSource = {
+        ...source,
+        properties: {
+            ...source.properties,
+            linkedObjects: (source.properties.linkedObjects || []).filter((id) => id !== target.id),
+        },
+    };
+
+    const updatedTarget = {
+        ...target,
+        properties: {
+            ...target.properties,
+            linkedFrom: (target.properties.linkedFrom || []).filter((id) => id !== source.id),
+        },
+    };
+
+    return { source: updatedSource, target: updatedTarget };
+}

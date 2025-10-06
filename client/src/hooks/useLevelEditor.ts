@@ -10,7 +10,7 @@ import type {
     Tile,
 } from '@/types/level';
 import { createDefaultLevel } from '@/utils/levelSerializer';
-import { canLinkObjects, canObjectBeLinked, createLink } from '@/utils/linkingLogic';
+import { canLinkObjects, canObjectBeLinked, createLink, removeLink } from '@/utils/linkingLogic';
 
 const STORAGE_KEY = 'levelEditor_levels';
 const AUTOSAVE_KEY = 'levelEditor_autosave';
@@ -550,6 +550,56 @@ export function useLevelEditor() {
         [currentLevel, updateCurrentLevel, toast]
     );
 
+    const unlinkObjects = useCallback(
+        (sourceId: string, targetId: string) => {
+            const sourceObj = currentLevel.objects.find((obj) => obj.id === sourceId);
+            const targetObj = currentLevel.objects.find((obj) => obj.id === targetId);
+
+            if (!sourceObj || !targetObj) {
+                toast({
+                    title: 'Unlink Error',
+                    description: 'Source or target object not found',
+                    variant: 'destructive',
+                });
+                return;
+            }
+
+            // Check if link exists
+            const hasLink = sourceObj.properties.linkedObjects?.includes(targetId);
+            if (!hasLink) {
+                toast({
+                    title: 'No Link Found',
+                    description: 'These objects are not linked',
+                    variant: 'destructive',
+                });
+                return;
+            }
+
+            // Remove the link
+            const { source: updatedSource, target: updatedTarget } = removeLink(sourceObj, targetObj);
+
+            // Update the level with the unlinked objects
+            updateCurrentLevel((level) => {
+                const updatedObjects = level.objects.map((obj) => {
+                    if (obj.id === sourceId) return updatedSource;
+                    if (obj.id === targetId) return updatedTarget;
+                    return obj;
+                });
+
+                return {
+                    ...level,
+                    objects: updatedObjects,
+                };
+            }, `Unlinked ${sourceObj.type} from ${targetObj.type}`);
+
+            toast({
+                title: 'Link Removed',
+                description: `${sourceObj.type} unlinked from ${targetObj.type}`,
+            });
+        },
+        [currentLevel, updateCurrentLevel, toast]
+    );
+
     // Cleanup timeout on unmount
     useEffect(() => {
         return () => {
@@ -585,6 +635,7 @@ export function useLevelEditor() {
         pasteObjects,
         moveSelectedObjects,
         linkObjects,
+        unlinkObjects,
         undo,
         redo,
         commitBatchToHistory,

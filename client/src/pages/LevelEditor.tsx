@@ -53,6 +53,7 @@ export default function LevelEditor() {
         pasteObjects: _pasteObjects,
         moveSelectedObjects: _moveSelectedObjects,
         linkObjects,
+        unlinkObjects,
         undo: _undo,
         redo: _redo,
         commitBatchToHistory,
@@ -130,16 +131,56 @@ export default function LevelEditor() {
                         }));
                     }
                 }
+            } else if (editorState.selectedTool === 'unlink' && currentLevel) {
+                // Find object at clicked position (only interactable objects)
+                const clickedObj = currentLevel.objects.find(
+                    (obj) => obj.position.x === position.x && obj.position.y === position.y
+                );
+
+                if (clickedObj) {
+                    if (!editorState.unlinkSourceId) {
+                        // First click - set as unlink source and show selection
+                        setEditorState((prev) => ({
+                            ...prev,
+                            unlinkSourceId: clickedObj.id,
+                            selectedObjects: [clickedObj.id], // Show selection box around source
+                        }));
+
+                        toast({
+                            title: 'Unlink Source Selected',
+                            description: `Click a linked object to remove the link`,
+                        });
+                    } else if (editorState.unlinkSourceId === clickedObj.id) {
+                        // Clicked same object twice - deselect and clear
+                        setEditorState((prev) => ({
+                            ...prev,
+                            unlinkSourceId: null,
+                            selectedObjects: [],
+                        }));
+                    } else {
+                        // Second click on different object - remove link
+                        unlinkObjects(editorState.unlinkSourceId, clickedObj.id);
+                        // Clear unlink source and selection
+                        setEditorState((prev) => ({
+                            ...prev,
+                            unlinkSourceId: null,
+                            selectedObjects: [],
+                        }));
+                    }
+                }
             }
         },
         [
             editorState.selectedTool,
             editorState.linkSourceId,
+            editorState.unlinkSourceId,
             currentLevel,
             _selectObject,
             setEditorState,
             selectionState,
             linkObjects,
+            unlinkObjects,
+            toast,
         ]
     );
 
@@ -440,6 +481,7 @@ export default function LevelEditor() {
                 l: 'line',
                 r: 'rectangle',
                 k: 'link',
+                u: 'unlink',
             };
             if (toolMap[key]) {
                 handleToolChange(toolMap[key]);

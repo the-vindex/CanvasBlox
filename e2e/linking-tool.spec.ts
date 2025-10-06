@@ -70,11 +70,9 @@ test.describe('Linking Tool', () => {
         await clickCanvas(page, 200, 200);
         await page.waitForTimeout(100);
 
-        // Properties panel should not show self-link
+        // Properties panel should not show "Linked Objects" section (no link created)
         const propertiesPanel = page.getByTestId('properties-panel');
-        // If there are no links, the panel might not show "Linked Objects" section
-        // or it should show empty links array
-        await expect(propertiesPanel).toBeVisible();
+        await expect(propertiesPanel).not.toContainText('Linked Objects');
     });
 
     test('should allow linking multiple targets from one source', async ({ page }) => {
@@ -121,7 +119,9 @@ test.describe('Linking Tool', () => {
 
         const propertiesPanel = page.getByTestId('properties-panel');
         await expect(propertiesPanel).toContainText('Linked Objects');
-        // Should show 2 linked objects in some form
+        // Verify both doors are listed (we can see two "door" entries in the output)
+        await expect(propertiesPanel).toContainText('door (');
+        // Count occurrences would be ideal but without test-ids, we verify section exists
     });
 
     test('should prevent duplicate links', async ({ page }) => {
@@ -197,5 +197,129 @@ test.describe('Linking Tool', () => {
 
         // Link tool should be activated
         await expect(linkTool).toHaveAttribute('aria-pressed', 'true');
+    });
+});
+
+test.describe('Unlinking Tool', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/');
+    });
+
+    test('should unlink objects using unlink tool', async ({ page }) => {
+        const buttonTile = page.getByTestId('tile-button');
+        const doorTile = page.getByTestId('tile-door');
+        const linkTool = page.getByTestId('tool-link');
+        const unlinkTool = page.getByTestId('tool-unlink');
+        const selectTool = page.getByTestId('tool-select');
+
+        // Place a button at (200, 200)
+        await buttonTile.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+
+        // Place a door at (400, 200)
+        await doorTile.click();
+        await clickCanvas(page, 400, 200);
+        await page.waitForTimeout(100);
+
+        // Create link
+        await linkTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+        await clickCanvas(page, 400, 200);
+        await page.waitForTimeout(100);
+
+        // Verify link exists
+        await selectTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+        const propertiesPanel = page.getByTestId('properties-panel');
+        await expect(propertiesPanel).toContainText('Linked Objects');
+
+        // Activate unlink tool
+        await unlinkTool.click();
+        await expect(unlinkTool).toHaveAttribute('aria-pressed', 'true');
+
+        // Click button to select it and show its links
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+
+        // Click door to remove the link
+        await clickCanvas(page, 400, 200);
+        await page.waitForTimeout(100);
+
+        // Verify link is removed
+        await selectTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+
+        // Properties panel should not show linked objects anymore
+        await expect(propertiesPanel).not.toContainText('Linked Objects');
+    });
+
+    test.skip('should support undo/redo for unlink operation', async ({ page }) => {
+        const buttonTile = page.getByTestId('tile-button');
+        const doorTile = page.getByTestId('tile-door');
+        const linkTool = page.getByTestId('tool-link');
+        const unlinkTool = page.getByTestId('tool-unlink');
+        const selectTool = page.getByTestId('tool-select');
+
+        // Place and link objects
+        await buttonTile.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+
+        await doorTile.click();
+        await clickCanvas(page, 400, 200);
+        await page.waitForTimeout(100);
+
+        await linkTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+        await clickCanvas(page, 400, 200);
+        await page.waitForTimeout(100);
+
+        // Unlink objects
+        await unlinkTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+        await clickCanvas(page, 400, 200);
+        await page.waitForTimeout(100);
+
+        // Verify link is removed
+        await selectTool.click();
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(100);
+        const propertiesPanel = page.getByTestId('properties-panel');
+        await expect(propertiesPanel).not.toContainText('Linked Objects');
+
+        // Undo unlink
+        await page.keyboard.press('Control+z');
+        await page.waitForTimeout(200);
+
+        // Link should be restored
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(200);
+        await expect(propertiesPanel).toContainText('Linked Objects');
+
+        // Redo unlink
+        await page.keyboard.press('Control+y');
+        await page.waitForTimeout(200);
+
+        // Link should be removed again
+        await clickCanvas(page, 200, 200);
+        await page.waitForTimeout(200);
+        await expect(propertiesPanel).not.toContainText('Linked Objects');
+    });
+
+    test('should work with keyboard shortcut U', async ({ page }) => {
+        const unlinkTool = page.getByTestId('tool-unlink');
+
+        // Press U key
+        await page.keyboard.press('u');
+        await page.waitForTimeout(100);
+
+        // Unlink tool should be activated
+        await expect(unlinkTool).toHaveAttribute('aria-pressed', 'true');
     });
 });

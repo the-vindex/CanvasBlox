@@ -31,7 +31,7 @@ function getToolGroupColor(tool: EditorState['selectedTool']) {
     if (tool === 'pen' || tool === 'line' || tool === 'rectangle') {
         return 'green'; // Drawing tools
     }
-    if (tool === 'link') {
+    if (tool === 'link' || tool === 'unlink') {
         return 'purple'; // Linking tools
     }
     return 'blue';
@@ -153,6 +153,14 @@ export function Toolbar({
                     title="Link Objects (K)"
                     testId="tool-link"
                     isActive={editorState.selectedTool === 'link'}
+                    onToolChange={onToolChange}
+                />
+                <ToolButton
+                    tool="unlink"
+                    icon={LinkIcon}
+                    title="Unlink Objects (U)"
+                    testId="tool-unlink"
+                    isActive={editorState.selectedTool === 'unlink'}
                     onToolChange={onToolChange}
                 />
             </div>

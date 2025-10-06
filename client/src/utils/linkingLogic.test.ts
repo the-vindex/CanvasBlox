@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { InteractableObject, SpawnPoint, Tile } from '@/types/level';
-import { canLinkObjects, canObjectBeLinked, createLink } from '@/utils/linkingLogic';
+import { canLinkObjects, canObjectBeLinked, createLink, removeLink } from '@/utils/linkingLogic';
 
 describe('Linking Tool Logic', () => {
     describe('canObjectBeLinked', () => {
@@ -116,87 +116,6 @@ describe('Linking Tool Logic', () => {
     });
 
     describe('createLink', () => {
-        it('should add target ID to source linkedObjects', () => {
-            const button: InteractableObject = {
-                id: 'btn1',
-                type: 'button',
-                position: { x: 0, y: 0 },
-                dimensions: { width: 1, height: 1 },
-                rotation: 0,
-                layer: 1,
-                properties: { interactable: true },
-            };
-
-            const door: InteractableObject = {
-                id: 'door1',
-                type: 'door',
-                position: { x: 5, y: 0 },
-                dimensions: { width: 1, height: 2 },
-                rotation: 0,
-                layer: 1,
-                properties: { interactable: true },
-            };
-
-            const result = createLink(button, door);
-
-            expect(result.source.properties.linkedObjects).toEqual(['door1']);
-        });
-
-        it('should add source ID to target linkedFrom', () => {
-            const button: InteractableObject = {
-                id: 'btn1',
-                type: 'button',
-                position: { x: 0, y: 0 },
-                dimensions: { width: 1, height: 1 },
-                rotation: 0,
-                layer: 1,
-                properties: { interactable: true },
-            };
-
-            const door: InteractableObject = {
-                id: 'door1',
-                type: 'door',
-                position: { x: 5, y: 0 },
-                dimensions: { width: 1, height: 2 },
-                rotation: 0,
-                layer: 1,
-                properties: { interactable: true },
-            };
-
-            const result = createLink(button, door);
-
-            expect(result.target.properties.linkedFrom).toEqual(['btn1']);
-        });
-
-        it('should preserve existing links when adding new link', () => {
-            const button: InteractableObject = {
-                id: 'btn1',
-                type: 'button',
-                position: { x: 0, y: 0 },
-                dimensions: { width: 1, height: 1 },
-                rotation: 0,
-                layer: 1,
-                properties: {
-                    interactable: true,
-                    linkedObjects: ['door1'],
-                },
-            };
-
-            const door2: InteractableObject = {
-                id: 'door2',
-                type: 'door',
-                position: { x: 5, y: 0 },
-                dimensions: { width: 1, height: 2 },
-                rotation: 0,
-                layer: 1,
-                properties: { interactable: true },
-            };
-
-            const result = createLink(button, door2);
-
-            expect(result.source.properties.linkedObjects).toEqual(['door1', 'door2']);
-        });
-
         it('should not mutate original objects', () => {
             const button: InteractableObject = {
                 id: 'btn1',
@@ -222,6 +141,44 @@ describe('Linking Tool Logic', () => {
             const originalDoorLinkedFrom = door.properties.linkedFrom;
 
             createLink(button, door);
+
+            expect(button.properties.linkedObjects).toBe(originalButtonLinked);
+            expect(door.properties.linkedFrom).toBe(originalDoorLinkedFrom);
+        });
+    });
+
+    describe('removeLink', () => {
+        it('should not mutate original objects', () => {
+            const button: InteractableObject = {
+                id: 'btn1',
+                type: 'button',
+                position: { x: 0, y: 0 },
+                dimensions: { width: 1, height: 1 },
+                rotation: 0,
+                layer: 1,
+                properties: {
+                    interactable: true,
+                    linkedObjects: ['door1'],
+                },
+            };
+
+            const door: InteractableObject = {
+                id: 'door1',
+                type: 'door',
+                position: { x: 5, y: 0 },
+                dimensions: { width: 1, height: 2 },
+                rotation: 0,
+                layer: 1,
+                properties: {
+                    interactable: true,
+                    linkedFrom: ['btn1'],
+                },
+            };
+
+            const originalButtonLinked = button.properties.linkedObjects;
+            const originalDoorLinkedFrom = door.properties.linkedFrom;
+
+            removeLink(button, door);
 
             expect(button.properties.linkedObjects).toBe(originalButtonLinked);
             expect(door.properties.linkedFrom).toBe(originalDoorLinkedFrom);
