@@ -1070,7 +1070,7 @@ Please test the following scenarios:
 ### Tasks:
 
 #### 21.1 Rethink Properties Panel for multi-select ✅ Complete
-- **Status:** ✅ COMPLETE - Commit TBD
+- **Status:** ✅ COMPLETE - Commit a097591
 - **Priority:** 4 (Idea/enhancement)
 - **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`, `client/src/utils/batchPropertyUpdate.ts`
 - **Current:** Properties Panel doesn't work well when multiple objects are selected
