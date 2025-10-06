@@ -725,7 +725,7 @@ Please test the following scenarios:
 - **Impact:** -1 test, reduced E2E execution time
 
 #### 17.2 Remove redundant platform tile placement test ✅ COMPLETE
-- **Status:** ✅ COMPLETE - Commit TBD
+- **Status:** ✅ COMPLETE - Commit 4fca9be
 - **Priority:** 3 (Test cleanup)
 - **Location:** `e2e/tile-placement.spec.ts:9`
 - **Test removed:** "should place single platform tile with click"
