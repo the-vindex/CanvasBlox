@@ -497,6 +497,11 @@ export function useLevelEditor() {
 
     const linkObjects = useCallback(
         (sourceId: string, targetId: string) => {
+            // Silent return if trying to link object to itself (happens on double-click)
+            if (sourceId === targetId) {
+                return;
+            }
+
             const sourceObj = currentLevel.objects.find((obj) => obj.id === sourceId);
             const targetObj = currentLevel.objects.find((obj) => obj.id === targetId);
 

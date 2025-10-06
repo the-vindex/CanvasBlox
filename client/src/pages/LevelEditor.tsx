@@ -97,6 +97,10 @@ export default function LevelEditor() {
                     if (!editorState.linkSourceId) {
                         // First click - set as link source
                         setEditorState((prev) => ({ ...prev, linkSourceId: clickedObj.id }));
+                        toast({
+                            title: 'Link Source Selected',
+                            description: `Click another object to link it with this ${clickedObj.type}`,
+                        });
                     } else if (editorState.linkSourceId === clickedObj.id) {
                         // Clicked same object twice - silently clear selection (deselect)
                         setEditorState((prev) => ({ ...prev, linkSourceId: null }));
