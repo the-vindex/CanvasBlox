@@ -6,32 +6,25 @@
 
 ---
 
-## Chapter Format & Archiving
+## Chapter Format
 
-**Chapter Separator Format:**
-All chapters use HTML comment markers for programmatic extraction:
+All chapters require HTML comment markers:
 ```markdown
 <!-- CHAPTER_START: 11 -->
-## Chapter 11: Drawing Tools Implementation
+## Chapter 11: Title
 
 **Status:** ✅ Complete
 **Files:** ...
+**Goal:** ...
 
-[Chapter content...]
-
+### Tasks:
+#### 11.1 Task title
+- **Priority:** 3 (Feature)
+...
 <!-- CHAPTER_END: 11 -->
 ```
 
-**When Adding New Chapters:**
-1. Add separator markers at start and end
-2. Use sequential chapter numbers
-3. Follow existing chapter structure (Status, Files, Priority, Goal, Tasks)
-
-**Archiving Completed Chapters:**
-- Run `/todo-archive` or `npx tsx scripts/archive-completed-chapters.ts`
-- Script automatically archives chapters marked "✅ Complete" AND "✓ Approved" in Progress Tracking
-- Archived chapters moved to `docs/archive/TASKS-COMPLETED.md` with timestamp
-- Progress Tracking table updated automatically
+Use `/todo-archive` to archive completed chapters. See `docs/TASK_MANAGEMENT.md` for details.
 
 ---
 

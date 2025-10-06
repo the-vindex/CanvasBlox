@@ -27,14 +27,13 @@ This document defines the detailed workflow, implementation strategy, and testin
 
 **Status:** ✅ Complete | 🔄 In Progress | ⏸️ Not Started
 **Files:** Primary files affected
-**Priority:** P3 (Feature)
 **Goal:** Brief objective
 
 ### Tasks:
 
 #### N.1 Task Title
 - **Status:** ✅ COMPLETE | 🔄 In Progress | ⏸️ Not Started
-- **Priority:** 3
+- **Priority:** 3 (Feature)
 - **Location:** File paths
 - **Implementation:** Details
 - **Tests:** Test descriptions
