@@ -31,3 +31,33 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 18.1: Rethink copy/paste workflow with ghost preview
+
+**Question:** How should large clipboard pastes be handled (e.g., 100+ objects from Ctrl+A, Ctrl+C)?
+
+**Assumption/Decision:**
+- Implement ghost preview for normal paste operations
+- For large clipboards (>20 objects), show confirmation dialog instead of ghost preview
+- Threshold: 20 objects (reasonable for ghost preview performance)
+- Dialog: "Paste [N] objects at cursor position?" with Cancel/Paste buttons
+- On confirm: Paste immediately at cursor position (no ghost)
+- This prevents performance issues and unclear UX from hundreds of ghost objects
+- Ghost preview will be rendered similar to move tool (50% opacity)
+
+**Question:** Should paste keep the tool active after placing, or clear to null?
+
+**Assumption/Decision:**
+- After successful paste (click to place), clear selectedTool to null
+- This matches the behavior of other one-shot tools and prevents accidental multiple pastes
+- User can press Ctrl+V again to paste another copy if needed
+
+**Question:** How should paste interact with tile overlap logic (Task 11.10)?
+
+**Assumption/Decision:**
+- Pasted tiles should follow same overlap rules as drawing tools
+- Use removeOverlappingTiles() when pasting
+- Newest tile wins, button-on-door exception applies
+- This provides consistent behavior across all placement methods
+
+---
+

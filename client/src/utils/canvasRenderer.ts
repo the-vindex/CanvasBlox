@@ -1291,6 +1291,49 @@ export class CanvasRenderer {
         this.ctx.restore();
     }
 
+    private drawPastePreview(
+        pastePreview: {
+            items: (Tile | InteractableObject | SpawnPoint)[];
+            offset: Position;
+        },
+        mousePosition: Position,
+        pan: Position,
+        zoom: number
+    ) {
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.5;
+
+        pastePreview.items.forEach((item) => {
+            // Calculate position relative to mouse cursor
+            const relativePos = {
+                x: item.position.x - pastePreview.items[0].position.x,
+                y: item.position.y - pastePreview.items[0].position.y,
+            };
+
+            const ghostItem = {
+                ...item,
+                position: {
+                    x: mousePosition.x + relativePos.x,
+                    y: mousePosition.y + relativePos.y,
+                },
+            };
+
+            // Determine item type and draw accordingly
+            if ('properties' in item && 'collidable' in item.properties) {
+                // It's a tile
+                this.drawTile(ghostItem as Tile, pan, zoom, false, false);
+            } else if ('facingDirection' in item) {
+                // It's a spawn point
+                this.drawSpawnPoint(ghostItem as SpawnPoint, pan, zoom, false, false);
+            } else {
+                // It's an object
+                this.drawObject(ghostItem as InteractableObject, pan, zoom, false, false);
+            }
+        });
+
+        this.ctx.restore();
+    }
+
     render(levelData: LevelData, editorState: EditorState) {
         this.editorState = editorState; // Store for use in draw methods
         this.levelData = levelData; // Store for use in draw methods
@@ -1365,6 +1408,16 @@ export class CanvasRenderer {
                     this.drawGhostSpawnPoint(spawn, editorState.moveDelta!, editorState.pan, editorState.zoom);
                 }
             });
+        }
+
+        // Draw paste preview ghost if in paste mode
+        if (editorState.pastePreview) {
+            this.drawPastePreview(
+                editorState.pastePreview,
+                editorState.mousePosition,
+                editorState.pan,
+                editorState.zoom
+            );
         }
 
         // Draw links

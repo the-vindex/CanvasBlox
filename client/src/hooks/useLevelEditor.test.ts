@@ -508,7 +508,7 @@ describe('useLevelEditor', () => {
             expect(result.current.editorState.clipboard).toHaveLength(1);
         });
 
-        it('should paste objects with offset', () => {
+        it('should paste objects with ghost preview and complete on click', () => {
             const { result } = renderHook(() => useLevelEditor());
 
             const initialTileCount = result.current.currentLevel.tiles.length;
@@ -527,12 +527,26 @@ describe('useLevelEditor', () => {
                 result.current.copySelectedObjects();
             });
 
+            // Initiate paste mode (shows ghost preview)
             act(() => {
                 result.current.pasteObjects();
             });
 
+            // Verify paste preview is active
+            expect(result.current.editorState.pastePreview).toBeDefined();
+            expect(result.current.editorState.pastePreview?.items).toHaveLength(1);
+
+            // Verify tile hasn't been placed yet
+            expect(result.current.currentLevel.tiles).toHaveLength(initialTileCount + 1);
+
+            // Complete paste at new position
+            act(() => {
+                result.current.completePaste({ x: 10, y: 10 });
+            });
+
+            // Verify tile was pasted
             expect(result.current.currentLevel.tiles).toHaveLength(initialTileCount + 2);
-            expect(result.current.currentLevel.tiles[initialTileCount + 1].position).toEqual({ x: 55, y: 55 });
+            expect(result.current.editorState.pastePreview).toBeUndefined();
         });
 
         it('should delete selected objects with animation delay', async () => {

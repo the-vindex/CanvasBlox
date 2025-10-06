@@ -102,6 +102,11 @@ export interface EditorState {
         end: Position;
         tileType: string;
     };
+    pastePreview?: {
+        items: (Tile | InteractableObject | SpawnPoint)[];
+        offset: Position; // Offset from original positions to cursor
+    };
+    showLargeClipboardDialog?: boolean;
 }
 
 export interface HistoryEntry {

@@ -6,6 +6,16 @@ import { LevelTabs } from '@/components/level-editor/LevelTabs';
 import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
 import { TilePalette } from '@/components/level-editor/TilePalette';
 import { Toolbar } from '@/components/level-editor/Toolbar';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -50,6 +60,9 @@ export default function LevelEditor() {
         deleteSelectedObjects: _deleteSelectedObjects,
         copySelectedObjects: _copySelectedObjects,
         pasteObjects: _pasteObjects,
+        completePaste,
+        cancelPaste,
+        confirmLargeClipboardPaste,
         moveSelectedObjects: _moveSelectedObjects,
         linkObjects,
         unlinkObjects,
@@ -189,6 +202,12 @@ export default function LevelEditor() {
         (position: Position, _event: MouseEvent) => {
             if (!currentLevel) return;
 
+            // Handle paste preview click-to-place
+            if (editorState.pastePreview) {
+                completePaste(position);
+                return;
+            }
+
             if (editorState.selectedTool === 'select') {
                 handleSelectToolClick(position);
             } else if (editorState.selectedTool === 'link') {
@@ -197,7 +216,15 @@ export default function LevelEditor() {
                 handleUnlinkToolClick(position);
             }
         },
-        [currentLevel, editorState.selectedTool, handleSelectToolClick, handleLinkToolClick, handleUnlinkToolClick]
+        [
+            currentLevel,
+            editorState.selectedTool,
+            editorState.pastePreview,
+            completePaste,
+            handleSelectToolClick,
+            handleLinkToolClick,
+            handleUnlinkToolClick,
+        ]
     );
 
     const drawingSessionTileCount = useRef(0);
@@ -522,6 +549,10 @@ export default function LevelEditor() {
                 return true;
             }
             if (key === 'escape') {
+                // Cancel paste mode if active
+                if (editorState.pastePreview) {
+                    cancelPaste();
+                }
                 setEditorState((prev) => ({
                     ...prev,
                     ...selectionState.clearAll(),
@@ -534,7 +565,7 @@ export default function LevelEditor() {
             }
             return false;
         },
-        [_deleteSelectedObjects, selectionState, setEditorState]
+        [_deleteSelectedObjects, selectionState, setEditorState, editorState.pastePreview, cancelPaste]
     );
 
     // Helper: Handle Ctrl/Cmd shortcuts
@@ -1012,6 +1043,36 @@ export default function LevelEditor() {
                 onImport={handleImportLevel}
             />
             <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} levelData={currentLevel} />
+
+            {/* Large Clipboard Paste Confirmation Dialog */}
+            <AlertDialog
+                open={editorState.showLargeClipboardDialog}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        cancelPaste();
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Paste {editorState.clipboard.length} objects?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You are about to paste {editorState.clipboard.length} objects at the cursor position. This
+                            is a large clipboard and will be pasted immediately without preview.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                confirmLargeClipboardPaste(editorState.mousePosition);
+                            }}
+                        >
+                            Paste
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -446,49 +446,161 @@ export function useLevelEditor() {
     const pasteObjects = useCallback(() => {
         if (editorState.clipboard.length === 0) return;
 
-        const pastedItems = editorState.clipboard.map((item) => ({
-            ...JSON.parse(JSON.stringify(item)),
-            id: `${item.id}_copy_${Date.now()}`,
-            position: {
-                x: item.position.x + 50,
-                y: item.position.y + 50,
+        const LARGE_CLIPBOARD_THRESHOLD = 20;
+
+        // For large clipboards (>20 objects), show confirmation dialog
+        if (editorState.clipboard.length > LARGE_CLIPBOARD_THRESHOLD) {
+            setEditorState((prev) => ({
+                ...prev,
+                showLargeClipboardDialog: true,
+            }));
+            return;
+        }
+
+        // For normal clipboards, initiate paste mode with ghost preview
+        const minPosition = editorState.clipboard.reduce(
+            (min, item) => ({
+                x: Math.min(min.x, item.position.x),
+                y: Math.min(min.y, item.position.y),
+            }),
+            { x: Infinity, y: Infinity }
+        );
+
+        setEditorState((prev) => ({
+            ...prev,
+            pastePreview: {
+                items: editorState.clipboard,
+                offset: { x: -minPosition.x, y: -minPosition.y }, // Offset to position relative to cursor
             },
         }));
+    }, [editorState.clipboard]);
 
-        updateCurrentLevel((level) => {
-            const newLevel = { ...level };
+    const completePaste = useCallback(
+        (position: Position) => {
+            if (!editorState.pastePreview) return;
 
-            // Check if we're pasting a player spawn point
-            const hasPlayerSpawn = pastedItems.some(
-                (item) => 'facingDirection' in item && (item as SpawnPoint).type === 'player'
-            );
+            const pastedItems = editorState.pastePreview.items.map((item) => ({
+                ...JSON.parse(JSON.stringify(item)),
+                id: `${item.id}_copy_${Date.now()}`,
+                position: {
+                    x:
+                        position.x +
+                        editorState.pastePreview.offset.x +
+                        (item.position.x - editorState.pastePreview.items[0].position.x),
+                    y:
+                        position.y +
+                        editorState.pastePreview.offset.y +
+                        (item.position.y - editorState.pastePreview.items[0].position.y),
+                },
+            }));
 
-            // If pasting a player spawn, remove existing player spawn
-            if (hasPlayerSpawn) {
-                newLevel.spawnPoints = newLevel.spawnPoints.filter((spawn) => spawn.type !== 'player');
-            }
+            updateCurrentLevel((level) => {
+                const newLevel = { ...level };
 
-            pastedItems.forEach((item) => {
-                if ('properties' in item && 'collidable' in item.properties) {
-                    // It's a tile
-                    newLevel.tiles.push(item as Tile);
-                } else if ('facingDirection' in item) {
-                    // It's a spawn point
-                    newLevel.spawnPoints.push(item as SpawnPoint);
-                } else {
-                    // It's an object
-                    newLevel.objects.push(item as InteractableObject);
+                // Check if we're pasting a player spawn point
+                const hasPlayerSpawn = pastedItems.some(
+                    (item) => 'facingDirection' in item && (item as SpawnPoint).type === 'player'
+                );
+
+                // If pasting a player spawn, remove existing player spawn
+                if (hasPlayerSpawn) {
+                    newLevel.spawnPoints = newLevel.spawnPoints.filter((spawn) => spawn.type !== 'player');
                 }
+
+                pastedItems.forEach((item) => {
+                    if ('properties' in item && 'collidable' in item.properties) {
+                        // It's a tile
+                        newLevel.tiles.push(item as Tile);
+                    } else if ('facingDirection' in item) {
+                        // It's a spawn point
+                        newLevel.spawnPoints.push(item as SpawnPoint);
+                    } else {
+                        // It's an object
+                        newLevel.objects.push(item as InteractableObject);
+                    }
+                });
+
+                return newLevel;
+            }, `Pasted ${pastedItems.length} objects`);
+
+            toast({
+                title: 'Pasted',
+                description: `Pasted ${pastedItems.length} items.`,
             });
 
-            return newLevel;
-        }, `Pasted ${pastedItems.length} objects`);
+            // Clear paste preview and tool
+            setEditorState((prev) => ({
+                ...prev,
+                pastePreview: undefined,
+                selectedTool: null,
+            }));
+        },
+        [editorState.pastePreview, updateCurrentLevel, toast]
+    );
 
-        toast({
-            title: 'Pasted',
-            description: `Pasted ${pastedItems.length} items.`,
-        });
-    }, [editorState.clipboard, updateCurrentLevel, toast]);
+    const cancelPaste = useCallback(() => {
+        setEditorState((prev) => ({
+            ...prev,
+            pastePreview: undefined,
+            showLargeClipboardDialog: false,
+        }));
+    }, []);
+
+    const confirmLargeClipboardPaste = useCallback(
+        (position: Position) => {
+            if (editorState.clipboard.length === 0) return;
+
+            const pastedItems = editorState.clipboard.map((item) => ({
+                ...JSON.parse(JSON.stringify(item)),
+                id: `${item.id}_copy_${Date.now()}`,
+                position: {
+                    x: position.x + (item.position.x - editorState.clipboard[0].position.x),
+                    y: position.y + (item.position.y - editorState.clipboard[0].position.y),
+                },
+            }));
+
+            updateCurrentLevel((level) => {
+                const newLevel = { ...level };
+
+                // Check if we're pasting a player spawn point
+                const hasPlayerSpawn = pastedItems.some(
+                    (item) => 'facingDirection' in item && (item as SpawnPoint).type === 'player'
+                );
+
+                // If pasting a player spawn, remove existing player spawn
+                if (hasPlayerSpawn) {
+                    newLevel.spawnPoints = newLevel.spawnPoints.filter((spawn) => spawn.type !== 'player');
+                }
+
+                pastedItems.forEach((item) => {
+                    if ('properties' in item && 'collidable' in item.properties) {
+                        // It's a tile
+                        newLevel.tiles.push(item as Tile);
+                    } else if ('facingDirection' in item) {
+                        // It's a spawn point
+                        newLevel.spawnPoints.push(item as SpawnPoint);
+                    } else {
+                        // It's an object
+                        newLevel.objects.push(item as InteractableObject);
+                    }
+                });
+
+                return newLevel;
+            }, `Pasted ${pastedItems.length} objects`);
+
+            toast({
+                title: 'Pasted',
+                description: `Pasted ${pastedItems.length} items.`,
+            });
+
+            // Close dialog
+            setEditorState((prev) => ({
+                ...prev,
+                showLargeClipboardDialog: false,
+            }));
+        },
+        [editorState.clipboard, updateCurrentLevel, toast]
+    );
 
     const moveSelectedObjects = useCallback(
         (delta: Position) => {
@@ -682,6 +794,9 @@ export function useLevelEditor() {
         deleteSelectedObjects,
         copySelectedObjects,
         pasteObjects,
+        completePaste,
+        cancelPaste,
+        confirmLargeClipboardPaste,
         moveSelectedObjects,
         linkObjects,
         unlinkObjects,
