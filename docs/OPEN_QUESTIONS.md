@@ -61,3 +61,23 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 12.1: Reshape and consolidate project documentation
+
+**Question:** Should we create a README.md file for the project, or is the lack of one intentional?
+
+**Assumption/Decision:** Will create a comprehensive README.md as part of documentation consolidation. This is standard practice for all projects and provides essential onboarding for new developers.
+
+**Question:** How much technical detail should go in README.md vs ARCHITECTURE.md?
+
+**Assumption/Decision:** README.md will be high-level (overview, quick start, basic architecture), while ARCHITECTURE.md will contain deep technical details. This follows industry standard separation of concerns.
+
+**Question:** Should we keep CLAUDE.md separate or merge it into a general DEVELOPMENT.md?
+
+**Assumption/Decision:** Keep CLAUDE.md separate as it contains AI-specific instructions. Create new DEVELOPMENT.md for general development workflow (commands, testing, linting) that applies to all developers.
+
+**Question:** What to do with specialized docs (E2E_TESTING.md, TDD_PRINCIPLES.md, REACT_BEST_PRACTICES.md)?
+
+**Assumption/Decision:** Keep these as standalone reference docs in docs/ folder. They serve specific purposes and are appropriately scoped. Will ensure they're properly linked from README and DEVELOPMENT.md.
+
+---
+

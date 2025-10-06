@@ -5,7 +5,13 @@
 - ✅ **During feature development** - Reference testing strategy and quality checklists
 - ❌ **When creating/writing tasks** - Task creation doesn't need this level of detail
 
-This document defines the detailed workflow, implementation strategy, and testing approach for the CanvasBlox project. These principles were extracted from FEATURE_RESTORATION_PLAN.md and serve as our complete process rulebook.
+This document defines the task management process, implementation workflow, and quality standards for CanvasBlox development.
+
+**See also:**
+- [DEVELOPMENT.md](../DEVELOPMENT.md) - Development commands and setup
+- [TDD_PRINCIPLES.md](TDD_PRINCIPLES.md) - Test-Driven Development methodology
+- [E2E_TESTING.md](E2E_TESTING.md) - E2E testing patterns
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture
 
 ---
 

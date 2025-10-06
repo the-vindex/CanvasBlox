@@ -2,7 +2,10 @@
 
 This file provides quick-reference guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**📋 For detailed implementation workflow, testing strategy, and task structure:** See `docs/TASK_MANAGEMENT.md`
+**📋 For detailed guides:**
+- Implementation workflow: See `docs/TASK_MANAGEMENT.md`
+- Development setup: See `DEVELOPMENT.md`
+- Project overview: See `README.md`
 
 ## CanvasBlox - Level Editor for Young Game Designers
 

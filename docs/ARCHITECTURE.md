@@ -155,40 +155,26 @@ Preferred communication style: Simple, everyday language.
 - Storage abstraction allows easy backend expansion
 - Database ready but not yet connected to routes
 
-## Testing Strategy
+## Testing Architecture
 
-**Why Tests for a Fun Project?**
-Because even vibe-coded apps benefit from good practices! Tests help us:
-- Catch bugs before kids find them
+**Testing Philosophy:**
+Even fun projects deserve quality! Tests help us:
+- Catch bugs before users find them
 - Refactor with confidence
-- Document how things work
+- Document system behavior
 
-**Test-Driven Development (TDD)**
-- Write tests first, then make them pass
-- Red-Green-Refactor cycle
-- Focus on critical features (undo/redo, save/load, etc.)
+**Testing Strategy:**
+- Test-Driven Development (TDD) - Write tests before implementation
+- Co-located tests - Tests live next to source files
+- Multiple test types - Unit, component, integration, and E2E tests
 
-**Test Organization**
-Tests live next to the code they test (modern convention):
-```
-client/src/
-  ├── hooks/
-  │   ├── useLevelEditor.ts
-  │   └── useLevelEditor.test.ts        # ← Test next to source
-  ├── utils/
-  │   ├── canvasRenderer.ts
-  │   └── canvasRenderer.test.ts        # ← Test next to source
-  └── components/
-      ├── TilePalette.tsx
-      └── TilePalette.test.tsx          # ← Test next to source
+For detailed testing workflow and TDD methodology, see:
+- [TDD_PRINCIPLES.md](TDD_PRINCIPLES.md) - Red-Green-Refactor cycle
+- [E2E_TESTING.md](E2E_TESTING.md) - Playwright patterns
+- [TASK_MANAGEMENT.md](TASK_MANAGEMENT.md) - Testing strategy
 
-e2e/                                    # End-to-end tests
-  └── level-editor.spec.ts              # Main editor workflows
-```
-
-**Testing Tools**
-- **Vitest** - Unit test runner
-- **React Testing Library** - Component testing
-- **Playwright** - E2E browser testing
+**Testing Tools:**
+- **Vitest** - Unit/integration test runner with Vite integration
+- **React Testing Library** - Component testing utilities
+- **Playwright** - End-to-end browser testing
 - **jsdom** - DOM environment for unit tests
-- **Vi mocking** - Mock utilities for localStorage, etc.
