@@ -12,17 +12,10 @@ interface PropertiesPanelProps {
     levelData: LevelData;
     editorState: EditorState;
     onLevelUpdate: (updater: (level: LevelData) => LevelData, action?: string) => void;
-    onDuplicateLevel: () => void;
     onClose?: () => void;
 }
 
-export function PropertiesPanel({
-    levelData,
-    editorState,
-    onLevelUpdate,
-    onDuplicateLevel,
-    onClose,
-}: PropertiesPanelProps) {
+export function PropertiesPanel({ levelData, editorState, onLevelUpdate, onClose }: PropertiesPanelProps) {
     const collidableId = useId();
     const defaultSpawnId = useId();
     const selectedObjectId = editorState.selectedObjects[0];
@@ -187,15 +180,6 @@ export function PropertiesPanel({
                             />
                         </div>
                     </div>
-
-                    <Button
-                        onClick={onDuplicateLevel}
-                        className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-                        data-testid="button-duplicate-level"
-                    >
-                        <i className="fas fa-clone mr-2"></i>
-                        Duplicate Level
-                    </Button>
                 </div>
 
                 {/* Object Properties (shown when object selected) */}

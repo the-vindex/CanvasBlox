@@ -42,7 +42,6 @@ export default function LevelEditor() {
         setEditorState,
         updateCurrentLevel,
         createNewLevel,
-        duplicateLevel,
         deleteLevel,
         addTile,
         addObject,
@@ -915,7 +914,6 @@ export default function LevelEditor() {
                         levelData={currentLevel}
                         editorState={editorState}
                         onLevelUpdate={updateCurrentLevel}
-                        onDuplicateLevel={() => duplicateLevel()}
                         onClose={() => setShowPropertiesPanel(false)}
                     />
                 )}

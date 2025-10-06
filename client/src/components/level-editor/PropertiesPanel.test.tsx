@@ -36,14 +36,12 @@ describe('PropertiesPanel', () => {
 
     it('should render level properties', () => {
         const mockOnLevelUpdate = vi.fn();
-        const mockOnDuplicateLevel = vi.fn();
 
         render(
             <PropertiesPanel
                 levelData={mockLevelData}
                 editorState={mockEditorState}
                 onLevelUpdate={mockOnLevelUpdate}
-                onDuplicateLevel={mockOnDuplicateLevel}
             />
         );
 
@@ -64,14 +62,12 @@ describe('PropertiesPanel', () => {
     it('should call onLevelUpdate when level name changes', async () => {
         const user = userEvent.setup();
         const mockOnLevelUpdate = vi.fn();
-        const mockOnDuplicateLevel = vi.fn();
 
         render(
             <PropertiesPanel
                 levelData={mockLevelData}
                 editorState={mockEditorState}
                 onLevelUpdate={mockOnLevelUpdate}
-                onDuplicateLevel={mockOnDuplicateLevel}
             />
         );
 
@@ -82,29 +78,8 @@ describe('PropertiesPanel', () => {
         expect(mockOnLevelUpdate).toHaveBeenCalled();
     });
 
-    it('should call onDuplicateLevel when duplicate button is clicked', async () => {
-        const user = userEvent.setup();
-        const mockOnLevelUpdate = vi.fn();
-        const mockOnDuplicateLevel = vi.fn();
-
-        render(
-            <PropertiesPanel
-                levelData={mockLevelData}
-                editorState={mockEditorState}
-                onLevelUpdate={mockOnLevelUpdate}
-                onDuplicateLevel={mockOnDuplicateLevel}
-            />
-        );
-
-        const duplicateButton = screen.getByTestId('button-duplicate-level');
-        await user.click(duplicateButton);
-
-        expect(mockOnDuplicateLevel).toHaveBeenCalledOnce();
-    });
-
     it('should conditionally render close button based on onClose prop', () => {
         const mockOnLevelUpdate = vi.fn();
-        const mockOnDuplicateLevel = vi.fn();
         const mockOnClose = vi.fn();
 
         // Render with onClose - button should be present
@@ -113,7 +88,6 @@ describe('PropertiesPanel', () => {
                 levelData={mockLevelData}
                 editorState={mockEditorState}
                 onLevelUpdate={mockOnLevelUpdate}
-                onDuplicateLevel={mockOnDuplicateLevel}
                 onClose={mockOnClose}
             />
         );
@@ -126,7 +100,6 @@ describe('PropertiesPanel', () => {
                 levelData={mockLevelData}
                 editorState={mockEditorState}
                 onLevelUpdate={mockOnLevelUpdate}
-                onDuplicateLevel={mockOnDuplicateLevel}
             />
         );
 
@@ -136,7 +109,6 @@ describe('PropertiesPanel', () => {
     it('should call onClose when close button is clicked', async () => {
         const user = userEvent.setup();
         const mockOnLevelUpdate = vi.fn();
-        const mockOnDuplicateLevel = vi.fn();
         const mockOnClose = vi.fn();
 
         render(
@@ -144,7 +116,6 @@ describe('PropertiesPanel', () => {
                 levelData={mockLevelData}
                 editorState={mockEditorState}
                 onLevelUpdate={mockOnLevelUpdate}
-                onDuplicateLevel={mockOnDuplicateLevel}
                 onClose={mockOnClose}
             />
         );
@@ -180,12 +151,7 @@ describe('PropertiesPanel', () => {
         };
 
         render(
-            <PropertiesPanel
-                levelData={levelWithTile}
-                editorState={editorStateWithSelection}
-                onLevelUpdate={vi.fn()}
-                onDuplicateLevel={vi.fn()}
-            />
+            <PropertiesPanel levelData={levelWithTile} editorState={editorStateWithSelection} onLevelUpdate={vi.fn()} />
         );
 
         // Check for object properties section

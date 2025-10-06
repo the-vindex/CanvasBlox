@@ -19,3 +19,15 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 15.2: Remove duplicate level button
+
+**Question:** Should the duplicateLevel function be removed from useLevelEditor.ts as well, or just the UI button?
+
+**Assumption/Decision:**
+- Remove only the UI button and the onDuplicateLevel prop
+- Keep the duplicateLevel function in useLevelEditor.ts - it may be useful programmatically or for future features
+- The rationale from TASKS.md is valid: Ctrl+A + Ctrl+C workflow makes the button redundant
+- Update E2E test to remove the duplicate level button visibility test
+
+---
+

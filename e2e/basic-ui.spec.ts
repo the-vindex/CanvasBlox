@@ -244,12 +244,6 @@ test.describe('Basic UI', () => {
         await expect(propertiesPanel).toBeVisible();
     });
 
-    test('should show duplicate level button', async ({ page }) => {
-        const duplicateButton = page.getByTestId('button-duplicate-level');
-        await expect(duplicateButton).toBeVisible();
-        await expect(duplicateButton).toHaveText(/Duplicate Level/);
-    });
-
     test('should update background color', async ({ page }) => {
         // Use the text input for background color, not the color picker
         const colorTextInput = page.getByTestId('input-background-color-text');
