@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
 import { useSelectionState } from '@/hooks/useSelectionState';
 import type { EditorState, InteractableObject, LevelData, Position, Tile } from '@/types/level';
-import { exportToPNG } from '@/utils/levelSerializer';
+import { exportToPNG, removeOverlappingTiles } from '@/utils/levelSerializer';
 
 export default function LevelEditor() {
     const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
@@ -250,11 +250,17 @@ export default function LevelEditor() {
             // Update level with all tiles/objects in a single operation
             // This ensures history is added with the correct state
             updateCurrentLevel(
-                (level) => ({
-                    ...level,
-                    tiles: [...level.tiles, ...newTiles],
-                    objects: [...level.objects, ...newObjects],
-                }),
+                (level) => {
+                    // Combine existing tiles with new tiles, then remove overlaps
+                    const allTiles = [...level.tiles, ...newTiles];
+                    const cleanedTiles = removeOverlappingTiles(allTiles);
+
+                    return {
+                        ...level,
+                        tiles: cleanedTiles,
+                        objects: [...level.objects, ...newObjects],
+                    };
+                },
                 `Drew ${toolName} with ${positions.length} tile${positions.length > 1 ? 's' : ''}`
             );
         },

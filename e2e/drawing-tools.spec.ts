@@ -72,6 +72,51 @@ test.describe('Drawing Tools', () => {
             // Line tool and tile selection should be cleared
             await expect(lineTool).toHaveAttribute('aria-pressed', 'false');
         });
+
+        test('should remove overlapping tiles when drawing over same line twice', async ({ page }) => {
+            const canvas = page.getByTestId('level-canvas');
+            const basicTile = page.getByTestId('tile-platform-basic');
+            const lineTool = page.getByTestId('tool-line');
+
+            // Get initial count (default grass tiles)
+            const initialCount = await getObjectCount(page);
+
+            // Select tile type and switch to line tool
+            await basicTile.click();
+            await lineTool.click();
+
+            // Draw first horizontal line
+            const box = await canvas.boundingBox();
+            if (!box) throw new Error('Canvas not found');
+            const startX = box.x + 200;
+            const startY = box.y + 200;
+            const endX = box.x + 360;
+            const endY = box.y + 200;
+
+            await page.mouse.move(startX, startY);
+            await page.mouse.down();
+            await page.mouse.move(endX, endY, { steps: 5 });
+            await page.mouse.up();
+            await page.waitForTimeout(100);
+
+            const countAfterFirstLine = await getObjectCount(page);
+            const firstLineLength = countAfterFirstLine - initialCount;
+
+            // First line should have been drawn
+            expect(firstLineLength).toBeGreaterThan(0);
+
+            // Draw same line again (exact same coordinates)
+            await page.mouse.move(startX, startY);
+            await page.mouse.down();
+            await page.mouse.move(endX, endY, { steps: 5 });
+            await page.mouse.up();
+            await page.waitForTimeout(100);
+
+            const countAfterSecondLine = await getObjectCount(page);
+
+            // Count should stay the same (overlap detection removes duplicates)
+            expect(countAfterSecondLine).toBe(countAfterFirstLine);
+        });
     });
 
     test.describe('Rectangle Tool', () => {
