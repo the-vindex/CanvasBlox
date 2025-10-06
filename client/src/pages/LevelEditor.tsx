@@ -16,7 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useLevelEditor } from '@/hooks/useLevelEditor';
 import { useSelectionState } from '@/hooks/useSelectionState';
-import type { EditorState, LevelData, Position } from '@/types/level';
+import type { EditorState, InteractableObject, LevelData, Position, Tile } from '@/types/level';
 import { exportToPNG } from '@/utils/levelSerializer';
 
 export default function LevelEditor() {
@@ -125,18 +125,47 @@ export default function LevelEditor() {
      */
     const handleDrawingToolComplete = useCallback(
         (positions: Position[], tileType: string, toolName: string) => {
-            // Place tiles/objects at each position
+            // Build all new tiles/objects first
+            const newTiles: Tile[] = [];
+            const newObjects: InteractableObject[] = [];
+
             for (const position of positions) {
                 if (tileType.includes('platform')) {
-                    addTile(position, tileType, true); // Skip history for each individual tile
+                    newTiles.push({
+                        id: `tile_${Date.now()}_${Math.random()}`,
+                        type: tileType,
+                        position,
+                        dimensions: { width: 1, height: 1 },
+                        rotation: 0,
+                        layer: 0,
+                        properties: { collidable: true },
+                    });
                 } else {
-                    addObject(position, tileType);
+                    // Handle objects (buttons, doors, etc.)
+                    newObjects.push({
+                        id: `obj_${Date.now()}_${Math.random()}`,
+                        type: tileType,
+                        position,
+                        dimensions: { width: 1, height: 1 },
+                        rotation: 0,
+                        layer: 1,
+                        properties: {},
+                    });
                 }
             }
-            // Commit all as a single history entry
-            commitBatchToHistory(`Drew ${toolName} with ${positions.length} tile${positions.length > 1 ? 's' : ''}`);
+
+            // Update level with all tiles/objects in a single operation
+            // This ensures history is added with the correct state
+            updateCurrentLevel(
+                (level) => ({
+                    ...level,
+                    tiles: [...level.tiles, ...newTiles],
+                    objects: [...level.objects, ...newObjects],
+                }),
+                `Drew ${toolName} with ${positions.length} tile${positions.length > 1 ? 's' : ''}`
+            );
         },
-        [addTile, addObject, commitBatchToHistory]
+        [updateCurrentLevel]
     );
 
     const handleLineComplete = useCallback(
