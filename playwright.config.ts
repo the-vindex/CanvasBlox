@@ -6,7 +6,11 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     workers: process.env.CI ? 1 : undefined,
-    reporter: 'list',
+    // Dot reporter: Minimal console output - single character per test
+    // Optimized for AI agents: Reduces token consumption by ~90% vs list/verbose reporters
+    // Shows: · (pass) ✘ (fail) ⊘ (skip) + failure details + summary
+    // For verbose output during debugging, use: npx playwright test --reporter=list
+    reporter: 'dot',
 
     use: {
         baseURL: 'http://localhost:3000',

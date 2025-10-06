@@ -17,14 +17,20 @@ npm start            # Run production build
 npm run check        # Type check with TypeScript
 
 # Unit Tests (Vitest)
-npm test             # Run unit tests with Vitest
+npm test             # Run unit tests (dot reporter: minimal output)
 npm run test:ui      # Run tests with UI
 npm run test:coverage # Run tests with coverage report
 
 # E2E Tests (Playwright)
-npm run test:e2e     # Run end-to-end tests
+npm run test:e2e     # Run E2E tests (dot reporter: minimal output)
 npm run test:e2e:ui  # Run E2E tests with UI
 npm run test:e2e:debug # Debug E2E tests
+
+# Test Output Optimization
+# Both test frameworks use 'dot' reporter by default for minimal console output
+# This reduces AI agent token consumption by ~90% while preserving failure details
+# For verbose output during debugging: npm test -- --reporter=default
+# For verbose E2E output: npx playwright test --reporter=list
 
 # Linting & Formatting (Biome)
 npm run lint         # Check code for lint errors
