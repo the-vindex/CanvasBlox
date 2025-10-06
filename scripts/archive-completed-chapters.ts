@@ -7,7 +7,23 @@
  * extracts them using HTML comment separators, appends to archive file,
  * and removes from main task file.
  *
- * Usage: tsx scripts/archive-completed-chapters.ts
+ * Usage:
+ *   npx tsx scripts/archive-completed-chapters.ts
+ *   OR use slash command: /todo-archive
+ *
+ * Requirements:
+ *   - Chapters must have <!-- CHAPTER_START: N --> and <!-- CHAPTER_END: N --> markers
+ *   - Chapter status must be "✅ Complete"
+ *   - Progress Tracking table must show "✓ Approved"
+ *
+ * What it does:
+ *   1. Scans TASKS.md for chapters meeting both criteria
+ *   2. Extracts complete chapter content using separator markers
+ *   3. Appends to docs/archive/TASKS-COMPLETED.md with timestamp
+ *   4. Removes from TASKS.md
+ *   5. Updates Progress Tracking table
+ *
+ * See: docs/TASK_MANAGEMENT.md for chapter format documentation
  */
 
 import * as fs from 'fs';
