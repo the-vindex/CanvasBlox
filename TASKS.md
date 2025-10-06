@@ -849,7 +849,7 @@ Please test the following scenarios:
 <!-- CHAPTER_START: 20 -->
 ## Chapter 20: Advanced Selection Modifiers
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ Complete
 **Files:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/pages/LevelEditor.tsx`
 **Priority:** Medium
 
@@ -1011,17 +1011,39 @@ Please test the following scenarios:
   - Type in input field while holding Shift → verify no indicator appears
   - Hold Shift and drag selection box → verify indicator visible during interaction
 
-#### 20.6 Rethink selection tool buttons (if needed)
+#### 20.6 Rethink selection tool buttons (if needed) ✅ Complete
+- **Status:** ✅ COMPLETE
 - **Priority:** 4 (Idea/enhancement)
-- **Location:** `client/src/components/level-editor/Toolbar.tsx`
-- **Current:** Separate Select and Multi-select tool buttons
-- **Change:** Potentially consolidate or rethink based on modifier key implementation
-- **Questions:**
-  - With Shift+Drag for multi-select, do we still need Multi-select button?
-  - Should Select button be default tool, or just use modifier keys?
-  - Keep buttons for discoverability, or remove for cleaner UI?
-- **Decision:** Defer until 20.2-20.5 implemented, then evaluate based on UX testing
-- **Note:** Low priority - might not be needed
+- **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/types/level.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useCanvas.ts`
+- **What was implemented:**
+  1. ✅ **Removed Multi-select tool button** from Toolbar (`client/src/components/level-editor/Toolbar.tsx`)
+     - Removed MultiselectIcon import
+     - Removed Multi-select button from toolbar
+     - Updated Select tool tooltip: "Select Tool (V) • Hold Shift to multi-select"
+     - Updated tool group color logic to remove 'multiselect' reference
+  2. ✅ **Updated type definitions** (`client/src/types/level.ts`)
+     - Removed 'multiselect' from EditorState['selectedTool'] union type
+  3. ✅ **Removed keyboard shortcut** (`client/src/pages/LevelEditor.tsx`)
+     - Removed 'M' key mapping for multi-select tool
+  4. ✅ **Updated mouse handlers** (`client/src/hooks/useCanvas.ts`)
+     - Removed multi-select tool case from handleToolMouseDown
+     - Removed startMultiSelect from dependency array
+  5. ✅ **Updated E2E tests** (multiple test files)
+     - Replaced all multi-select button clicks with Shift+Drag pattern
+     - Updated test descriptions to reflect Shift+Drag usage
+     - All 160 E2E tests passing (6 skipped)
+- **Rationale:**
+  - Consistent with industry standards (Photoshop, Figma, Illustrator have no separate multi-select button)
+  - Shift+Drag provides same functionality with better UX (temporary override)
+  - Cleaner toolbar with less cognitive load
+  - Forces users to learn industry-standard modifier key patterns
+  - Select tool + modifiers (Shift+Drag, Ctrl+Click) cover all selection use cases
+- **Tests:**
+  - ✅ 189 unit tests passing
+  - ✅ 160 E2E tests passing (6 skipped)
+  - ✅ All multi-select functionality preserved via Shift+Drag
+- **Decision logged:** See `docs/OPEN_QUESTIONS.md` for detailed analysis
+- **Note:** Multi-select functionality still available via Shift+Drag (Task 20.2)
 
 **Dependencies:**
 - 20.1 (research) should be completed before implementing 20.2-20.5
@@ -1162,7 +1184,7 @@ Please test the following scenarios:
 | 15. Code Quality | ✅ Completed | ✓ | All tasks complete |
 | 17. E2E Test Optimization | ✅ Completed | ✓ | Phase 3 continuation - auto-save test merge, redundant test removal |
 | 18. Enhanced Copy/Paste | ✅ Completed | ❌ | Ghost preview paste workflow (needs user testing) |
-| 20. Advanced Selection Modifiers | ⏸️ Not Started | ❌ | Shift/Ctrl modifier keys, temporary tool override (6 tasks) |
+| 20. Advanced Selection Modifiers | ✅ Completed | ✓ | Shift/Ctrl modifier keys, temporary tool override, visual feedback (5 tasks) |
 | 21. Multi-Select Properties Panel | ⏸️ Not Started | ❌ | Batch editing, property differences UI (1 task, P4) |
 | 22. Future Enhancements | ⏭️ Skipped | N/A | Zoom fit-to-view skipped (not needed) |
 | 12. Documentation | ✅ Completed | ✓ | Consolidate and organize project documentation |

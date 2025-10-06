@@ -333,21 +333,12 @@ export function useCanvas({
                 startRectangleDrawing(worldPos);
             } else if (editorState.selectedTool === 'move') {
                 startMoving(worldPos);
-            } else if (editorState.selectedTool === 'multiselect') {
-                startMultiSelect(worldPos);
             } else if (editorState.selectedTool === 'pen') {
                 startPenPainting(worldPos);
             }
             // Note: onCanvasClick is handled by the 'click' event, not mousedown
         },
-        [
-            editorState.selectedTool,
-            startLineDrawing,
-            startRectangleDrawing,
-            startMoving,
-            startMultiSelect,
-            startPenPainting,
-        ]
+        [editorState.selectedTool, startLineDrawing, startRectangleDrawing, startMoving, startPenPainting]
     );
 
     const handleMouseDown = useCallback(

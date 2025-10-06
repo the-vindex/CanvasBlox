@@ -242,3 +242,55 @@ Review this file after the auto-implementation is complete.
 - Status bar updates based on mouse move events when modifiers are held
 
 ---
+
+## Task 20.6: Rethink selection tool buttons (if needed)
+
+**Question:** With Shift+Drag multi-select now implemented (Task 20.2), do we still need the separate Multi-select tool button in the toolbar?
+
+**Analysis:**
+1. **Current state:**
+   - Toolbar has separate "Select" and "Multi-select" tool buttons
+   - Multi-select button activates dedicated multi-select tool (M key)
+   - Shift+Drag now provides temporary multi-select from any tool (Task 20.2)
+   - Ctrl+Click provides additive selection from any tool (Task 20.3)
+
+2. **Multi-select button usage patterns:**
+   - E2E tests show explicit multi-select tool clicks (e2e/selection.spec.ts)
+   - No keyboard shortcut 'M' tests found
+   - Button provides persistent multi-select mode (stays active until tool changed)
+   - Shift+Drag is temporary (returns to previous tool after selection)
+
+3. **Comparison with industry tools:**
+   - **Photoshop:** No separate multi-select tool - uses Shift+Click for additive selection
+   - **Figma:** No separate multi-select tool - uses Shift+Click for additive selection
+   - **Illustrator:** No separate multi-select tool - uses Shift+Click for additive selection
+   - **Tiled Map Editor:** Has separate box select tool, but also supports modifier keys
+   - **Conclusion:** Most professional tools do NOT have separate multi-select buttons
+
+4. **Discoverability vs. Efficiency:**
+   - **Keep button:** Better discoverability for new users, persistent mode for repetitive selections
+   - **Remove button:** Cleaner UI, forces learning of modifier keys (industry standard)
+
+**Assumption/Decision:**
+- **REMOVE the Multi-select tool button** from the toolbar
+- **Rationale:**
+  1. Shift+Drag provides same functionality (box selection) with better UX (temporary override)
+  2. Consistent with industry standards (Photoshop, Figma, Illustrator have no separate button)
+  3. Cleaner toolbar with less cognitive load
+  4. Forces users to learn industry-standard modifier key patterns
+  5. Select tool + modifiers (Shift+Drag, Ctrl+Click) cover all selection use cases
+
+- **Implementation:**
+  1. Remove Multi-select button from Toolbar.tsx
+  2. Remove 'multiselect' from EditorState['selectedTool'] type
+  3. Remove multi-select tool icon import
+  4. Update keyboard shortcuts documentation (remove 'M' key)
+  5. Update all E2E tests to use Shift+Drag instead of multi-select button clicks
+  6. Keep Select tool button - it's the primary selection tool
+
+- **Migration path for users:**
+  - Replace Multi-select button workflow with Shift+Drag workflow
+  - Tooltip on Select tool: "Select Tool (V) • Hold Shift to multi-select"
+  - Help documentation emphasizes Shift+Drag pattern
+
+---

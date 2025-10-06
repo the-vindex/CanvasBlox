@@ -3,7 +3,6 @@ import CopyIcon from '@/assets/icons/copy.svg?react';
 import LineIcon from '@/assets/icons/line.svg?react';
 import LinkIcon from '@/assets/icons/link.svg?react';
 import MoveIcon from '@/assets/icons/move.svg?react';
-import MultiselectIcon from '@/assets/icons/multiselect.svg?react';
 import PasteIcon from '@/assets/icons/paste.svg?react';
 import PenIcon from '@/assets/icons/pen.svg?react';
 import RectangleIcon from '@/assets/icons/rectangle.svg?react';
@@ -35,7 +34,7 @@ interface ToolbarProps {
 
 // Define color scheme for tool groups
 function getToolGroupColor(tool: EditorState['selectedTool']) {
-    if (tool === 'select' || tool === 'multiselect' || tool === 'move') {
+    if (tool === 'select' || tool === 'move') {
         return 'blue'; // Selection tools
     }
     if (tool === 'pen' || tool === 'line' || tool === 'rectangle') {
@@ -110,17 +109,9 @@ export function Toolbar({
                 <ToolButton
                     tool="select"
                     icon={SelectIcon}
-                    title="Select Tool (V)"
+                    title="Select Tool (V) • Hold Shift to multi-select"
                     testId="tool-select"
                     isActive={editorState.selectedTool === 'select'}
-                    onToolChange={onToolChange}
-                />
-                <ToolButton
-                    tool="multiselect"
-                    icon={MultiselectIcon}
-                    title="Multi-Select (M)"
-                    testId="tool-multiselect"
-                    isActive={editorState.selectedTool === 'multiselect'}
                     onToolChange={onToolChange}
                 />
                 <ToolButton

@@ -201,18 +201,15 @@ test.describe('Visual Effects', () => {
         await clickCanvas(page, 264, 200); // Next to second tile
         await page.waitForTimeout(50);
 
-        // Use multi-select tool to select all tiles
-        const multiselectButton = page.getByRole('button', { name: /multi.*select/i }).first();
-        await multiselectButton.click();
-        await page.waitForTimeout(50);
-
-        // Drag selection box over all tiles
+        // Use Shift+Drag to select all tiles
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
+        await page.keyboard.down('Shift');
         await page.mouse.move(box.x + 190, box.y + 190);
         await page.mouse.down();
         await page.mouse.move(box.x + 280, box.y + 240);
         await page.mouse.up();
+        await page.keyboard.up('Shift');
         await page.waitForTimeout(100);
 
         // Verify multiple objects are selected
@@ -336,17 +333,15 @@ test.describe('Delete Animations', () => {
         await clickCanvas(page, 300, 200);
         await page.waitForTimeout(100);
 
-        // Switch to multi-select tool
-        await page.getByTestId('tool-multiselect').click();
-        await page.waitForTimeout(50);
-
-        // Drag to select all three tiles
+        // Use Shift+Drag to select all three tiles
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
+        await page.keyboard.down('Shift');
         await page.mouse.move(box.x + 180, box.y + 180);
         await page.mouse.down();
         await page.mouse.move(box.x + 320, box.y + 220);
         await page.mouse.up();
+        await page.keyboard.up('Shift');
         await page.waitForTimeout(100);
 
         // Verify multiple objects selected
@@ -393,15 +388,15 @@ test.describe('Delete Animations', () => {
         await clickCanvas(page, 450, 250);
         await page.waitForTimeout(100);
 
-        // Select all objects with multi-select
-        await page.getByTestId('tool-multiselect').click();
-        await page.waitForTimeout(50);
+        // Select all objects with Shift+Drag
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
+        await page.keyboard.down('Shift');
         await page.mouse.move(box.x + 230, box.y + 230);
         await page.mouse.down();
         await page.mouse.move(box.x + 470, box.y + 270);
         await page.mouse.up();
+        await page.keyboard.up('Shift');
         await page.waitForTimeout(100);
 
         // Verify objects are selected

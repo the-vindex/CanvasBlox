@@ -13,7 +13,6 @@ test.describe('Toolbar', () => {
     test('should have selection tools in toolbar', async ({ page }) => {
         // Check for selection tools
         await expect(page.getByTestId('tool-select')).toBeVisible();
-        await expect(page.getByTestId('tool-multiselect')).toBeVisible();
         await expect(page.getByTestId('tool-move')).toBeVisible();
     });
 

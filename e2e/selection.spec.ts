@@ -54,10 +54,9 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
-    test('should select multiple objects with multi-select drag box', async ({ page }) => {
+    test('should select multiple objects with Shift+Drag', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
-        const multiSelectTool = page.getByTestId('tool-multiselect');
         const selectionCount = page.getByTestId('selection-count');
 
         // Place multiple objects
@@ -71,11 +70,7 @@ test.describe('Selection', () => {
         await clickCanvas(page, 328, 200);
         await page.waitForTimeout(100);
 
-        // Switch to multi-select tool
-        await multiSelectTool.click();
-        await expect(multiSelectTool).toHaveAttribute('aria-pressed', 'true');
-
-        // Drag a selection box over all objects
+        // Hold Shift and drag a selection box over all objects
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
         const startX = box.x + 180;
@@ -83,10 +78,12 @@ test.describe('Selection', () => {
         const endX = box.x + 360;
         const endY = box.y + 240;
 
+        await page.keyboard.down('Shift');
         await page.mouse.move(startX, startY);
         await page.mouse.down();
         await page.mouse.move(endX, endY, { steps: 5 });
         await page.mouse.up();
+        await page.keyboard.up('Shift');
         await page.waitForTimeout(100);
 
         // Should have selected multiple objects
@@ -154,22 +151,19 @@ test.describe('Selection', () => {
         await expect(selectionCount).toHaveText('Selected: 0 object(s)');
     });
 
-    test('should render multi-select drag box while dragging', async ({ page }) => {
+    test('should render multi-select drag box while dragging with Shift', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
-        const multiSelectTool = page.getByTestId('tool-multiselect');
-
-        // Switch to multi-select tool
-        await multiSelectTool.click();
 
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
 
-        // Start dragging
+        // Start dragging with Shift held
         const startX = box.x + 100;
         const startY = box.y + 100;
         const endX = box.x + 300;
         const endY = box.y + 300;
 
+        await page.keyboard.down('Shift');
         await page.mouse.move(startX, startY);
         await page.mouse.down();
         await page.mouse.move(endX, endY, { steps: 5 });
@@ -186,6 +180,7 @@ test.describe('Selection', () => {
         expect(isDragging).toBe(true);
 
         await page.mouse.up();
+        await page.keyboard.up('Shift');
     });
 
     test('should move selected objects with move tool', async ({ page }) => {
@@ -225,7 +220,6 @@ test.describe('Selection', () => {
     test('should move multiple selected objects together', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
-        const multiSelectTool = page.getByTestId('tool-multiselect');
         const moveTool = page.getByTestId('tool-move');
         const selectionCount = page.getByTestId('selection-count');
 
@@ -238,14 +232,15 @@ test.describe('Selection', () => {
         await clickCanvas(page, 328, 200);
         await page.waitForTimeout(100);
 
-        // Multi-select all 3
-        await multiSelectTool.click();
+        // Multi-select all 3 using Shift+Drag
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
+        await page.keyboard.down('Shift');
         await page.mouse.move(box.x + 180, box.y + 180);
         await page.mouse.down();
         await page.mouse.move(box.x + 360, box.y + 240, { steps: 5 });
         await page.mouse.up();
+        await page.keyboard.up('Shift');
         await page.waitForTimeout(100);
 
         // Verify selection
@@ -301,7 +296,6 @@ test.describe('Selection', () => {
 
         const canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
-        const multiSelectTool = page.getByTestId('tool-multiselect');
         const moveTool = page.getByTestId('tool-move');
 
         // Place a few tiles
@@ -310,14 +304,15 @@ test.describe('Selection', () => {
         await clickCanvas(page, 232, 200);
         await clickCanvas(page, 264, 200);
 
-        // Multi-select all tiles
-        await multiSelectTool.click();
+        // Multi-select all tiles using Shift+Drag
         const box = await canvas.boundingBox();
         if (!box) throw new Error('Canvas not found');
+        await page.keyboard.down('Shift');
         await page.mouse.move(box.x + 180, box.y + 180);
         await page.mouse.down();
         await page.mouse.move(box.x + 300, box.y + 220);
         await page.mouse.up();
+        await page.keyboard.up('Shift');
         await page.waitForTimeout(100);
 
         // Verify some objects are selected

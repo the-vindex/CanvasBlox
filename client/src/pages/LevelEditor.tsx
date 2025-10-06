@@ -540,7 +540,6 @@ export default function LevelEditor() {
         (key: string) => {
             const toolMap: Record<string, EditorState['selectedTool']> = {
                 v: 'select',
-                m: 'multiselect',
                 h: 'move',
                 b: 'pen',
                 l: 'line',

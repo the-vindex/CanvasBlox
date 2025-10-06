@@ -17,17 +17,6 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('should select multi-select tool with M shortcut', async ({ page }) => {
-        const multiSelectTool = page.getByTestId('tool-multiselect');
-        await expect(multiSelectTool).toBeVisible();
-
-        // Press M key
-        await page.keyboard.press('m');
-
-        // Multi-select tool should be selected
-        await expect(multiSelectTool).toHaveAttribute('aria-pressed', 'true');
-    });
-
     test('should select move tool with H shortcut', async ({ page }) => {
         const moveTool = page.getByTestId('tool-move');
         await expect(moveTool).toBeVisible();

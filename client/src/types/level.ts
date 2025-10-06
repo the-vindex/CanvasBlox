@@ -74,7 +74,7 @@ export interface LevelData {
 }
 
 export interface EditorState {
-    selectedTool: 'select' | 'multiselect' | 'move' | 'pen' | 'line' | 'rectangle' | 'link' | 'unlink' | null;
+    selectedTool: 'select' | 'move' | 'pen' | 'line' | 'rectangle' | 'link' | 'unlink' | null;
     selectedObjects: string[];
     clipboard: (Tile | InteractableObject | SpawnPoint)[];
     selectedTileType: string | null;
