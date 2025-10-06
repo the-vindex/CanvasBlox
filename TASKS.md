@@ -496,7 +496,7 @@ Please test the following scenarios:
 - **Note:** Selection outline now clearly visible on blue default background and all other colors
 
 #### 11.14 Move Select All button to toolbar ✅ Complete
-- **Status:** ✅ COMPLETE + TESTED - Commit 4ac9987
+- **Status:** ✅ COMPLETE - Commit 4ac9987
 - **Priority:** 3 (Feature)
 - **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/pages/LevelEditor.tsx`
 - **What was implemented:**
