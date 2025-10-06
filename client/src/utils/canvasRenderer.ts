@@ -584,7 +584,7 @@ export class CanvasRenderer {
      * Draw a numbered badge (for buttons)
      * Badge maintains constant screen size regardless of zoom
      */
-    private drawBadge(buttonNumber: number, width: number, height: number, zoom: number, objectType: string) {
+    private drawBadge(buttonNumber: number, _width: number, height: number, _zoom: number, _objectType: string) {
         // Calculate background color of button for adaptive contrast
         // Red button: #dc2626 -> RGB(220, 38, 38)
         const bgLuminance = calculateLuminance(220, 38, 38);
@@ -637,7 +637,7 @@ export class CanvasRenderer {
      * Draw door badge showing linked button count
      * Shows single button number or "×N" for multiple buttons
      */
-    private drawDoorBadge(linkedButtons: InteractableObject[], width: number, height: number, zoom: number) {
+    private drawDoorBadge(linkedButtons: InteractableObject[], _width: number, height: number, _zoom: number) {
         // Calculate background color of door for adaptive contrast
         // Orange door: #d97706 -> RGB(217, 119, 6)
         const bgLuminance = calculateLuminance(217, 119, 6);
@@ -696,43 +696,27 @@ export class CanvasRenderer {
         this.ctx.restore();
     }
 
-    drawObject(obj: InteractableObject, pan: Position, zoom: number, isSelected = false, isDeleting = false) {
-        // Convert tile position to pixel position
-        const x = obj.position.x * TILE_SIZE * zoom + pan.x;
-        const y = obj.position.y * TILE_SIZE * zoom + pan.y;
-        const width = obj.dimensions.width * TILE_SIZE * zoom;
-        const height = obj.dimensions.height * TILE_SIZE * zoom;
-
-        this.ctx.save();
-
-        // Apply delete animation effect (shrink from 1.0 to 0.0 over 250ms)
-        let isAnimatingDelete = false;
-        let scale = 1.0;
-        if (isDeleting && this.editorState?.deletionStartTimes?.has(obj.id)) {
-            const startTime = this.editorState.deletionStartTimes.get(obj.id)!;
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / 250, 1.0); // 250ms animation
-            scale = Math.max(1.0 - progress, 0.01); // Shrink from 1.0 to 0.01 (avoid 0 which breaks rendering)
-            isAnimatingDelete = true;
-
-            // Also fade out
-            this.ctx.globalAlpha = scale;
+    /**
+     * Calculate delete animation scale
+     */
+    private getDeleteAnimationScale(objId: string): { scale: number; isAnimating: boolean } {
+        if (!this.editorState?.deletionStartTimes?.has(objId)) {
+            return { scale: 1.0, isAnimating: false };
         }
 
-        this.ctx.translate(x + width / 2, y + height / 2);
+        const startTime = this.editorState.deletionStartTimes.get(objId)!;
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / 250, 1.0); // 250ms animation
+        const scale = Math.max(1.0 - progress, 0.01); // Avoid 0 which breaks rendering
 
-        // Apply scale for delete animation
-        if (isAnimatingDelete) {
-            this.ctx.scale(scale, scale);
-        }
+        return { scale, isAnimating: true };
+    }
 
-        // Apply rotation
-        if (obj.rotation !== 0) {
-            this.ctx.rotate((obj.rotation * Math.PI) / 180);
-        }
-
-        // Draw object based on type with detailed textures
-        switch (obj.type) {
+    /**
+     * Draw object sprite based on type
+     */
+    private drawObjectSprite(type: string, width: number, height: number) {
+        switch (type) {
             case 'button':
                 this.drawButton(width, height);
                 break;
@@ -758,22 +742,58 @@ export class CanvasRenderer {
                 this.drawCheckpoint(width, height);
                 break;
         }
+    }
 
-        // Draw badge for buttons and doors (after object rendering, before selection outline)
-        if (!isDeleting) {
-            if (obj.type === 'button' && obj.properties.buttonNumber !== undefined) {
-                // Draw button number badge
-                this.drawBadge(obj.properties.buttonNumber, width, height, zoom, obj.type);
-            } else if (obj.type === 'door') {
-                // Draw door badge showing linked button numbers
-                const linkedButtons = getButtonsLinkingToDoor(obj, this.levelData?.objects || []);
-                if (linkedButtons.length > 0) {
-                    this.drawDoorBadge(linkedButtons, width, height, zoom);
-                }
+    /**
+     * Draw badges for buttons and doors
+     */
+    private drawObjectBadges(obj: InteractableObject, width: number, height: number, zoom: number) {
+        if (obj.type === 'button' && obj.properties.buttonNumber !== undefined) {
+            this.drawBadge(obj.properties.buttonNumber, width, height, zoom, obj.type);
+        } else if (obj.type === 'door') {
+            const linkedButtons = getButtonsLinkingToDoor(obj, this.levelData?.objects || []);
+            if (linkedButtons.length > 0) {
+                this.drawDoorBadge(linkedButtons, width, height, zoom);
             }
         }
+    }
 
-        // Draw selection outline with high contrast
+    drawObject(obj: InteractableObject, pan: Position, zoom: number, isSelected = false, isDeleting = false) {
+        // Convert tile position to pixel position
+        const x = obj.position.x * TILE_SIZE * zoom + pan.x;
+        const y = obj.position.y * TILE_SIZE * zoom + pan.y;
+        const width = obj.dimensions.width * TILE_SIZE * zoom;
+        const height = obj.dimensions.height * TILE_SIZE * zoom;
+
+        this.ctx.save();
+
+        // Apply delete animation
+        const { scale, isAnimating } = isDeleting
+            ? this.getDeleteAnimationScale(obj.id)
+            : { scale: 1.0, isAnimating: false };
+        if (isAnimating) {
+            this.ctx.globalAlpha = scale;
+        }
+
+        this.ctx.translate(x + width / 2, y + height / 2);
+
+        if (isAnimating) {
+            this.ctx.scale(scale, scale);
+        }
+
+        if (obj.rotation !== 0) {
+            this.ctx.rotate((obj.rotation * Math.PI) / 180);
+        }
+
+        // Draw sprite
+        this.drawObjectSprite(obj.type, width, height);
+
+        // Draw badges (not during deletion)
+        if (!isDeleting) {
+            this.drawObjectBadges(obj, width, height, zoom);
+        }
+
+        // Draw selection outline
         if (isSelected) {
             this.drawHighContrastSelection(-width / 2 - 2, -height / 2 - 2, width + 4, height + 4);
         }

@@ -129,7 +129,7 @@ test.describe('Visual Effects', () => {
     });
 
     test('selection should work for different object types', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const selectionCount = page.getByTestId('selection-count');
 
         // Test 1: Select a tile (platform)

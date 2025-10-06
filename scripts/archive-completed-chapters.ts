@@ -26,8 +26,8 @@
  * See: docs/TASK_MANAGEMENT.md for chapter format documentation
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const TASKS_FILE = path.join(process.cwd(), 'TASKS.md');
 const ARCHIVE_DIR = path.join(process.cwd(), 'docs', 'archive');

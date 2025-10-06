@@ -19,7 +19,7 @@ test.describe('Undo/Redo', () => {
     test('should undo with Ctrl+Z and button', async ({ page }) => {
         const canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const objectCount = page.getByTestId('statusbar-object-count');
+        const _objectCount = page.getByTestId('statusbar-object-count');
         const undoButton = page.getByRole('button', { name: /Undo/ });
 
         // Get initial object count
@@ -55,9 +55,9 @@ test.describe('Undo/Redo', () => {
     });
 
     test('should redo with Ctrl+Y, Ctrl+Shift+Z, and button', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
-        const objectCount = page.getByTestId('statusbar-object-count');
+        const _objectCount = page.getByTestId('statusbar-object-count');
         const redoButton = page.getByRole('button', { name: /Redo/ });
 
         // Place a tile and record the expected count after redo
@@ -104,7 +104,7 @@ test.describe('Undo/Redo', () => {
         await newLevelButton.click();
         await page.waitForTimeout(200);
 
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const historyDisplay = page.getByTestId('statusbar-history');
 
@@ -167,7 +167,7 @@ test.describe('Undo/Redo', () => {
     });
 
     test('should disable redo button when at end of history', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
         const redoButton = page.getByRole('button', { name: /Redo/ });
 
@@ -181,7 +181,7 @@ test.describe('Undo/Redo', () => {
     });
 
     test('should show visual flash feedback on undo/redo', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
 
         // Place a tile
@@ -207,9 +207,9 @@ test.describe('Undo/Redo', () => {
         await newLevelButton.click();
         await page.waitForTimeout(200);
 
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const grassTile = page.getByTestId('tile-platform-grass');
-        const objectCount = page.getByTestId('statusbar-object-count');
+        const _objectCount = page.getByTestId('statusbar-object-count');
 
         // Get initial object count (should be 0 for fresh level)
         const initialCount = await getObjectCount(page);
@@ -238,9 +238,9 @@ test.describe('Undo/Redo', () => {
     });
 
     test('should redo multiple actions in sequence', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const basicTile = page.getByTestId('tile-platform-basic');
-        const objectCount = page.getByTestId('statusbar-object-count');
+        const _objectCount = page.getByTestId('statusbar-object-count');
 
         // Get initial object count
         const initialCount = await getObjectCount(page);

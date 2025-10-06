@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clickCanvas, getObjectCount } from './helpers';
+import { clickCanvas } from './helpers';
 
 test.describe('Selection', () => {
     test.beforeEach(async ({ page }) => {
@@ -7,7 +7,7 @@ test.describe('Selection', () => {
     });
 
     test('should select single object with select tool', async ({ page }) => {
-        const canvas = page.getByTestId('level-canvas');
+        const _canvas = page.getByTestId('level-canvas');
         const buttonTile = page.getByTestId('tile-button');
         const selectTool = page.getByTestId('tool-select');
         const selectionCount = page.getByTestId('selection-count');

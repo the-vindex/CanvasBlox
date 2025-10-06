@@ -11,7 +11,7 @@ import type {
 } from '@/types/level';
 import { assignButtonNumber } from '@/utils/buttonNumbering';
 import { createDefaultLevel, removeOverlappingTiles } from '@/utils/levelSerializer';
-import { canLinkObjects, canObjectBeLinked, createLink, removeLink } from '@/utils/linkingLogic';
+import { canLinkObjects, createLink, removeLink } from '@/utils/linkingLogic';
 
 const STORAGE_KEY = 'levelEditor_levels';
 const AUTOSAVE_KEY = 'levelEditor_autosave';

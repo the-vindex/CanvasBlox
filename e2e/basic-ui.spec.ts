@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clickCanvas, getCanvasBounds } from './helpers';
+import { getCanvasBounds } from './helpers';
 
 test.describe('Basic UI', () => {
     test.beforeEach(async ({ page }) => {

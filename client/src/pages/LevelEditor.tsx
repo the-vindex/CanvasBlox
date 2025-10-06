@@ -67,121 +67,138 @@ export default function LevelEditor() {
         [setEditorState]
     );
 
-    const handleCanvasClick = useCallback(
-        (position: Position, _event: MouseEvent) => {
-            if (editorState.selectedTool === 'select' && currentLevel) {
-                // Find object at clicked position (check tiles, objects, and spawn points)
-                const clickedItem =
-                    currentLevel.tiles.find(
-                        (tile) => tile.position.x === position.x && tile.position.y === position.y
-                    ) ||
-                    currentLevel.objects.find(
-                        (obj) => obj.position.x === position.x && obj.position.y === position.y
-                    ) ||
-                    currentLevel.spawnPoints.find(
-                        (spawn) => spawn.position.x === position.x && spawn.position.y === position.y
-                    );
+    // Helper: Find any item (tile, object, or spawn point) at position
+    const findItemAtPosition = useCallback(
+        (position: Position) => {
+            if (!currentLevel) return null;
 
-                if (clickedItem) {
-                    // Select the clicked item (tile, object, or spawn point)
-                    _selectObject(clickedItem.id);
-                } else {
-                    // Clear selection when clicking empty space
-                    setEditorState((prev) => ({ ...prev, ...selectionState.clearObjects() }));
-                }
-            } else if (editorState.selectedTool === 'link' && currentLevel) {
-                // Find object at clicked position (only interactable objects)
-                const clickedObj = currentLevel.objects.find(
-                    (obj) => obj.position.x === position.x && obj.position.y === position.y
-                );
+            return (
+                currentLevel.tiles.find((tile) => tile.position.x === position.x && tile.position.y === position.y) ||
+                currentLevel.objects.find((obj) => obj.position.x === position.x && obj.position.y === position.y) ||
+                currentLevel.spawnPoints.find(
+                    (spawn) => spawn.position.x === position.x && spawn.position.y === position.y
+                )
+            );
+        },
+        [currentLevel]
+    );
 
-                if (clickedObj) {
-                    if (!editorState.linkSourceId) {
-                        // First click - set as link source and show selection
-                        setEditorState((prev) => ({
-                            ...prev,
-                            linkSourceId: clickedObj.id,
-                            selectedObjects: [clickedObj.id], // Show selection box around source
-                        }));
+    // Helper: Find interactable object at position
+    const findObjectAtPosition = useCallback(
+        (position: Position) => {
+            if (!currentLevel) return null;
+            return currentLevel.objects.find((obj) => obj.position.x === position.x && obj.position.y === position.y);
+        },
+        [currentLevel]
+    );
 
-                        // Prevent duplicate toasts within 100ms
-                        const now = Date.now();
-                        if (now - lastLinkToastRef.current > 100) {
-                            lastLinkToastRef.current = now;
-                            toast({
-                                title: 'Link Source Selected',
-                                description: `Click another object to link it with this ${clickedObj.type}`,
-                            });
-                        }
-                    } else if (editorState.linkSourceId === clickedObj.id) {
-                        // Clicked same object twice - deselect and clear
-                        setEditorState((prev) => ({
-                            ...prev,
-                            linkSourceId: null,
-                            selectedObjects: [],
-                        }));
-                    } else {
-                        // Second click on different object - create link
-                        linkObjects(editorState.linkSourceId, clickedObj.id);
-                        // Clear link source and selection
-                        setEditorState((prev) => ({
-                            ...prev,
-                            linkSourceId: null,
-                            selectedObjects: [],
-                        }));
-                    }
-                }
-            } else if (editorState.selectedTool === 'unlink' && currentLevel) {
-                // Find object at clicked position (only interactable objects)
-                const clickedObj = currentLevel.objects.find(
-                    (obj) => obj.position.x === position.x && obj.position.y === position.y
-                );
+    // Helper: Handle select tool click
+    const handleSelectToolClick = useCallback(
+        (position: Position) => {
+            const clickedItem = findItemAtPosition(position);
 
-                if (clickedObj) {
-                    if (!editorState.unlinkSourceId) {
-                        // First click - set as unlink source and show selection
-                        setEditorState((prev) => ({
-                            ...prev,
-                            unlinkSourceId: clickedObj.id,
-                            selectedObjects: [clickedObj.id], // Show selection box around source
-                        }));
-
-                        toast({
-                            title: 'Unlink Source Selected',
-                            description: `Click a linked object to remove the link`,
-                        });
-                    } else if (editorState.unlinkSourceId === clickedObj.id) {
-                        // Clicked same object twice - deselect and clear
-                        setEditorState((prev) => ({
-                            ...prev,
-                            unlinkSourceId: null,
-                            selectedObjects: [],
-                        }));
-                    } else {
-                        // Second click on different object - remove link
-                        unlinkObjects(editorState.unlinkSourceId, clickedObj.id);
-                        // Clear unlink source and selection
-                        setEditorState((prev) => ({
-                            ...prev,
-                            unlinkSourceId: null,
-                            selectedObjects: [],
-                        }));
-                    }
-                }
+            if (clickedItem) {
+                _selectObject(clickedItem.id);
+            } else {
+                setEditorState((prev) => ({ ...prev, ...selectionState.clearObjects() }));
             }
         },
-        [
-            editorState.selectedTool,
-            editorState.linkSourceId,
-            editorState.unlinkSourceId,
-            currentLevel,
-            _selectObject,
-            setEditorState,
-            selectionState,
-            linkObjects,
-            unlinkObjects,
-            toast,
-        ]
+        [findItemAtPosition, _selectObject, setEditorState, selectionState]
+    );
+
+    // Helper: Handle link tool click
+    const handleLinkToolClick = useCallback(
+        (position: Position) => {
+            const clickedObj = findObjectAtPosition(position);
+            if (!clickedObj) return;
+
+            if (!editorState.linkSourceId) {
+                // First click - set as link source
+                setEditorState((prev) => ({
+                    ...prev,
+                    linkSourceId: clickedObj.id,
+                    selectedObjects: [clickedObj.id],
+                }));
+
+                const now = Date.now();
+                if (now - lastLinkToastRef.current > 100) {
+                    lastLinkToastRef.current = now;
+                    toast({
+                        title: 'Link Source Selected',
+                        description: `Click another object to link it with this ${clickedObj.type}`,
+                    });
+                }
+            } else if (editorState.linkSourceId === clickedObj.id) {
+                // Clicked same object - deselect
+                setEditorState((prev) => ({
+                    ...prev,
+                    linkSourceId: null,
+                    selectedObjects: [],
+                }));
+            } else {
+                // Second click - create link
+                linkObjects(editorState.linkSourceId, clickedObj.id);
+                setEditorState((prev) => ({
+                    ...prev,
+                    linkSourceId: null,
+                    selectedObjects: [],
+                }));
+            }
+        },
+        [findObjectAtPosition, editorState.linkSourceId, setEditorState, linkObjects, toast]
+    );
+
+    // Helper: Handle unlink tool click
+    const handleUnlinkToolClick = useCallback(
+        (position: Position) => {
+            const clickedObj = findObjectAtPosition(position);
+            if (!clickedObj) return;
+
+            if (!editorState.unlinkSourceId) {
+                // First click - set as unlink source
+                setEditorState((prev) => ({
+                    ...prev,
+                    unlinkSourceId: clickedObj.id,
+                    selectedObjects: [clickedObj.id],
+                }));
+
+                toast({
+                    title: 'Unlink Source Selected',
+                    description: `Click a linked object to remove the link`,
+                });
+            } else if (editorState.unlinkSourceId === clickedObj.id) {
+                // Clicked same object - deselect
+                setEditorState((prev) => ({
+                    ...prev,
+                    unlinkSourceId: null,
+                    selectedObjects: [],
+                }));
+            } else {
+                // Second click - remove link
+                unlinkObjects(editorState.unlinkSourceId, clickedObj.id);
+                setEditorState((prev) => ({
+                    ...prev,
+                    unlinkSourceId: null,
+                    selectedObjects: [],
+                }));
+            }
+        },
+        [findObjectAtPosition, editorState.unlinkSourceId, setEditorState, unlinkObjects, toast]
+    );
+
+    const handleCanvasClick = useCallback(
+        (position: Position, _event: MouseEvent) => {
+            if (!currentLevel) return;
+
+            if (editorState.selectedTool === 'select') {
+                handleSelectToolClick(position);
+            } else if (editorState.selectedTool === 'link') {
+                handleLinkToolClick(position);
+            } else if (editorState.selectedTool === 'unlink') {
+                handleUnlinkToolClick(position);
+            }
+        },
+        [currentLevel, editorState.selectedTool, handleSelectToolClick, handleLinkToolClick, handleUnlinkToolClick]
     );
 
     const drawingSessionTileCount = useRef(0);

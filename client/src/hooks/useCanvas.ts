@@ -32,7 +32,7 @@ export function useCanvas({
     onMoveObjectsComplete,
     onLineComplete,
     onRectangleComplete,
-    onLinkComplete,
+    _onLinkComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -107,117 +107,224 @@ export function useCanvas({
         [editorState.pan, editorState.zoom]
     );
 
+    // Helper: Handle middle mouse panning during mouse move
+    const handlePanningMove = useCallback((e: MouseEvent) => {
+        const wrapper = wrapperRef.current;
+        if (!wrapper) return false;
+
+        const deltaX = e.clientX - panStartRef.current.x;
+        const deltaY = e.clientY - panStartRef.current.y;
+
+        wrapper.scrollLeft = scrollStartRef.current.left - deltaX;
+        wrapper.scrollTop = scrollStartRef.current.top - deltaY;
+        return true;
+    }, []);
+
+    // Helper: Handle line tool preview during mouse move
+    const handleLinePreview = useCallback(
+        (worldPos: Position) => {
+            if (!lineStartRef.current || !rendererRef.current || !editorState.selectedTileType) {
+                return false;
+            }
+
+            lineEndRef.current = worldPos;
+            rendererRef.current.render(levelData, {
+                ...editorState,
+                linePreview: {
+                    start: lineStartRef.current,
+                    end: worldPos,
+                    tileType: editorState.selectedTileType,
+                },
+            });
+            return true;
+        },
+        [levelData, editorState]
+    );
+
+    // Helper: Handle rectangle tool preview during mouse move
+    const handleRectanglePreview = useCallback(
+        (worldPos: Position) => {
+            if (!rectangleStartRef.current || !rendererRef.current || !editorState.selectedTileType) {
+                return false;
+            }
+
+            rectangleEndRef.current = worldPos;
+            rendererRef.current.render(levelData, {
+                ...editorState,
+                rectanglePreview: {
+                    start: rectangleStartRef.current,
+                    end: worldPos,
+                    tileType: editorState.selectedTileType,
+                },
+            });
+            return true;
+        },
+        [levelData, editorState]
+    );
+
+    // Helper: Handle move tool dragging during mouse move
+    const handleMovePreview = useCallback(
+        (worldPos: Position) => {
+            if (!moveStartPositionRef.current || !rendererRef.current) {
+                return false;
+            }
+
+            const delta = {
+                x: worldPos.x - moveStartPositionRef.current.x,
+                y: worldPos.y - moveStartPositionRef.current.y,
+            };
+            moveDeltaRef.current = delta;
+            rendererRef.current.render(levelData, {
+                ...editorState,
+                moveDelta: delta,
+            });
+            return true;
+        },
+        [levelData, editorState]
+    );
+
+    // Helper: Handle multi-select drag box during mouse move
+    const handleMultiSelectPreview = useCallback(
+        (worldPos: Position) => {
+            if (!selectionStartRef.current || !rendererRef.current) {
+                return false;
+            }
+
+            selectionEndRef.current = worldPos;
+            rendererRef.current.render(levelData, {
+                ...editorState,
+                selectionBox: {
+                    start: selectionStartRef.current,
+                    end: worldPos,
+                },
+            });
+            return true;
+        },
+        [levelData, editorState]
+    );
+
+    // Helper: Handle pen tool continuous painting
+    const handlePenPainting = useCallback(
+        (worldPos: Position) => {
+            if (!editorState.selectedTileType) {
+                return false;
+            }
+
+            const isPlatform = editorState.selectedTileType.includes('platform');
+            if (isPlatform) {
+                onTilePlaced(worldPos, editorState.selectedTileType, true);
+            }
+            return true;
+        },
+        [editorState.selectedTileType, onTilePlaced]
+    );
+
+    // Helper: Route mouse move to appropriate tool handler
+    const handleToolPreview = useCallback(
+        (worldPos: Position) => {
+            // Try each preview handler - each returns true if it handled the event
+            if (isDrawingLineRef.current && handleLinePreview(worldPos)) return;
+            if (isDrawingRectangleRef.current && handleRectanglePreview(worldPos)) return;
+            if (isMovingObjectsRef.current && handleMovePreview(worldPos)) return;
+            if (isDraggingSelectionRef.current && handleMultiSelectPreview(worldPos)) return;
+            if (isPaintingRef.current) handlePenPainting(worldPos);
+        },
+        [handleLinePreview, handleRectanglePreview, handleMovePreview, handleMultiSelectPreview, handlePenPainting]
+    );
+
     const handleMouseMove = useCallback(
         (e: MouseEvent) => {
-            // Handle middle mouse panning
+            // Handle middle mouse panning (early return)
             if (isPanningRef.current) {
-                const wrapper = wrapperRef.current;
-                if (!wrapper) return;
-
-                const deltaX = e.clientX - panStartRef.current.x;
-                const deltaY = e.clientY - panStartRef.current.y;
-
-                wrapper.scrollLeft = scrollStartRef.current.left - deltaX;
-                wrapper.scrollTop = scrollStartRef.current.top - deltaY;
+                handlePanningMove(e);
                 return;
             }
 
             const worldPos = getWorldPosition(e);
             onMouseMove(worldPos);
-
-            // Handle line tool preview
-            if (
-                isDrawingLineRef.current &&
-                editorState.selectedTool === 'line' &&
-                lineStartRef.current &&
-                editorState.selectedTileType
-            ) {
-                lineEndRef.current = worldPos;
-                // Re-render to show line preview
-                if (rendererRef.current) {
-                    rendererRef.current.render(levelData, {
-                        ...editorState,
-                        linePreview: {
-                            start: lineStartRef.current,
-                            end: worldPos,
-                            tileType: editorState.selectedTileType,
-                        },
-                    });
-                }
-                return;
-            }
-
-            // Handle rectangle tool preview
-            if (
-                isDrawingRectangleRef.current &&
-                editorState.selectedTool === 'rectangle' &&
-                rectangleStartRef.current &&
-                editorState.selectedTileType
-            ) {
-                rectangleEndRef.current = worldPos;
-                // Re-render to show rectangle preview
-                if (rendererRef.current) {
-                    rendererRef.current.render(levelData, {
-                        ...editorState,
-                        rectanglePreview: {
-                            start: rectangleStartRef.current,
-                            end: worldPos,
-                            tileType: editorState.selectedTileType,
-                        },
-                    });
-                }
-                return;
-            }
-
-            // Handle move tool dragging
-            if (isMovingObjectsRef.current && editorState.selectedTool === 'move' && moveStartPositionRef.current) {
-                const delta = {
-                    x: worldPos.x - moveStartPositionRef.current.x,
-                    y: worldPos.y - moveStartPositionRef.current.y,
-                };
-                moveDeltaRef.current = delta;
-                // Re-render to show ghost preview
-                if (rendererRef.current) {
-                    rendererRef.current.render(levelData, {
-                        ...editorState,
-                        moveDelta: delta,
-                    });
-                }
-                return;
-            }
-
-            // Handle multi-select drag box
-            if (isDraggingSelectionRef.current && editorState.selectedTool === 'multiselect') {
-                selectionEndRef.current = worldPos;
-                // Force re-render to show drag box
-                if (rendererRef.current) {
-                    rendererRef.current.render(levelData, {
-                        ...editorState,
-                        selectionBox: {
-                            start: selectionStartRef.current!,
-                            end: worldPos,
-                        },
-                    });
-                }
-                return;
-            }
-
-            // Handle pen tool painting
-            // Only allow continuous placement for platform tiles, not for objects (buttons, doors, etc.)
-            if (isPaintingRef.current && editorState.selectedTool === 'pen' && editorState.selectedTileType) {
-                const isPlatform = editorState.selectedTileType.includes('platform');
-                if (isPlatform) {
-                    onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
-                }
-            }
+            handleToolPreview(worldPos);
         },
-        [getWorldPosition, onMouseMove, onTilePlaced, editorState, levelData]
+        [getWorldPosition, onMouseMove, handlePanningMove, handleToolPreview]
+    );
+
+    // Helper: Start middle mouse panning
+    const startPanning = useCallback((e: MouseEvent) => {
+        e.preventDefault();
+        const wrapper = wrapperRef.current;
+        if (!wrapper) return false;
+
+        isPanningRef.current = true;
+        panStartRef.current = { x: e.clientX, y: e.clientY };
+        scrollStartRef.current = {
+            left: wrapper.scrollLeft,
+            top: wrapper.scrollTop,
+        };
+        wrapper.style.cursor = 'grabbing';
+        return true;
+    }, []);
+
+    // Helper: Start drawing with line tool
+    const startLineDrawing = useCallback(
+        (worldPos: Position) => {
+            if (!editorState.selectedTileType) return false;
+
+            isDrawingLineRef.current = true;
+            lineStartRef.current = worldPos;
+            lineEndRef.current = worldPos;
+            return true;
+        },
+        [editorState.selectedTileType]
+    );
+
+    // Helper: Start drawing with rectangle tool
+    const startRectangleDrawing = useCallback(
+        (worldPos: Position) => {
+            if (!editorState.selectedTileType) return false;
+
+            isDrawingRectangleRef.current = true;
+            rectangleStartRef.current = worldPos;
+            rectangleEndRef.current = worldPos;
+            return true;
+        },
+        [editorState.selectedTileType]
+    );
+
+    // Helper: Start moving selected objects
+    const startMoving = useCallback(
+        (worldPos: Position) => {
+            if (editorState.selectedObjects.length === 0) return false;
+
+            isMovingObjectsRef.current = true;
+            moveStartPositionRef.current = worldPos;
+            moveDeltaRef.current = { x: 0, y: 0 };
+            return true;
+        },
+        [editorState.selectedObjects.length]
+    );
+
+    // Helper: Start multi-select drag box
+    const startMultiSelect = useCallback((worldPos: Position) => {
+        isDraggingSelectionRef.current = true;
+        selectionStartRef.current = worldPos;
+        selectionEndRef.current = worldPos;
+        return true;
+    }, []);
+
+    // Helper: Start painting with pen tool
+    const startPenPainting = useCallback(
+        (worldPos: Position) => {
+            if (!editorState.selectedTileType) return false;
+
+            isPaintingRef.current = true;
+            onTilePlaced(worldPos, editorState.selectedTileType, true);
+            return true;
+        },
+        [editorState.selectedTileType, onTilePlaced]
     );
 
     const handleMouseDown = useCallback(
         (e: MouseEvent) => {
             // Prevent event from bubbling to wrapper to avoid duplicate handling
-            // This is only done when the event originates from the canvas itself
             const canvas = canvasRef.current;
             if (e.currentTarget === canvas) {
                 e.stopPropagation();
@@ -225,163 +332,150 @@ export function useCanvas({
 
             // Middle mouse button (button === 1) for panning
             if (e.button === 1) {
-                e.preventDefault();
-                const wrapper = wrapperRef.current;
-                if (!wrapper) return;
-
-                isPanningRef.current = true;
-                panStartRef.current = { x: e.clientX, y: e.clientY };
-                scrollStartRef.current = {
-                    left: wrapper.scrollLeft,
-                    top: wrapper.scrollTop,
-                };
-                // Change cursor to grabbing
-                wrapper.style.cursor = 'grabbing';
+                startPanning(e);
                 return;
             }
 
             // Left mouse button for drawing/clicking
             const worldPos = getWorldPosition(e);
 
-            // Handle line tool - start drawing line
-            if (editorState.selectedTool === 'line' && editorState.selectedTileType) {
-                isDrawingLineRef.current = true;
-                lineStartRef.current = worldPos;
-                lineEndRef.current = worldPos;
-                return;
-            }
-
-            // Handle rectangle tool - start drawing rectangle
-            if (editorState.selectedTool === 'rectangle' && editorState.selectedTileType) {
-                isDrawingRectangleRef.current = true;
-                rectangleStartRef.current = worldPos;
-                rectangleEndRef.current = worldPos;
-                return;
-            }
-
-            // Handle move tool - start dragging selected objects
-            if (editorState.selectedTool === 'move' && editorState.selectedObjects.length > 0) {
-                isMovingObjectsRef.current = true;
-                moveStartPositionRef.current = worldPos;
-                moveDeltaRef.current = { x: 0, y: 0 };
-                return;
-            }
-
-            // Handle multi-select tool
-            if (editorState.selectedTool === 'multiselect') {
-                isDraggingSelectionRef.current = true;
-                selectionStartRef.current = worldPos;
-                selectionEndRef.current = worldPos;
-                return;
-            }
-
-            // Handle pen tool - start painting
-            if (editorState.selectedTool === 'pen' && editorState.selectedTileType) {
-                isPaintingRef.current = true;
-                onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
+            // Handle each tool type
+            if (editorState.selectedTool === 'line') {
+                startLineDrawing(worldPos);
+            } else if (editorState.selectedTool === 'rectangle') {
+                startRectangleDrawing(worldPos);
+            } else if (editorState.selectedTool === 'move') {
+                startMoving(worldPos);
+            } else if (editorState.selectedTool === 'multiselect') {
+                startMultiSelect(worldPos);
+            } else if (editorState.selectedTool === 'pen') {
+                startPenPainting(worldPos);
             }
             // Note: onCanvasClick is handled by the 'click' event, not mousedown
         },
         [
             getWorldPosition,
-            onTilePlaced,
-            editorState.selectedTileType,
             editorState.selectedTool,
-            editorState.selectedObjects.length,
+            startPanning,
+            startLineDrawing,
+            startRectangleDrawing,
+            startMoving,
+            startMultiSelect,
+            startPenPainting,
         ]
     );
 
-    const handleMouseUp = useCallback(() => {
+    // Helper: End panning
+    const endPanning = useCallback(() => {
+        if (!isPanningRef.current) return;
+
+        isPanningRef.current = false;
         const wrapper = wrapperRef.current;
-
-        // End panning
-        if (isPanningRef.current) {
-            isPanningRef.current = false;
-            if (wrapper) {
-                wrapper.style.cursor = '';
-            }
+        if (wrapper) {
+            wrapper.style.cursor = '';
         }
+    }, []);
 
-        // End line drawing
-        if (isDrawingLineRef.current && lineStartRef.current && lineEndRef.current && editorState.selectedTileType) {
-            isDrawingLineRef.current = false;
-            const positions = getLinePositions(lineStartRef.current, lineEndRef.current);
-            if (onLineComplete) {
-                onLineComplete(positions, editorState.selectedTileType);
-            }
-            lineStartRef.current = null;
-            lineEndRef.current = null;
-            // Re-render without preview
-            if (rendererRef.current) {
-                rendererRef.current.render(levelData, editorState);
-            }
-        }
-
-        // End rectangle drawing
+    // Helper: End line drawing and finalize
+    const endLineDrawing = useCallback(() => {
         if (
-            isDrawingRectangleRef.current &&
-            rectangleStartRef.current &&
-            rectangleEndRef.current &&
-            editorState.selectedTileType
+            !isDrawingLineRef.current ||
+            !lineStartRef.current ||
+            !lineEndRef.current ||
+            !editorState.selectedTileType
         ) {
-            isDrawingRectangleRef.current = false;
-            const positions = getRectanglePositions(rectangleStartRef.current, rectangleEndRef.current, true); // filled=true
-            if (onRectangleComplete) {
-                onRectangleComplete(positions, editorState.selectedTileType);
-            }
-            rectangleStartRef.current = null;
-            rectangleEndRef.current = null;
-            // Re-render without preview
-            if (rendererRef.current) {
-                rendererRef.current.render(levelData, editorState);
-            }
+            return;
         }
 
-        // End move drag
-        if (isMovingObjectsRef.current) {
-            isMovingObjectsRef.current = false;
-            if (onMoveObjectsComplete && (moveDeltaRef.current.x !== 0 || moveDeltaRef.current.y !== 0)) {
-                onMoveObjectsComplete(moveDeltaRef.current);
-            }
-            moveStartPositionRef.current = null;
-            moveDeltaRef.current = { x: 0, y: 0 };
-            // Re-render
-            if (rendererRef.current) {
-                rendererRef.current.render(levelData, editorState);
-            }
+        isDrawingLineRef.current = false;
+        const positions = getLinePositions(lineStartRef.current, lineEndRef.current);
+        if (onLineComplete) {
+            onLineComplete(positions, editorState.selectedTileType);
+        }
+        lineStartRef.current = null;
+        lineEndRef.current = null;
+
+        if (rendererRef.current) {
+            rendererRef.current.render(levelData, editorState);
+        }
+    }, [onLineComplete, editorState, levelData]);
+
+    // Helper: End rectangle drawing and finalize
+    const endRectangleDrawing = useCallback(() => {
+        if (
+            !isDrawingRectangleRef.current ||
+            !rectangleStartRef.current ||
+            !rectangleEndRef.current ||
+            !editorState.selectedTileType
+        ) {
+            return;
         }
 
-        // End multi-select drag
-        if (isDraggingSelectionRef.current && selectionStartRef.current && selectionEndRef.current) {
-            isDraggingSelectionRef.current = false;
-            if (onMultiSelectComplete) {
-                onMultiSelectComplete(selectionStartRef.current, selectionEndRef.current);
-            }
-            selectionStartRef.current = null;
-            selectionEndRef.current = null;
-            // Re-render without selection box
-            if (rendererRef.current) {
-                rendererRef.current.render(levelData, editorState);
-            }
+        isDrawingRectangleRef.current = false;
+        const positions = getRectanglePositions(rectangleStartRef.current, rectangleEndRef.current, true);
+        if (onRectangleComplete) {
+            onRectangleComplete(positions, editorState.selectedTileType);
+        }
+        rectangleStartRef.current = null;
+        rectangleEndRef.current = null;
+
+        if (rendererRef.current) {
+            rendererRef.current.render(levelData, editorState);
+        }
+    }, [onRectangleComplete, editorState, levelData]);
+
+    // Helper: End move drag and finalize
+    const endMoving = useCallback(() => {
+        if (!isMovingObjectsRef.current) return;
+
+        isMovingObjectsRef.current = false;
+        if (onMoveObjectsComplete && (moveDeltaRef.current.x !== 0 || moveDeltaRef.current.y !== 0)) {
+            onMoveObjectsComplete(moveDeltaRef.current);
+        }
+        moveStartPositionRef.current = null;
+        moveDeltaRef.current = { x: 0, y: 0 };
+
+        if (rendererRef.current) {
+            rendererRef.current.render(levelData, editorState);
+        }
+    }, [onMoveObjectsComplete, levelData, editorState]);
+
+    // Helper: End multi-select drag and finalize
+    const endMultiSelect = useCallback(() => {
+        if (!isDraggingSelectionRef.current || !selectionStartRef.current || !selectionEndRef.current) {
+            return;
         }
 
-        // End painting
-        if (isPaintingRef.current) {
-            isPaintingRef.current = false;
-            // End the drawing session
-            if (onDrawingSessionEnd) {
-                onDrawingSessionEnd();
-            }
+        isDraggingSelectionRef.current = false;
+        if (onMultiSelectComplete) {
+            onMultiSelectComplete(selectionStartRef.current, selectionEndRef.current);
         }
-    }, [
-        onDrawingSessionEnd,
-        onMultiSelectComplete,
-        onMoveObjectsComplete,
-        onLineComplete,
-        onRectangleComplete,
-        levelData,
-        editorState,
-    ]);
+        selectionStartRef.current = null;
+        selectionEndRef.current = null;
+
+        if (rendererRef.current) {
+            rendererRef.current.render(levelData, editorState);
+        }
+    }, [onMultiSelectComplete, levelData, editorState]);
+
+    // Helper: End pen painting
+    const endPenPainting = useCallback(() => {
+        if (!isPaintingRef.current) return;
+
+        isPaintingRef.current = false;
+        if (onDrawingSessionEnd) {
+            onDrawingSessionEnd();
+        }
+    }, [onDrawingSessionEnd]);
+
+    const handleMouseUp = useCallback(() => {
+        endPanning();
+        endLineDrawing();
+        endRectangleDrawing();
+        endMoving();
+        endMultiSelect();
+        endPenPainting();
+    }, [endPanning, endLineDrawing, endRectangleDrawing, endMoving, endMultiSelect, endPenPainting]);
 
     const handleClick = useCallback(
         (e: MouseEvent) => {
