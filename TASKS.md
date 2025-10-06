@@ -705,22 +705,24 @@ Please test the following scenarios:
 
 ### Tasks:
 
-#### 17.1 Merge auto-save E2E tests
-- **Status:** ⏸️ Not Started
+#### 17.1 Merge auto-save E2E tests ✅ COMPLETE
+- **Status:** ✅ COMPLETE
 - **Priority:** 3 (Test consolidation)
 - **Location:** `e2e/auto-save.spec.ts`
-- **Tests to merge:**
-  - Line 32: "should auto-save after 5 seconds"
-  - Line 56: "should change icon color based on save state"
-- **Reason:** Both tests verify auto-save behavior, can be consolidated into single comprehensive test
-- **Pattern:** Follow consolidation pattern from Chapter 13 (undo/redo/copy/paste merges)
-- **Implementation:**
-  - Merge both tests into single test that verifies timing AND icon state changes
-  - Place tiles → wait 5 seconds → verify save occurred + icon state
-  - Delete tests → verify icon shows unsaved state
-- **Files to modify:**
-  - `e2e/auto-save.spec.ts`
-- **Impact:** -1 test, reduces E2E execution time
+- **Tests merged:**
+  - Line 30-49: "should auto-save after 5 seconds"
+  - Line 51-72: "should change icon color based on save state"
+- **What was implemented:**
+  - Merged both tests into single comprehensive test: "should auto-save after 5 seconds and update both text and icon color"
+  - Test verifies timing (5 seconds), text changes (Unsaved → Saved), and icon color changes (orange → green)
+  - Follows consolidation pattern from Chapter 13
+- **Files modified:**
+  - `e2e/auto-save.spec.ts` - Merged two tests into one
+- **Tests:**
+  - ✅ 189 unit tests passing
+  - ✅ 149 E2E tests passing (5 skipped)
+  - ✅ All linter checks passing
+- **Impact:** -1 test, reduced E2E execution time
 
 #### 17.2 Remove redundant platform tile placement test
 - **Status:** ⏸️ Not Started

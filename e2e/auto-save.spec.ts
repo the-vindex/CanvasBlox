@@ -27,9 +27,10 @@ test.describe('Auto-Save', () => {
         await expect(saveIndicator).toContainText('Unsaved');
     });
 
-    test('should auto-save after 5 seconds', async ({ page }) => {
-        // Get save indicator
+    test('should auto-save after 5 seconds and update both text and icon color', async ({ page }) => {
+        // Get save indicator and icon
         const saveIndicator = page.getByTestId('save-indicator');
+        const saveIcon = page.locator('[data-testid="save-indicator"] i.fa-save').first();
 
         // Make a change
         const grassTile = page.getByTestId('tile-platform-grass');
@@ -38,33 +39,18 @@ test.describe('Auto-Save', () => {
         await clickCanvas(page, 150, 150);
         await page.waitForTimeout(100);
 
-        // Should show "Unsaved"
+        // Should show "Unsaved" text
         await expect(saveIndicator).toContainText('Unsaved');
-
-        // Wait for auto-save (5 seconds + buffer)
-        await page.waitForTimeout(5500);
-
-        // Should now show "Saved"
-        await expect(saveIndicator).toContainText('Saved');
-    });
-
-    test('should change icon color based on save state', async ({ page }) => {
-        // Get save indicator icon
-        const saveIcon = page.locator('[data-testid="save-indicator"] i.fa-save').first();
-
-        // Make a change
-        const grassTile = page.getByTestId('tile-platform-grass');
-
-        await grassTile.click();
-        await clickCanvas(page, 200, 200);
-        await page.waitForTimeout(100);
 
         // Icon should have orange color class for unsaved
         const unsavedClasses = await saveIcon.getAttribute('class');
         expect(unsavedClasses).toContain('text-orange-500');
 
-        // Wait for auto-save
+        // Wait for auto-save (5 seconds + buffer)
         await page.waitForTimeout(5500);
+
+        // Should now show "Saved" text
+        await expect(saveIndicator).toContainText('Saved');
 
         // Icon should have green color class for saved
         const savedClasses = await saveIcon.getAttribute('class');
