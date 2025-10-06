@@ -198,31 +198,48 @@ Press ESC                      → null            | null               ❌ clea
   - ✅ Undo/redo works correctly (bugfix verified)
 - **Note:** Works as part of drawing mode tools group following same patterns as pen and line tools
 
-#### 11.5 Implement linking tool for interactable objects
-- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
-- **Current:** Link tool button exists in toolbar ('k' key) but does nothing when activated
-- **Purpose:** Link interactable objects (buttons → doors, levers → doors, etc.) to create cause-effect relationships
-- **Implementation:**
-  - Click first object (source): Mark as link source, highlight visually
-  - Click second object (target): Create link from source to target
-  - Store link in source object's `properties.linkedObjects` array
-  - Store reverse link in target object's `properties.linkedFrom` array (for bidirectional tracking)
-  - Draw visual connection line between linked objects (already exists in canvasRenderer.ts:829-855)
-  - Exit link mode or allow chaining multiple links
-- **Validation needed:**
-  - Only interactable objects can be linked (not tiles or spawn points)
-  - Prevent linking object to itself
-  - Prevent duplicate links
-  - Visual feedback for valid/invalid link targets
-- **UI considerations:**
-  - Show which object is currently the link source (highlight or indicator)
-  - Escape or right-click to cancel linking
-  - Visual preview line while selecting target
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` (add link mode logic)
-  - `client/src/hooks/useLevelEditor.ts` (add linkObjects function)
-  - `client/src/types/level.ts` (ObjectProperties already has linkedObjects/linkedFrom)
-- **Note:** Tool button already exists, visual line rendering exists, just needs interaction logic
+#### 11.5 Implement linking tool for interactable objects ✅ Complete
+- **Status:** ✅ COMPLETE - Commit 4a74244
+- **Location:** `client/src/utils/linkingLogic.ts`, `client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`
+- **What was implemented:**
+  1. ✅ **Linking logic utilities** (`client/src/utils/linkingLogic.ts`)
+     - `canObjectBeLinked()` - validates object type (interactables only)
+     - `canLinkObjects()` - validates linking rules (no self-link, no duplicates)
+     - `createLink()` - creates bidirectional link (linkedObjects + linkedFrom)
+  2. ✅ **linkObjects function** (`client/src/hooks/useLevelEditor.ts`)
+     - Validates source and target objects exist
+     - Calls validation logic from linkingLogic.ts
+     - Updates level state with linked objects
+     - Shows toast notifications for success/errors
+     - Integrates with undo/redo history
+  3. ✅ **Click-based linking workflow** (`client/src/pages/LevelEditor.tsx`)
+     - First click sets linkSourceId (source object)
+     - Second click creates link to target
+     - linkSourceId cleared after link creation
+     - ESC key clears link mode (via useSelectionState)
+     - Only interactable objects can be clicked in link mode
+  4. ✅ **EditorState updates** (`client/src/types/level.ts`)
+     - Added `linkSourceId?: string | null` to track link source
+     - Cleared when changing tools (useSelectionState)
+  5. ✅ **Properties panel integration** (`client/src/components/level-editor/PropertiesPanel.tsx`)
+     - Shows "Linked Objects" section when object has links
+     - Displays linked object type and position
+- **Tests:**
+  - ✅ 6 E2E tests (linking-tool.spec.ts) - All passing
+  - ✅ 11 unit tests (linkingLogic.test.ts) - All passing
+  - ✅ Test quality review completed, weak tests removed
+  - ✅ Total: 166 unit + 132 E2E = 298 tests passing
+- **Manual Test:** ✅ Ready for user testing
+  - Place button and door on canvas
+  - Press 'K' to activate link tool
+  - Click button (source) - should set link source
+  - Click door (target) - should show toast "Link Created"
+  - Select button with 'V' tool
+  - Check Properties Panel shows "Linked Objects: door (x, y)"
+  - Try creating duplicate link - should show error toast
+  - Try linking button to itself - should show error toast
+  - Press ESC in link mode - should deactivate tool
+- **Note:** Visual connection lines already rendered by canvasRenderer.ts (drawLinks method), no changes needed
 
 #### 11.6 Implement unlinking tool for removing object links
 - **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/components/level-editor/PropertiesPanel.tsx`
