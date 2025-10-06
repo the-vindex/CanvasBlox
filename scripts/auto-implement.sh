@@ -6,7 +6,7 @@
 set -e
 
 MAX_ITERATIONS=20
-OPEN_QUESTIONS_FILE="../docs/OPEN_QUESTIONS.md"
+OPEN_QUESTIONS_FILE="docs/OPEN_QUESTIONS.md"
 TIMEOUT_MINUTES=10
 
 # Initialize open questions file
