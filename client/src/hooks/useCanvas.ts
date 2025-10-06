@@ -53,6 +53,7 @@ export function useCanvas({
     const isDrawingRectangleRef = useRef(false);
     const rectangleStartRef = useRef<Position | null>(null);
     const rectangleEndRef = useRef<Position | null>(null);
+    const suspendedToolRef = useRef<EditorState['selectedTool']>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -322,6 +323,33 @@ export function useCanvas({
         [editorState.selectedTileType, onTilePlaced]
     );
 
+    // Helper: Route mouse down to appropriate tool handler
+    const handleToolMouseDown = useCallback(
+        (worldPos: Position) => {
+            // Handle each tool type
+            if (editorState.selectedTool === 'line') {
+                startLineDrawing(worldPos);
+            } else if (editorState.selectedTool === 'rectangle') {
+                startRectangleDrawing(worldPos);
+            } else if (editorState.selectedTool === 'move') {
+                startMoving(worldPos);
+            } else if (editorState.selectedTool === 'multiselect') {
+                startMultiSelect(worldPos);
+            } else if (editorState.selectedTool === 'pen') {
+                startPenPainting(worldPos);
+            }
+            // Note: onCanvasClick is handled by the 'click' event, not mousedown
+        },
+        [
+            editorState.selectedTool,
+            startLineDrawing,
+            startRectangleDrawing,
+            startMoving,
+            startMultiSelect,
+            startPenPainting,
+        ]
+    );
+
     const handleMouseDown = useCallback(
         (e: MouseEvent) => {
             // Prevent event from bubbling to wrapper to avoid duplicate handling
@@ -339,30 +367,19 @@ export function useCanvas({
             // Left mouse button for drawing/clicking
             const worldPos = getWorldPosition(e);
 
-            // Handle each tool type
-            if (editorState.selectedTool === 'line') {
-                startLineDrawing(worldPos);
-            } else if (editorState.selectedTool === 'rectangle') {
-                startRectangleDrawing(worldPos);
-            } else if (editorState.selectedTool === 'move') {
-                startMoving(worldPos);
-            } else if (editorState.selectedTool === 'multiselect') {
+            // Shift key modifier: temporarily engage multi-select (replaces current tool)
+            if (e.shiftKey) {
+                // Store current tool so we can restore it later
+                if (!suspendedToolRef.current) {
+                    suspendedToolRef.current = editorState.selectedTool;
+                }
                 startMultiSelect(worldPos);
-            } else if (editorState.selectedTool === 'pen') {
-                startPenPainting(worldPos);
+                return;
             }
-            // Note: onCanvasClick is handled by the 'click' event, not mousedown
+
+            handleToolMouseDown(worldPos);
         },
-        [
-            getWorldPosition,
-            editorState.selectedTool,
-            startPanning,
-            startLineDrawing,
-            startRectangleDrawing,
-            startMoving,
-            startMultiSelect,
-            startPenPainting,
-        ]
+        [getWorldPosition, editorState.selectedTool, startPanning, startMultiSelect, handleToolMouseDown]
     );
 
     // Helper: End panning

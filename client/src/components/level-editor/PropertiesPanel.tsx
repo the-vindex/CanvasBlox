@@ -182,8 +182,20 @@ export function PropertiesPanel({ levelData, editorState, onLevelUpdate, onClose
                     </div>
                 </div>
 
-                {/* Object Properties (shown when object selected) */}
-                {selectedObject && (
+                {/* Multi-select indicator (shown when multiple objects selected) */}
+                {editorState.selectedObjects.length > 1 && (
+                    <div className="space-y-3 pt-4 border-t border-border">
+                        <h3 className="text-xs font-semibold text-muted-foreground uppercase">
+                            {editorState.selectedObjects.length} objects selected
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                            Use Move tool (H) to move all selected objects together, or Copy (Ctrl+C) to copy them.
+                        </p>
+                    </div>
+                )}
+
+                {/* Object Properties (shown when single object selected) */}
+                {selectedObject && editorState.selectedObjects.length === 1 && (
                     <div className="space-y-3 pt-4 border-t border-border">
                         <h3 className="text-xs font-semibold text-muted-foreground uppercase">Selected Object</h3>
 
