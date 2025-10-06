@@ -914,26 +914,38 @@ Please test the following scenarios:
   - Use Shift+Drag from Move tool → verify Move tool stays active
 - **Note:** Implementation follows "temporary behavior override" pattern - toolbar state preserved, mouse behavior temporarily changes
 
-#### 20.3 Implement Ctrl+Click for additive selection
+#### 20.3 Implement Ctrl+Click for additive selection ✅ Complete
+- **Status:** ✅ COMPLETE - Commit bf6293b
 - **Priority:** 3 (Feature)
-- **Location:** `client/src/hooks/useCanvas.ts`
-- **Current:** Clicking object replaces current selection
-- **Change:** Ctrl+Click adds individual objects to selection (additive)
+- **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`
+- **What was implemented:**
+  1. ✅ **toggleObjectSelection function** (`client/src/hooks/useLevelEditor.ts:368-373`)
+     - Wraps selectObject with multiSelect=true for toggle behavior
+     - Exported in useLevelEditor return value
+  2. ✅ **Ctrl key detection** (`client/src/pages/LevelEditor.tsx:209-243`)
+     - Modified handleCanvasClick to detect Ctrl/Meta key from MouseEvent
+     - Added check for drawing tools (pen/line/rectangle) - Ctrl+Click disabled for these
+     - Routes to handleSelectToolClick with ctrlKey=true for toggle behavior
+  3. ✅ **Updated handleSelectToolClick** (`client/src/pages/LevelEditor.tsx:109-127`)
+     - Added ctrlKey parameter
+     - Calls toggleObjectSelection when Ctrl held, selectObject when not
+     - Preserves selection on empty click when Ctrl held
+  4. ✅ **Cross-platform support**
+     - Supports both Ctrl (Windows/Linux) and Meta/Cmd (Mac) keys
 - **Behavior:**
   - Hold Ctrl key
   - Click object - adds to selection if not selected, removes if already selected (toggle)
   - Click empty space - does nothing (preserves selection)
-- **Implementation:**
-  - Track Ctrl key state in useCanvas
-  - On Ctrl+Click object: Toggle object in selection array
-  - Visual feedback: Cursor shows "+" icon, status bar shows "Add to selection (Ctrl)"
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` - Ctrl key handling, click logic
-  - `client/src/hooks/useLevelEditor.ts` - toggleObjectSelection function
+  - Works from any tool except drawing tools (pen/line/rectangle)
 - **Tests:**
-  - E2E: Ctrl+Click adds object to selection
-  - E2E: Ctrl+Click selected object removes it from selection
-  - E2E: Ctrl+Click empty space preserves selection
+  - ✅ 3 E2E tests (ctrl-click-selection.spec.ts) - All passing
+  - ✅ Total: 189 unit + 154 E2E = 343 tests passing (6 skipped)
+- **Manual Test:**
+  - Select an object → Ctrl+Click another object → verify both selected
+  - With 2 objects selected → Ctrl+Click one → verify it's removed from selection
+  - With objects selected → Ctrl+Click empty space → verify selection preserved
+  - From Move tool → Ctrl+Click object → verify toggle selection works
+- **Note:** Visual feedback (cursor changes, status bar) deferred to Task 20.5
 
 #### 20.4 Implement temporary tool override for Move tool
 - **Priority:** 3 (Feature)
