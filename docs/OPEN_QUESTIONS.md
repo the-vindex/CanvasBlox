@@ -188,3 +188,31 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 20.4: Implement temporary tool override for Move tool
+
+**Question:** How should temporary tool override work when Move tool is active and modifier keys are pressed?
+
+**Assumption/Decision:**
+- When Move tool is active and Shift/Ctrl are pressed, temporarily suspend Move tool
+- Store suspended tool in state so it can be restored after modifier release
+- Visual feedback deferred to Task 20.5 (toolbar dimming, status bar updates)
+- Focus on functional behavior first, then add visual indicators
+
+**Question:** Should keyboard modifier key release restore the suspended tool, or only mouse-based operations?
+
+**Assumption/Decision:**
+- Use existing mechanism from Task 20.2 (suspendedToolRef pattern)
+- Tool restoration happens automatically when modifier-based operation completes
+- No need for explicit key-up handlers - simpler and more robust
+- This matches the pattern established in Shift+Drag implementation
+
+**Question:** Should the suspended tool behavior apply only to Move tool, or all tools?
+
+**Assumption/Decision:**
+- Apply to all tools (universal pattern) - Shift/Ctrl modifiers temporarily override any active tool
+- This is consistent with Task 20.2 implementation which already works from any tool
+- Move tool is mentioned in task description, but the pattern should be universal for consistency
+- Rationale: Users expect modifier keys to work consistently regardless of active tool
+
+---
+

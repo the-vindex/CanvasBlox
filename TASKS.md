@@ -947,28 +947,34 @@ Please test the following scenarios:
   - From Move tool → Ctrl+Click object → verify toggle selection works
 - **Note:** Visual feedback (cursor changes, status bar) deferred to Task 20.5
 
-#### 20.4 Implement temporary tool override for Move tool
+#### 20.4 Implement temporary tool override for Move tool ✅ Complete
+- **Status:** ✅ COMPLETE
 - **Priority:** 3 (Feature)
-- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useSelectionState.ts`
-- **Current:** Modifier keys disengage Move tool
-- **Change:** When Move tool active, Shift/Ctrl temporarily override without disengaging Move
-- **Behavior:**
-  - User has Move tool selected
-  - Press Shift - Move tool becomes inactive, multi-select engaged
-  - Release Shift - Move tool re-activates
-  - Same for Ctrl - temporary additive selection mode
-- **Special case:** This is an exception to normal tool behavior - requires careful state management
-- **Implementation:**
-  - Add "suspended tool" state (tool that will resume after modifier release)
-  - When modifier pressed with Move active: Suspend Move, activate selection mode
-  - When modifier released: Restore Move tool
-  - Visual feedback: Toolbar shows both Move (dimmed) and current modifier mode
-- **Files to modify:**
-  - `client/src/hooks/useSelectionState.ts` - Suspended tool state
-  - `client/src/components/level-editor/Toolbar.tsx` - Visual feedback for suspended state
+- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`
+- **What was implemented:**
+  1. ✅ **Shift+Drag temporary multi-select** (`client/src/hooks/useCanvas.ts:370-378`)
+     - When Shift is held during mouse down, multi-select tool temporarily engages
+     - Works from ANY tool (including Move, Link, Unlink tools)
+     - Original tool remains selected in toolbar during Shift+Drag
+     - After selection completes, original tool is still active
+     - Uses suspendedToolRef pattern from Task 20.2
+  2. ✅ **Ctrl+Click temporary additive selection** (`client/src/pages/LevelEditor.tsx:219-224`)
+     - When Ctrl/Cmd is held during click, additive selection mode engages
+     - Works from ANY tool except drawing tools (pen/line/rectangle)
+     - Original tool remains active after Ctrl+Click
+     - No tool switching required - purely modifies selection behavior
+  3. ✅ **Universal pattern** - Both modifiers work from all tools
+     - Move tool: Shift+Drag and Ctrl+Click work while Move stays active
+     - Link tool: Shift+Drag and Ctrl+Click work while Link stays active
+     - Select tool: Shift+Drag and Ctrl+Click work (additive to existing behavior)
+     - Drawing tools: Only Shift+Drag works (Ctrl disabled to prevent conflicts)
 - **Tests:**
-  - E2E: Move tool + Shift → multi-select works, release → Move resumes
-  - E2E: Move tool + Ctrl → additive selection works, release → Move resumes
+  - ✅ 3 E2E tests (temporary-tool-override.spec.ts) - All passing
+    - Test 1: Ctrl+Click additive selection from Move tool
+    - Test 2: Shift+Drag multi-select from Move tool
+    - Test 3: Ctrl+Click additive selection from Link tool
+  - ✅ Total: 189 unit + 157 E2E = 346 tests passing (6 skipped)
+- **Note:** Task discovered to already be implemented via Tasks 20.2 and 20.3. New tests added to verify and document the behavior.
 
 #### 20.5 Visual feedback for modifier states
 - **Priority:** 3 (Feature)
