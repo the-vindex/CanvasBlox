@@ -25,6 +25,7 @@ export default function LevelEditor() {
     const [showImportModal, setShowImportModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const lastLinkToastRef = useRef<number>(0);
 
     const { toast } = useToast();
     const selectionState = useSelectionState();
@@ -95,20 +96,38 @@ export default function LevelEditor() {
 
                 if (clickedObj) {
                     if (!editorState.linkSourceId) {
-                        // First click - set as link source
-                        setEditorState((prev) => ({ ...prev, linkSourceId: clickedObj.id }));
-                        toast({
-                            title: 'Link Source Selected',
-                            description: `Click another object to link it with this ${clickedObj.type}`,
-                        });
+                        // First click - set as link source and show selection
+                        setEditorState((prev) => ({
+                            ...prev,
+                            linkSourceId: clickedObj.id,
+                            selectedObjects: [clickedObj.id], // Show selection box around source
+                        }));
+
+                        // Prevent duplicate toasts within 100ms
+                        const now = Date.now();
+                        if (now - lastLinkToastRef.current > 100) {
+                            lastLinkToastRef.current = now;
+                            toast({
+                                title: 'Link Source Selected',
+                                description: `Click another object to link it with this ${clickedObj.type}`,
+                            });
+                        }
                     } else if (editorState.linkSourceId === clickedObj.id) {
-                        // Clicked same object twice - silently clear selection (deselect)
-                        setEditorState((prev) => ({ ...prev, linkSourceId: null }));
+                        // Clicked same object twice - deselect and clear
+                        setEditorState((prev) => ({
+                            ...prev,
+                            linkSourceId: null,
+                            selectedObjects: [],
+                        }));
                     } else {
                         // Second click on different object - create link
                         linkObjects(editorState.linkSourceId, clickedObj.id);
-                        // Clear link source to allow creating another link
-                        setEditorState((prev) => ({ ...prev, linkSourceId: null }));
+                        // Clear link source and selection
+                        setEditorState((prev) => ({
+                            ...prev,
+                            linkSourceId: null,
+                            selectedObjects: [],
+                        }));
                     }
                 }
             }
