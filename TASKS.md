@@ -495,24 +495,33 @@ Please test the following scenarios:
 - **Manual Test:** ✅ User confirmed - "animation is nice and visible"
 - **Note:** Selection outline now clearly visible on blue default background and all other colors
 
-#### 11.14 Move Select All button to toolbar
+#### 11.14 Move Select All button to toolbar ✅ Complete
+- **Status:** 🧪 Ready for User Testing - Commit 4ac9987
 - **Priority:** 3 (Feature)
 - **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/pages/LevelEditor.tsx`
-- **Current:** "Select All" is in Edit menu, requires menu navigation
-- **Change:** Move "Select All" button to toolbar near other selection tools (Select, Multi-select)
-- **Implementation:**
-  - Remove "Select All" from Edit menu dropdown
-  - Add button to toolbar in selection tools group
-  - Create icon for Select All button (e.g., dotted box with all corners highlighted)
-  - Keep Ctrl+A keyboard shortcut working
-  - Add tooltip: "Select All (Ctrl+A)"
-- **Files to modify:**
-  - `client/src/components/level-editor/Toolbar.tsx` - Add Select All button
-  - `client/src/pages/LevelEditor.tsx` - Remove from Edit menu
+- **What was implemented:**
+  1. ✅ **Added Select All button to toolbar** (`client/src/components/level-editor/Toolbar.tsx:124-134`)
+     - Button placed in selection tools group (first toolbar section)
+     - Created select-all.svg icon with filled corners design
+     - Added tooltip: "Select All (Ctrl+A)"
+     - Button disabled when no objects exist (hasObjects prop)
+  2. ✅ **Removed Select All from header** (`client/src/pages/LevelEditor.tsx:782-822`)
+     - Removed standalone button from header menu bar
+     - Cleaner UI, follows toolbar pattern for all selection tools
+  3. ✅ **Wired up props and handlers**
+     - Added onSelectAll and hasObjects props to Toolbar component
+     - Passed _selectAllObjects handler from LevelEditor
+     - Button enabled/disabled based on object presence
 - **Tests:**
-  - E2E test: Click Select All button → verify all objects selected
-  - E2E test: Ctrl+A still works
-- **Note:** User requirement - no discussion needed
+  - ✅ 2 E2E tests (select-all-toolbar.spec.ts) - All passing
+  - ✅ Test quality reviewed and refactored
+  - ✅ Total: 190 unit + 145 E2E = 335 tests passing
+- **Manual Test:**
+  - Click Select All button in toolbar → verify all objects selected
+  - Verify button shows tooltip "Select All (Ctrl+A)"
+  - Empty level → verify button is disabled
+  - Place object → verify button becomes enabled
+  - Ctrl+A keyboard shortcut still works (existing coverage)
 
 #### 11.15 Move Copy/Paste buttons to toolbar
 - **Priority:** 3 (Feature)
