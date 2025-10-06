@@ -279,13 +279,11 @@ export function useCanvas({
             if (editorState.selectedTool === 'pen' && editorState.selectedTileType) {
                 isPaintingRef.current = true;
                 onTilePlaced(worldPos, editorState.selectedTileType, true); // Pass isDrawing=true
-            } else {
-                onCanvasClick(worldPos, e);
             }
+            // Note: onCanvasClick is handled by the 'click' event, not mousedown
         },
         [
             getWorldPosition,
-            onCanvasClick,
             onTilePlaced,
             editorState.selectedTileType,
             editorState.selectedTool,

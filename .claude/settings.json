@@ -23,12 +23,12 @@
             "Bash(npm run format:*)",
             "Bash(npm run format:check:*)",
             "Bash(npm run format:*)",
-            "Bash(ast-grep:*)",        
+            "Bash(ast-grep:*)",
             "WebSearch"
         ],
         "deny": [],
         "ask": []
     },
     "enableAllProjectMcpServers": true,
-    "enabledMcpjsonServers": ["playwright"]
+    "enabledMcpjsonServers": ["playwright", "playwrightproxy"]
 }
