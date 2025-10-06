@@ -66,6 +66,7 @@ export default function LevelEditor() {
         cancelPaste,
         confirmLargeClipboardPaste,
         moveSelectedObjects: _moveSelectedObjects,
+        updateBatchProperty,
         linkObjects,
         unlinkObjects,
         undo: _undo,
@@ -985,6 +986,7 @@ export default function LevelEditor() {
                         levelData={currentLevel}
                         editorState={editorState}
                         onLevelUpdate={updateCurrentLevel}
+                        onBatchUpdate={updateBatchProperty}
                         onClose={() => setShowPropertiesPanel(false)}
                     />
                 )}

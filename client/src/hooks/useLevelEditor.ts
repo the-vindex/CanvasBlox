@@ -649,6 +649,49 @@ export function useLevelEditor() {
         [editorState.selectedObjects, updateCurrentLevel]
     );
 
+    const updateBatchProperty = useCallback(
+        (property: string, value: string | boolean | number | object) => {
+            if (editorState.selectedObjects.length === 0) return;
+
+            updateCurrentLevel(
+                (level) => {
+                    const updateObject = (obj: Tile | InteractableObject | SpawnPoint) => {
+                        if (!editorState.selectedObjects.includes(obj.id)) return obj;
+
+                        // Handle nested properties
+                        if (property.includes('.')) {
+                            const parts = property.split('.');
+                            const result = { ...obj };
+                            let current: any = result;
+
+                            // Navigate to the parent of the target property
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                current[parts[i]] = { ...current[parts[i]] };
+                                current = current[parts[i]];
+                            }
+
+                            // Set the final property value
+                            current[parts[parts.length - 1]] = value;
+                            return result;
+                        }
+
+                        // Simple property update
+                        return { ...obj, [property]: value };
+                    };
+
+                    return {
+                        ...level,
+                        tiles: level.tiles.map((obj) => updateObject(obj) as Tile),
+                        objects: level.objects.map((obj) => updateObject(obj) as InteractableObject),
+                        spawnPoints: level.spawnPoints.map((obj) => updateObject(obj) as SpawnPoint),
+                    };
+                },
+                `Updated ${editorState.selectedObjects.length} object${editorState.selectedObjects.length > 1 ? 's' : ''}`
+            );
+        },
+        [editorState.selectedObjects, updateCurrentLevel]
+    );
+
     const commitBatchToHistory = useCallback(
         (action: string) => {
             // Create a history entry for the current state (after batched changes)
@@ -806,6 +849,7 @@ export function useLevelEditor() {
         cancelPaste,
         confirmLargeClipboardPaste,
         moveSelectedObjects,
+        updateBatchProperty,
         linkObjects,
         unlinkObjects,
         undo,

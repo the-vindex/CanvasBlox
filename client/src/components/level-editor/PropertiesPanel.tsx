@@ -6,24 +6,43 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { EditorState, InteractableObject, LevelData, SpawnPoint, Tile } from '@/types/level';
+import {
+    analyzeSelection,
+    formatTypeName,
+    getCommonPropertyValue,
+    getSelectedObjects,
+} from '@/utils/batchPropertyUpdate';
 import { validateButtonNumber } from '@/utils/buttonNumbering';
 
 interface PropertiesPanelProps {
     levelData: LevelData;
     editorState: EditorState;
     onLevelUpdate: (updater: (level: LevelData) => LevelData, action?: string) => void;
+    onBatchUpdate?: (property: string, value: string | boolean | number | object) => void;
     onClose?: () => void;
 }
 
-export function PropertiesPanel({ levelData, editorState, onLevelUpdate, onClose }: PropertiesPanelProps) {
+export function PropertiesPanel({
+    levelData,
+    editorState,
+    onLevelUpdate,
+    onBatchUpdate,
+    onClose,
+}: PropertiesPanelProps) {
     const collidableId = useId();
     const defaultSpawnId = useId();
+    const batchCollidableId = useId();
     const selectedObjectId = editorState.selectedObjects[0];
     const selectedObject = selectedObjectId
         ? [...levelData.tiles, ...levelData.objects, ...levelData.spawnPoints].find(
               (obj) => obj.id === selectedObjectId
           )
         : null;
+
+    // Multi-select support
+    const selectedObjects = getSelectedObjects(levelData, editorState.selectedObjects);
+    const selectionAnalysis = analyzeSelection(selectedObjects);
+    const isMultiSelect = editorState.selectedObjects.length > 1;
 
     const handleLevelPropertyChange = (property: string, value: string | object) => {
         onLevelUpdate((level) => {
@@ -182,15 +201,112 @@ export function PropertiesPanel({ levelData, editorState, onLevelUpdate, onClose
                     </div>
                 </div>
 
-                {/* Multi-select indicator (shown when multiple objects selected) */}
-                {editorState.selectedObjects.length > 1 && (
+                {/* Multi-select batch editing (shown when multiple objects selected) */}
+                {isMultiSelect && onBatchUpdate && (
                     <div className="space-y-3 pt-4 border-t border-border">
                         <h3 className="text-xs font-semibold text-muted-foreground uppercase">
-                            {editorState.selectedObjects.length} objects selected
+                            {selectionAnalysis.count} objects selected
                         </h3>
-                        <p className="text-sm text-muted-foreground">
-                            Use Move tool (H) to move all selected objects together, or Copy (Ctrl+C) to copy them.
+
+                        {/* Object type breakdown */}
+                        <div className="text-sm text-muted-foreground">
+                            {selectionAnalysis.types.map((typeInfo, index) => (
+                                <div key={typeInfo.type}>
+                                    {typeInfo.count} {formatTypeName(typeInfo.type)}
+                                    {typeInfo.count > 1 ? 's' : ''}
+                                    {index < selectionAnalysis.types.length - 1 ? ', ' : ''}
+                                </div>
+                            ))}
+                        </div>
+
+                        <p className="text-xs text-muted-foreground italic">
+                            Edit properties below to apply changes to all selected objects.
                         </p>
+
+                        {/* Common properties for batch editing */}
+                        <div className="space-y-3">
+                            {/* Position - Note: Shows common value or "Mixed" */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <Label className="text-sm text-muted-foreground mb-1">X Position</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder={
+                                            getCommonPropertyValue(selectedObjects, 'position.x') === 'Mixed'
+                                                ? 'Mixed'
+                                                : String(getCommonPropertyValue(selectedObjects, 'position.x'))
+                                        }
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value, 10);
+                                            if (!Number.isNaN(value)) {
+                                                onBatchUpdate('position.x', value);
+                                            }
+                                        }}
+                                        className="text-sm"
+                                        data-testid="input-batch-x"
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-sm text-muted-foreground mb-1">Y Position</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder={
+                                            getCommonPropertyValue(selectedObjects, 'position.y') === 'Mixed'
+                                                ? 'Mixed'
+                                                : String(getCommonPropertyValue(selectedObjects, 'position.y'))
+                                        }
+                                        onChange={(e) => {
+                                            const value = parseInt(e.target.value, 10);
+                                            if (!Number.isNaN(value)) {
+                                                onBatchUpdate('position.y', value);
+                                            }
+                                        }}
+                                        className="text-sm"
+                                        data-testid="input-batch-y"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Layer */}
+                            <div>
+                                <Label className="text-sm text-muted-foreground mb-1">Layer</Label>
+                                <Input
+                                    type="number"
+                                    placeholder={
+                                        getCommonPropertyValue(selectedObjects, 'layer') === 'Mixed'
+                                            ? 'Mixed'
+                                            : String(getCommonPropertyValue(selectedObjects, 'layer'))
+                                    }
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value, 10);
+                                        if (!Number.isNaN(value)) {
+                                            onBatchUpdate('layer', value);
+                                        }
+                                    }}
+                                    className="text-sm"
+                                    data-testid="input-batch-layer"
+                                />
+                            </div>
+
+                            {/* Collidable (if all objects have this property) */}
+                            {selectedObjects.every((obj) => 'properties' in obj && 'collidable' in obj.properties) && (
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={batchCollidableId}
+                                        checked={
+                                            getCommonPropertyValue(selectedObjects, 'properties.collidable') === true
+                                        }
+                                        onCheckedChange={(checked) => onBatchUpdate('properties.collidable', checked)}
+                                        data-testid="checkbox-batch-collidable"
+                                    />
+                                    <Label htmlFor={batchCollidableId} className="text-sm cursor-pointer">
+                                        Collidable{' '}
+                                        {getCommonPropertyValue(selectedObjects, 'properties.collidable') === 'Mixed' &&
+                                            '(Mixed)'}
+                                    </Label>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 

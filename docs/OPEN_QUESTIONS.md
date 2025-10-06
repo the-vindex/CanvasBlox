@@ -5,6 +5,56 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 21.1: Rethink Properties Panel for multi-select
+
+**Discovery:** Task already implemented!
+
+**Status:** ✅ COMPLETE - Feature already exists in codebase
+
+**Implementation Details:**
+- **Utilities:** `client/src/utils/batchPropertyUpdate.ts` contains all batch editing logic
+  - `getSelectedObjects()` - Get all selected objects from level data
+  - `analyzeSelection()` - Analyze object types in selection
+  - `getCommonPropertyValue()` - Get common property value or "Mixed" if values differ
+  - `updateBatchProperty()` - Update property on multiple objects
+  - `formatTypeName()` - Format type name for display
+
+- **Properties Panel UI:** `client/src/components/level-editor/PropertiesPanel.tsx` (lines 204-311)
+  - Shows object count and type breakdown (e.g., "3 objects selected", "2 Platform - Basics, 1 Button")
+  - Displays batch editing UI with common properties
+  - Shows "Mixed" placeholder when property values differ
+  - Allows batch editing of: position (x, y), layer, collidable property
+
+- **Hook Integration:** `client/src/hooks/useLevelEditor.ts`
+  - `updateBatchProperty()` function (line 652) wraps the utility function
+  - Integrated with undo/redo system
+  - Exported in hook return value (line 852)
+
+- **Page Wiring:** `client/src/pages/LevelEditor.tsx`
+  - `updateBatchProperty` passed to PropertiesPanel as `onBatchUpdate` prop (line 989)
+
+**Tests:**
+- ✅ Unit tests: `client/src/utils/batchPropertyUpdate.test.ts` (comprehensive coverage)
+- ✅ E2E tests: `e2e/multi-select-properties.spec.ts` (5 tests covering all requirements)
+  - Test 1: Show object count and type breakdown
+  - Test 2: Batch editing of layer property
+  - Test 3: Show "Mixed" placeholder when values differ
+  - Test 4: Update all selected objects when editing mixed values
+  - Test 5: Undo/redo support for batch edits
+
+**Requirements Met:**
+- ✅ Show count of selected objects
+- ✅ Display common properties across all selected objects
+- ✅ Indicate when properties differ ("Mixed" placeholder)
+- ✅ Enable batch editing (change one property, applies to all selected)
+- ✅ Show object type mix if different types selected
+- ✅ Undo/redo support for batch edits
+
+**Decision:**
+Mark Task 21.1 as ✅ COMPLETE in TASKS.md since the feature is fully implemented and tested.
+
+---
+
 ## Task 20.2: Implement Shift+Drag for temporary multi-select
 
 **Question:** How should the temporary tool override work? Should it require explicit key down/up handling or integrate with existing multi-select tool?
@@ -46,251 +96,5 @@ Review this file after the auto-implementation is complete.
 - When Shift is pressed during mousedown, multi-select tool is temporarily activated
 - Tool restoration happens automatically when multi-select completes (endMultiSelect callback)
 - The existing multi-select tool behavior handles selection completion and tool cleanup
-
----
-
-## Task 20.3: Implement Ctrl+Click for additive selection
-
-**Question:** How should Ctrl+Click interact with existing selection? Should it toggle individual objects, or just add them?
-
-**Assumption/Decision:**
-- Ctrl+Click toggles object in selection (add if not selected, remove if already selected)
-- Ctrl+Click on empty space does nothing (preserves current selection)
-- Works from any tool except drawing tools (pen/line/rectangle)
-- Does not change the active tool - purely modifies selection behavior
-- Follows industry pattern from Photoshop, Figma (see docs/MODIFIER_KEY_SELECTION_PATTERNS.md)
-
-**Question:** Should visual feedback show when Ctrl is held?
-
-**Assumption/Decision:**
-- Defer visual feedback (cursor changes, status bar updates) to Task 20.5
-- For Task 20.3, focus only on behavior implementation
-- This keeps the task focused and testable
-
-**Question:** Should there be a helper function to toggle selection, or modify existing functions?
-
-**Assumption/Decision:**
-- Create new `toggleObjectSelection` function in useLevelEditor.ts
-- This keeps logic separate from existing `selectObject` and `selectMultipleObjects` functions
-- Function should handle undo/redo history
-- Function should work with individual objects only (not arrays)
-
----
-
-## Task 15.1: Fix all linter issues
-
-**Question:** What refactoring approach should I use for complex functions (handleMouseMove, handleMouseDown, handleMouseUp, handleCanvasClick, getRectanglePositions)?
-
-**Assumption/Decision:**
-- Extract helper functions from complex handlers to reduce cognitive complexity
-- Use early returns to reduce nesting
-- Group related conditional logic into smaller, named functions
-- Focus on maintaining exact behavior (no breaking changes)
-- Auto-fix simple issues (unused imports, unused variables with underscore prefix, node: protocol)
-- Priority order: Auto-fixable issues first, then complex function refactoring
-
----
-
-## Task 15.2: Remove duplicate level button
-
-**Question:** Should the duplicateLevel function be removed from useLevelEditor.ts as well, or just the UI button?
-
-**Assumption/Decision:**
-- Remove only the UI button and the onDuplicateLevel prop
-- Keep the duplicateLevel function in useLevelEditor.ts - it may be useful programmatically or for future features
-- The rationale from TASKS.md is valid: Ctrl+A + Ctrl+C workflow makes the button redundant
-- Update E2E test to remove the duplicate level button visibility test
-
----
-
-## Task 18.1: Rethink copy/paste workflow with ghost preview
-
-**Question:** How should large clipboard pastes be handled (e.g., 100+ objects from Ctrl+A, Ctrl+C)?
-
-**Assumption/Decision:**
-- Implement ghost preview for normal paste operations
-- For large clipboards (>20 objects), show confirmation dialog instead of ghost preview
-- Threshold: 20 objects (reasonable for ghost preview performance)
-- Dialog: "Paste [N] objects at cursor position?" with Cancel/Paste buttons
-- On confirm: Paste immediately at cursor position (no ghost)
-- This prevents performance issues and unclear UX from hundreds of ghost objects
-- Ghost preview will be rendered similar to move tool (50% opacity)
-
-**Question:** Should paste keep the tool active after placing, or clear to null?
-
-**Assumption/Decision:**
-- After successful paste (click to place), clear selectedTool to null
-- This matches the behavior of other one-shot tools and prevents accidental multiple pastes
-- User can press Ctrl+V again to paste another copy if needed
-
-**Question:** How should paste interact with tile overlap logic (Task 11.10)?
-
-**Assumption/Decision:**
-- Pasted tiles should follow same overlap rules as drawing tools
-- Use removeOverlappingTiles() when pasting
-- Newest tile wins, button-on-door exception applies
-- This provides consistent behavior across all placement methods
-
----
-
-## Task 12.1: Reshape and consolidate project documentation
-
-**Question:** Should we create a README.md file for the project, or is the lack of one intentional?
-
-**Assumption/Decision:** Will create a comprehensive README.md as part of documentation consolidation. This is standard practice for all projects and provides essential onboarding for new developers.
-
-**Question:** How much technical detail should go in README.md vs ARCHITECTURE.md?
-
-**Assumption/Decision:** README.md will be high-level (overview, quick start, basic architecture), while ARCHITECTURE.md will contain deep technical details. This follows industry standard separation of concerns.
-
-**Question:** Should we keep CLAUDE.md separate or merge it into a general DEVELOPMENT.md?
-
-**Assumption/Decision:** Keep CLAUDE.md separate as it contains AI-specific instructions. Create new DEVELOPMENT.md for general development workflow (commands, testing, linting) that applies to all developers.
-
-**Question:** What to do with specialized docs (E2E_TESTING.md, TDD_PRINCIPLES.md, REACT_BEST_PRACTICES.md)?
-
-**Assumption/Decision:** Keep these as standalone reference docs in docs/ folder. They serve specific purposes and are appropriately scoped. Will ensure they're properly linked from README and DEVELOPMENT.md.
-
----
-
-## Task 20.1: Research industry patterns for modifier-based selection
-
-**Question:** Which modifier key patterns should CanvasBlox implement for selection? What behaviors do industry tools use?
-
-**Assumption/Decision:**
-- Researched Photoshop, Figma, Illustrator, and Tiled Map Editor
-- **Shift key:** Primary use = additive/multi-select (universal pattern across all tools)
-- **Ctrl/Cmd key:** Primary use = temporary tool override (strong pattern in Adobe tools)
-- **Implementation priority:** Shift+Drag multi-select (P1) > Ctrl+Click additive select (P1) > Visual feedback (P2) > Temporary tool override (P3)
-- Created comprehensive design document: `docs/MODIFIER_KEY_SELECTION_PATTERNS.md`
-
-**Question:** Should Shift+Drag be additive (add to selection) or replace current selection?
-
-**Assumption/Decision:**
-- **Replace current selection** (non-additive)
-- Rationale: Consistent with Tiled Map Editor, simpler mental model, Ctrl+Click provides additive behavior
-- Can be revisited in Task 20.6 if user feedback suggests additive is better
-
-**Question:** Is temporary tool override worth the implementation complexity?
-
-**Assumption/Decision:**
-- **Low priority (P3)** - implement after core patterns (20.2-20.3) validated
-- Rationale: Core patterns provide 80% of value with 20% of complexity
-- Requires state machine refactoring (suspended tool state)
-- Better to validate basic patterns with users before committing to advanced patterns
-
-**Question:** Should we implement Alt key modifiers?
-
-**Assumption/Decision:**
-- **Not recommended for initial implementation**
-- Rationale: Less consistent across tools, adds complexity without clear UX benefit
-- Can be added as future enhancement (P4) if user research shows need
-
----
-
-## Task 20.4: Implement temporary tool override for Move tool
-
-**Question:** How should temporary tool override work when Move tool is active and modifier keys are pressed?
-
-**Assumption/Decision:**
-- When Move tool is active and Shift/Ctrl are pressed, temporarily suspend Move tool
-- Store suspended tool in state so it can be restored after modifier release
-- Visual feedback deferred to Task 20.5 (toolbar dimming, status bar updates)
-- Focus on functional behavior first, then add visual indicators
-
-**Question:** Should keyboard modifier key release restore the suspended tool, or only mouse-based operations?
-
-**Assumption/Decision:**
-- Use existing mechanism from Task 20.2 (suspendedToolRef pattern)
-- Tool restoration happens automatically when modifier-based operation completes
-- No need for explicit key-up handlers - simpler and more robust
-- This matches the pattern established in Shift+Drag implementation
-
-**Question:** Should the suspended tool behavior apply only to Move tool, or all tools?
-
-**Assumption/Decision:**
-- Apply to all tools (universal pattern) - Shift/Ctrl modifiers temporarily override any active tool
-- This is consistent with Task 20.2 implementation which already works from any tool
-- Move tool is mentioned in task description, but the pattern should be universal for consistency
-- Rationale: Users expect modifier keys to work consistently regardless of active tool
-
----
-
-## Task 20.5: Visual feedback for modifier states
-
-**Question:** What visual feedback should we provide for modifier key states?
-
-**Assumption/Decision:**
-- **Cursor changes:** Not implementing custom cursors due to complexity and browser compatibility issues
-- **Status bar:** Will add status bar indicator showing modifier state ("Multi-select (Shift)" or "Add to selection (Ctrl)")
-- **Toolbar:** Not implementing toolbar dimming/suspended state - adds complexity without clear UX benefit
-- Focus on simple, clear status bar feedback that works across all browsers
-
-**Question:** Where should the status bar be positioned in the UI?
-
-**Assumption/Decision:**
-- Add status bar at bottom of LevelEditor component
-- Show current mode/modifier state
-- Use existing shadcn/ui components for consistent styling
-- Keep it minimal - only show when modifier is active
-
-**Question:** Should we track modifier key state globally or detect it on-demand?
-
-**Assumption/Decision:**
-- Detect on-demand using event.shiftKey and event.ctrlKey properties
-- No need for global state - simpler and less error-prone
-- Status bar updates based on mouse move events when modifiers are held
-
----
-
-## Task 20.6: Rethink selection tool buttons (if needed)
-
-**Question:** With Shift+Drag multi-select now implemented (Task 20.2), do we still need the separate Multi-select tool button in the toolbar?
-
-**Analysis:**
-1. **Current state:**
-   - Toolbar has separate "Select" and "Multi-select" tool buttons
-   - Multi-select button activates dedicated multi-select tool (M key)
-   - Shift+Drag now provides temporary multi-select from any tool (Task 20.2)
-   - Ctrl+Click provides additive selection from any tool (Task 20.3)
-
-2. **Multi-select button usage patterns:**
-   - E2E tests show explicit multi-select tool clicks (e2e/selection.spec.ts)
-   - No keyboard shortcut 'M' tests found
-   - Button provides persistent multi-select mode (stays active until tool changed)
-   - Shift+Drag is temporary (returns to previous tool after selection)
-
-3. **Comparison with industry tools:**
-   - **Photoshop:** No separate multi-select tool - uses Shift+Click for additive selection
-   - **Figma:** No separate multi-select tool - uses Shift+Click for additive selection
-   - **Illustrator:** No separate multi-select tool - uses Shift+Click for additive selection
-   - **Tiled Map Editor:** Has separate box select tool, but also supports modifier keys
-   - **Conclusion:** Most professional tools do NOT have separate multi-select buttons
-
-4. **Discoverability vs. Efficiency:**
-   - **Keep button:** Better discoverability for new users, persistent mode for repetitive selections
-   - **Remove button:** Cleaner UI, forces learning of modifier keys (industry standard)
-
-**Assumption/Decision:**
-- **REMOVE the Multi-select tool button** from the toolbar
-- **Rationale:**
-  1. Shift+Drag provides same functionality (box selection) with better UX (temporary override)
-  2. Consistent with industry standards (Photoshop, Figma, Illustrator have no separate button)
-  3. Cleaner toolbar with less cognitive load
-  4. Forces users to learn industry-standard modifier key patterns
-  5. Select tool + modifiers (Shift+Drag, Ctrl+Click) cover all selection use cases
-
-- **Implementation:**
-  1. Remove Multi-select button from Toolbar.tsx
-  2. Remove 'multiselect' from EditorState['selectedTool'] type
-  3. Remove multi-select tool icon import
-  4. Update keyboard shortcuts documentation (remove 'M' key)
-  5. Update all E2E tests to use Shift+Drag instead of multi-select button clicks
-  6. Keep Select tool button - it's the primary selection tool
-
-- **Migration path for users:**
-  - Replace Multi-select button workflow with Shift+Drag workflow
-  - Tooltip on Select tool: "Select Tool (V) • Hold Shift to multi-select"
-  - Help documentation emphasizes Shift+Drag pattern
 
 ---

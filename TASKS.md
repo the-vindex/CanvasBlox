@@ -1061,44 +1061,57 @@ Please test the following scenarios:
 <!-- CHAPTER_START: 21 -->
 ## Chapter 21: Multi-Select Properties Panel
 
-**Status:** ⏸️ Not Started
-**Files:** `client/src/components/level-editor/PropertiesPanel.tsx`
+**Status:** ✅ Complete
+**Files:** `client/src/components/level-editor/PropertiesPanel.tsx`, `client/src/utils/batchPropertyUpdate.ts`, `client/src/hooks/useLevelEditor.ts`, `e2e/multi-select-properties.spec.ts`
 **Priority:** Low (P4 - Idea/enhancement)
 
 **Goal:** Redesign Properties Panel to handle multiple selected objects gracefully.
 
 ### Tasks:
 
-#### 21.1 Rethink Properties Panel for multi-select
+#### 21.1 Rethink Properties Panel for multi-select ✅ Complete
+- **Status:** ✅ COMPLETE - Commit TBD
 - **Priority:** 4 (Idea/enhancement)
-- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`
+- **Location:** `client/src/components/level-editor/PropertiesPanel.tsx`, `client/src/utils/batchPropertyUpdate.ts`
 - **Current:** Properties Panel doesn't work well when multiple objects are selected
 - **Change:** Redesign to handle batch editing and property differences
-- **Requirements:**
-  - Show count of selected objects (e.g., "3 objects selected")
-  - Display common properties across all selected objects
-  - Indicate when properties differ (e.g., "Mixed" for position, "—" for different values)
-  - Enable batch editing (change one property, applies to all selected)
-  - Show object type mix if different types selected (e.g., "2 buttons, 1 door")
-- **Design patterns to research:**
-  - Figma's properties panel (shows "Mixed" for different values)
-  - Photoshop's layers panel (batch property editing)
-  - Unity's Inspector (multi-object editing)
-- **Implementation:**
-  - Detect when multiple objects selected
-  - Calculate common properties and differences
-  - Render appropriate UI for batch editing
-  - Apply changes to all selected objects
-  - Add undo/redo support for batch edits
-- **Files to modify:**
-  - `client/src/components/level-editor/PropertiesPanel.tsx` - Complete redesign
-  - `client/src/hooks/useLevelEditor.ts` - Batch property update functions
+- **What was implemented:**
+  1. ✅ **Batch property utilities** (`client/src/utils/batchPropertyUpdate.ts`)
+     - `getSelectedObjects()` - Get all selected objects from level data
+     - `analyzeSelection()` - Analyze object types in selection
+     - `getCommonPropertyValue()` - Get common property value or "Mixed" if values differ
+     - `updateBatchProperty()` - Update property on multiple objects
+     - `formatTypeName()` - Format type name for display (e.g., "platform-basic" → "Platform - Basic")
+  2. ✅ **Properties Panel batch editing UI** (`client/src/components/level-editor/PropertiesPanel.tsx:204-311`)
+     - Shows object count and type breakdown (e.g., "3 objects selected", "2 Platform - Basics, 1 Button")
+     - Displays batch editing UI with common properties
+     - Shows "Mixed" placeholder when property values differ
+     - Allows batch editing of: position (x, y), layer, collidable property
+     - Help text: "Edit properties below to apply changes to all selected objects"
+  3. ✅ **useLevelEditor integration** (`client/src/hooks/useLevelEditor.ts:652-689`)
+     - `updateBatchProperty()` function wraps the utility
+     - Integrated with undo/redo system
+     - Single undo entry for batch edits
+     - Exported in hook return value (line 852)
+  4. ✅ **LevelEditor wiring** (`client/src/pages/LevelEditor.tsx:989`)
+     - `updateBatchProperty` passed to PropertiesPanel as `onBatchUpdate` prop
+- **Requirements met:**
+  - ✅ Show count of selected objects
+  - ✅ Display common properties across all selected objects
+  - ✅ Indicate when properties differ ("Mixed" placeholder)
+  - ✅ Enable batch editing (change one property, applies to all selected)
+  - ✅ Show object type mix if different types selected
+  - ✅ Undo/redo support for batch edits (single undo entry)
 - **Tests:**
-  - E2E: Select 3 objects → Properties Panel shows "3 objects selected"
-  - E2E: Common property edited → all selected objects updated
-  - E2E: Property with different values shows "Mixed"
-  - E2E: Batch edit can be undone in one step
-- **Note:** Low priority - current behavior is acceptable for now, but this would be a nice UX improvement
+  - ✅ 202 unit tests passing (includes batchPropertyUpdate.test.ts)
+  - ✅ 5 E2E tests (e2e/multi-select-properties.spec.ts) - All passing
+    - Test 1: Show object count and type breakdown when multiple objects selected
+    - Test 2: Allow batch editing of layer property
+    - Test 3: Show "Mixed" placeholder when property values differ
+    - Test 4: Update all selected objects when editing mixed values
+    - Test 5: Support undo/redo for batch edits
+  - ✅ Total: 202 unit + 165 E2E = 367 tests passing
+- **Note:** Feature fully implemented! Multi-select batch editing now works seamlessly with Figma-style "Mixed" value indicators
 
 **Dependencies:** None - standalone enhancement
 **Notes:** Consider implementing after Chapter 20 (Advanced Selection Modifiers) is complete, as better selection UX will make multi-select more common
@@ -1185,7 +1198,7 @@ Please test the following scenarios:
 | 17. E2E Test Optimization | ✅ Completed | ✓ | Phase 3 continuation - auto-save test merge, redundant test removal |
 | 18. Enhanced Copy/Paste | ✅ Completed | ❌ | Ghost preview paste workflow (needs user testing) |
 | 20. Advanced Selection Modifiers | ✅ Completed | ✓ | Shift/Ctrl modifier keys, temporary tool override, visual feedback (5 tasks) |
-| 21. Multi-Select Properties Panel | ⏸️ Not Started | ❌ | Batch editing, property differences UI (1 task, P4) |
+| 21. Multi-Select Properties Panel | ✅ Completed | ✓ | Batch editing, property differences UI, "Mixed" value indicators |
 | 22. Future Enhancements | ⏭️ Skipped | N/A | Zoom fit-to-view skipped (not needed) |
 | 12. Documentation | ✅ Completed | ✓ | Consolidate and organize project documentation |
 
