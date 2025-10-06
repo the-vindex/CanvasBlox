@@ -421,7 +421,7 @@ export default function LevelEditor() {
 
                 if (hasData) {
                     const confirmed = window.confirm(
-                        `Are you sure you want to close "${level.levelName}"? Any unsaved changes will be lost.`
+                        `Are you sure you want to close "${level.levelName}"?\n\nAll unsaved changes will be lost and cannot be undone.`
                     );
                     if (!confirmed) return;
                 }

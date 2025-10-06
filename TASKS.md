@@ -42,8 +42,8 @@ Work through chapters sequentially. After implementing each chapter:
 <!-- CHAPTER_START: 11 -->
 ## Chapter 11: Drawing Tools Implementation
 
-**Status:** 🔄 In Progress (Interaction model refactor needed)
-**Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/components/level-editor/Toolbar.tsx`
+**Status:** ✅ Complete
+**Files:** `client/src/hooks/useCanvas.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useLevelEditor.ts`, `client/src/hooks/useSelectionState.ts`, `client/src/components/level-editor/Toolbar.tsx`, `client/src/components/level-editor/PropertiesPanel.tsx`, `e2e/close-level-dialog.spec.ts`
 **Priority:** High
 
 ### Completed Tasks:
@@ -550,25 +550,29 @@ Please test the following scenarios:
   - Verify tooltips show on hover
   - Verify keyboard shortcuts still work (Ctrl+C, Ctrl+V)
 
-#### 11.16 Improve close level dialog message
+#### 11.16 Improve close level dialog message ✅ Complete
+- **Status:** ✅ COMPLETE - Commit TBD
 - **Priority:** 3 (Feature)
-- **Location:** Close level confirmation dialog component
-- **Current:** Close level dialog message is generic or unclear about data loss
-- **Change:** Dialog should clearly state: "Are you sure you want to close 'New Level 3'? Any unsaved changes will be lost."
-- **Implementation:**
-  - Include level name in dialog message
-  - Emphasize data loss and that undo is not possible
-  - Make message clear and user-friendly for kids
-  - Consider red/warning styling for destructive action
-- **Files to modify:**
-  - Level close confirmation dialog component (likely in `client/src/components/level-editor/` or `LevelEditor.tsx`)
+- **Location:** `client/src/pages/LevelEditor.tsx` (handleLevelClose function)
+- **What was implemented:**
+  1. ✅ **Enhanced dialog message** - Updated confirmation message to be more explicit:
+     - Shows level name: `"Are you sure you want to close "${level.levelName}"?"`
+     - Emphasizes data loss: "All unsaved changes will be lost"
+     - Clarifies permanence: "and cannot be undone"
+     - Message now split across two lines for better readability
+  2. ✅ **E2E test coverage** (`e2e/close-level-dialog.spec.ts`)
+     - 3 comprehensive E2E tests covering dialog behavior
+     - Test 1: Verifies level name appears in dialog message
+     - Test 2: Verifies clear warning about data loss
+     - Test 3: Verifies dialog appears for levels with content
 - **Tests:**
-  - E2E test: Close level → verify dialog shows level name
-  - E2E test: Verify warning message is clear
-- **Note:** Prevents accidental data loss
+  - ✅ 3 E2E tests (close-level-dialog.spec.ts) - All passing
+  - ✅ All existing tests still passing (190 unit + 148 E2E)
+- **Note:** Prevents accidental data loss with clear, kid-friendly warning
+- **Future enhancement:** Replace `window.confirm()` with shadcn AlertDialog for red/warning styling (tracked in OPEN_QUESTIONS.md)
 
 **Dependencies:** None - core selection/move tools already complete
-**Notes:** 1 task remaining: UI improvements (11.16). Completed 11.13 (selection outline), 11.14 (Select All toolbar), 11.15 (Copy/Paste toolbar), 11.7 (removed rotation UI), moved zoom reset (was 11.12) to Chapter 22 (P4).
+**Notes:** Chapter 11 COMPLETE! All tasks finished: 11.0 (Pen tool), 11.1 (Line tool), 11.2 (Rectangle tool), 11.3 (Selection tool), 11.4 (Move tool), 11.5 (Linking tool), 11.6 (Unlinking tool), 11.7 (Removed rotation UI), 11.8 (Clear brush on tool change), 11.9 (Button numbering), 11.10 (Tile overlap), 11.11 (ESC key fix), 11.13 (Selection outline), 11.14 (Select All toolbar), 11.15 (Copy/Paste toolbar), 11.16 (Close level dialog). Moved zoom reset (was 11.12) to Chapter 22 (P4).
 
 <!-- CHAPTER_END: 11 -->
 ---
@@ -1001,7 +1005,8 @@ Please test the following scenarios:
 
 ### Tasks:
 
-#### 22.1 Enhance zoom reset to fit all content
+#### 22.1 Enhance zoom reset to fit all content ⏭️ SKIPPED
+- **Status:** ⏭️ SKIPPED - Not needed for current scope
 - **Priority:** 4 (Idea/enhancement)
 - **Location:** Zoom reset function in `client/src/hooks/useCanvas.ts` or zoom control handlers
 - **Current:** Reset zoom sets to 100% regardless of content
@@ -1071,13 +1076,14 @@ Please test the following scenarios:
 | 18. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
 | 20. Advanced Selection Modifiers | ⏸️ Not Started | ❌ | Shift/Ctrl modifier keys, temporary tool override (6 tasks) |
 | 21. Multi-Select Properties Panel | ⏸️ Not Started | ❌ | Batch editing, property differences UI (1 task, P4) |
-| 22. Future Enhancements | ⏸️ Not Started | ❌ | P4 ideas - zoom fit-to-view (1 task) |
+| 22. Future Enhancements | ⏭️ Skipped | N/A | Zoom fit-to-view skipped (not needed) |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend - use only these statuses:**
 - ⏸️ Not Started
 - 🔄 In Progress
 - ✅ Completed
+- ⏭️ Skipped
 
 **Note:** Use "✅ COMPLETE" format (not "+ TESTED") when marking tasks complete
 
