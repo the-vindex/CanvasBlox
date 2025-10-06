@@ -1,8 +1,10 @@
 import { useId } from 'react';
+import CopyIcon from '@/assets/icons/copy.svg?react';
 import LineIcon from '@/assets/icons/line.svg?react';
 import LinkIcon from '@/assets/icons/link.svg?react';
 import MoveIcon from '@/assets/icons/move.svg?react';
 import MultiselectIcon from '@/assets/icons/multiselect.svg?react';
+import PasteIcon from '@/assets/icons/paste.svg?react';
 import PenIcon from '@/assets/icons/pen.svg?react';
 import RectangleIcon from '@/assets/icons/rectangle.svg?react';
 import SelectIcon from '@/assets/icons/select.svg?react';
@@ -25,6 +27,10 @@ interface ToolbarProps {
     onTogglePropertiesPanel?: () => void;
     onSelectAll: () => void;
     hasObjects: boolean;
+    onCopy: () => void;
+    onPaste: () => void;
+    hasSelection: boolean;
+    hasClipboard: boolean;
 }
 
 // Define color scheme for tool groups
@@ -89,6 +95,10 @@ export function Toolbar({
     onTogglePropertiesPanel,
     onSelectAll,
     hasObjects,
+    onCopy,
+    onPaste,
+    hasSelection,
+    hasClipboard,
 }: ToolbarProps) {
     const showGridId = useId();
     const showScanlinesId = useId();
@@ -131,6 +141,30 @@ export function Toolbar({
                     disabled={!hasObjects}
                 >
                     <SelectAllIcon className="w-4 h-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                    onClick={onCopy}
+                    title="Copy (Ctrl+C)"
+                    aria-label="Copy"
+                    data-testid="button-copy"
+                    disabled={!hasSelection}
+                >
+                    <CopyIcon className="w-4 h-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                    onClick={onPaste}
+                    title="Paste (Ctrl+V)"
+                    aria-label="Paste"
+                    data-testid="button-paste"
+                    disabled={!hasClipboard}
+                >
+                    <PasteIcon className="w-4 h-4" />
                 </Button>
             </div>
 

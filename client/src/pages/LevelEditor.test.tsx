@@ -43,6 +43,7 @@ vi.mock('@/hooks/useLevelEditor', () => ({
             pan: { x: 0, y: 0 },
             mousePosition: { x: 0, y: 0 },
             selectedObjects: [],
+            clipboard: [],
             linkingMode: {
                 active: false,
                 sourceObject: null,
@@ -83,7 +84,18 @@ vi.mock('@/components/level-editor/PropertiesPanel', () => ({
 }));
 
 vi.mock('@/components/level-editor/Toolbar', () => ({
-    Toolbar: ({ onToolChange, onZoomIn, onZoomOut, onZoomReset, onTogglePropertiesPanel, editorState }: any) => (
+    Toolbar: ({
+        onToolChange,
+        onZoomIn,
+        onZoomOut,
+        onZoomReset,
+        onTogglePropertiesPanel,
+        onCopy,
+        onPaste,
+        hasSelection,
+        hasClipboard,
+        editorState,
+    }: any) => (
         <div data-testid="toolbar">
             <button type="button" data-testid="tool-select" onClick={() => onToolChange('select')}>
                 Select
@@ -115,6 +127,18 @@ vi.mock('@/components/level-editor/Toolbar', () => ({
             <button type="button" data-testid="button-toggle-properties" onClick={onTogglePropertiesPanel}>
                 Toggle Properties
             </button>
+            <button type="button" aria-label="Copy" onClick={onCopy} disabled={!hasSelection} data-testid="button-copy">
+                Copy
+            </button>
+            <button
+                type="button"
+                aria-label="Paste"
+                onClick={onPaste}
+                disabled={!hasClipboard}
+                data-testid="button-paste"
+            >
+                Paste
+            </button>
             <span data-testid="zoom-level">{Math.round(editorState.zoom * 100)}%</span>
         </div>
     ),
@@ -145,13 +169,13 @@ describe('LevelEditor - Step 6: Toolbar Integration', () => {
 });
 
 describe('LevelEditor - Step 13: Copy/Paste', () => {
-    it('should render copy button in header', () => {
+    it('should render copy button in toolbar', () => {
         render(<LevelEditor />);
         const copyButton = screen.getByRole('button', { name: /Copy/i });
         expect(copyButton).toBeInTheDocument();
     });
 
-    it('should render paste button in header', () => {
+    it('should render paste button in toolbar', () => {
         render(<LevelEditor />);
         const pasteButton = screen.getByRole('button', { name: /Paste/i });
         expect(pasteButton).toBeInTheDocument();
