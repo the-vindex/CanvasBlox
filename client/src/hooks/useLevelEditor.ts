@@ -326,27 +326,30 @@ export function useLevelEditor() {
                     };
                 }, `Added ${objectType}`);
             } else {
-                // For buttons, auto-assign button number
-                const properties: any = { interactable: true };
-                if (objectType === 'button') {
-                    properties.buttonNumber = assignButtonNumber(currentLevel?.objects || []);
-                }
-
-                newObject = {
-                    id: `obj_${Date.now()}_${Math.random()}`,
-                    type: objectType,
-                    position,
-                    dimensions: { width: 1, height: 1 }, // Dimensions in tiles
-                    rotation: 0,
-                    layer: 1,
-                    properties,
-                } as InteractableObject;
-
+                // Build the new object inside the state update to avoid stale closure
                 updateCurrentLevel(
-                    (level) => ({
-                        ...level,
-                        objects: [...level.objects, newObject as InteractableObject],
-                    }),
+                    (level) => {
+                        // For buttons, auto-assign button number using current level state
+                        const properties: any = { interactable: true };
+                        if (objectType === 'button') {
+                            properties.buttonNumber = assignButtonNumber(level.objects);
+                        }
+
+                        const newObject: InteractableObject = {
+                            id: `obj_${Date.now()}_${Math.random()}`,
+                            type: objectType,
+                            position,
+                            dimensions: { width: 1, height: 1 }, // Dimensions in tiles
+                            rotation: 0,
+                            layer: 1,
+                            properties,
+                        };
+
+                        return {
+                            ...level,
+                            objects: [...level.objects, newObject],
+                        };
+                    },
                     `Added ${objectType}`
                 );
             }
