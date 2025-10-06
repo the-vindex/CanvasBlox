@@ -229,17 +229,19 @@ Press ESC                      → null            | null               ❌ clea
   - ✅ 11 unit tests (linkingLogic.test.ts) - All passing
   - ✅ Test quality review completed, weak tests removed
   - ✅ Total: 166 unit + 132 E2E = 298 tests passing
-- **Manual Test:** ✅ Ready for user testing
-  - Place button and door on canvas
-  - Press 'K' to activate link tool
-  - Click button (source) - should set link source
-  - Click door (target) - should show toast "Link Created"
-  - Select button with 'V' tool
-  - Check Properties Panel shows "Linked Objects: door (x, y)"
-  - Try creating duplicate link - should show error toast
-  - Try linking button to itself - should show error toast
-  - Press ESC in link mode - should deactivate tool
-- **Note:** Visual connection lines already rendered by canvasRenderer.ts (drawLinks method), no changes needed
+- **Manual Test:** ✅ User testing COMPLETE - Verified working
+  - ✅ Link creation (button → door) works correctly
+  - ✅ Visual selection feedback shows selected source
+  - ✅ Link lines visible (bright yellow with black outline)
+  - ✅ Properties Panel shows linked objects
+  - ✅ Duplicate link prevention works
+  - ✅ ESC key deactivates tool
+- **Bug fixes applied:**
+  - Fixed link visibility (yellow with black outline)
+  - Fixed double toast issue (100ms debounce)
+  - Added visual selection feedback for link source
+  - Removed implementation-coupled tests
+- **Final commits:** 4a74244 (initial), 47e3a58, 96180c9, 38e65f7, 67bd960, 960eb0b, 1ee3e7d, b7571a8
 
 #### 11.6 Implement unlinking tool for removing object links
 - **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/components/level-editor/PropertiesPanel.tsx`
