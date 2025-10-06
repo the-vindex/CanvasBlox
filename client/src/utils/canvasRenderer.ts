@@ -937,10 +937,6 @@ export class CanvasRenderer {
     }
 
     drawLinks(objects: InteractableObject[], pan: Position, zoom: number) {
-        this.ctx.strokeStyle = '#06b6d4';
-        this.ctx.lineWidth = 2;
-        this.ctx.setLineDash([5, 5]);
-
         objects.forEach((obj) => {
             if (obj.properties.linkedObjects) {
                 const fromX = obj.position.x * TILE_SIZE * zoom + pan.x + (obj.dimensions.width * TILE_SIZE * zoom) / 2;
@@ -959,6 +955,19 @@ export class CanvasRenderer {
                             pan.y +
                             (linkedObj.dimensions.height * TILE_SIZE * zoom) / 2;
 
+                        // Draw dark outline for contrast
+                        this.ctx.strokeStyle = '#000000';
+                        this.ctx.lineWidth = 5;
+                        this.ctx.setLineDash([8, 6]);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(fromX, fromY);
+                        this.ctx.lineTo(toX, toY);
+                        this.ctx.stroke();
+
+                        // Draw bright yellow link line on top
+                        this.ctx.strokeStyle = '#fbbf24'; // Bright amber/yellow
+                        this.ctx.lineWidth = 3;
+                        this.ctx.setLineDash([8, 6]);
                         this.ctx.beginPath();
                         this.ctx.moveTo(fromX, fromY);
                         this.ctx.lineTo(toX, toY);
