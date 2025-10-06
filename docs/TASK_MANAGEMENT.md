@@ -17,90 +17,49 @@ This document defines the detailed workflow, implementation strategy, and testin
 
 ---
 
-## Chapter Format & Organization
+## Chapter Format
 
-### Chapter Structure
+### Required Structure
 
-All chapters in `TASKS.md` follow a standardized structure with HTML comment markers for programmatic extraction and archiving.
-
-**Required Format:**
 ```markdown
 <!-- CHAPTER_START: N -->
-## Chapter N: Chapter Title
+## Chapter N: Title
 
 **Status:** ✅ Complete | 🔄 In Progress | ⏸️ Not Started
-**Files:** List of primary files affected
-**Priority:** High | Medium | Low
-**Goal:** Brief description of chapter objective
+**Files:** Primary files affected
+**Priority:** P3 (Feature)
+**Goal:** Brief objective
 
 ### Tasks:
 
 #### N.1 Task Title
-- **Status:** ✅ COMPLETE | 🔄 In Progress | ⏸️ Not Started
+- **Priority:** 3
 - **Location:** File paths
-- **Implementation:** Details...
+- **Implementation:** Details
 - **Tests:** Test descriptions
-- **Files to modify:** List of files
 
-**Dependencies:** Chapter/task dependencies
-**Notes:** Additional context
+**Dependencies:** None
+**Notes:** Context
 
 <!-- CHAPTER_END: N -->
 ```
 
-### Adding New Chapters
+**Priority System (P1-P4):**
+- **P1** - AI config (slash commands, permissions, MCP)
+- **P2** - Bugfix
+- **P3** - Feature (default)
+- **P4** - Idea/enhancement
 
-1. **Choose next sequential chapter number** - Check existing chapters in TASKS.md
-2. **Add separator markers** - Required for archiving automation
-3. **Follow structure** - Match format above for consistency
-4. **Update Progress Tracking** - Add row to Progress Tracking table at bottom of TASKS.md
+### Adding Chapters
 
-**Example:**
-```markdown
-<!-- CHAPTER_START: 22 -->
-## Chapter 22: New Feature Title
+1. Use next sequential number
+2. Add `<!-- CHAPTER_START/END -->` markers
+3. Follow structure above
+4. Update Progress Tracking table
 
-**Status:** ⏸️ Not Started
-**Files:** `client/src/components/NewFeature.tsx`
-**Priority:** Medium
-**Goal:** Implement new feature XYZ
+### Archiving
 
-### Tasks:
-
-#### 22.1 First subtask
-[Task details...]
-
-**Dependencies:** None
-**Notes:** Implementation notes
-
-<!-- CHAPTER_END: 22 -->
-```
-
-### Archiving Completed Chapters
-
-Completed and approved chapters can be archived to reduce TASKS.md size while preserving history.
-
-**Automatic Archiving:**
-```bash
-# Using slash command (recommended)
-/todo-archive
-
-# Or directly
-npx tsx scripts/archive-completed-chapters.ts
-```
-
-**Archive Criteria:**
-- Chapter Status: `✅ Complete`
-- Progress Tracking: `✓ Approved`
-
-**What Happens:**
-1. Script scans for chapters meeting both criteria
-2. Extracts complete chapter content using separator markers
-3. Appends to `docs/archive/TASKS-COMPLETED.md` with timestamp
-4. Removes from `TASKS.md`
-5. Updates Progress Tracking table
-
-**Archive Location:** `docs/archive/TASKS-COMPLETED.md`
+Use `/todo-archive` to move completed chapters to `docs/archive/TASKS-COMPLETED.md`.
 
 ---
 
