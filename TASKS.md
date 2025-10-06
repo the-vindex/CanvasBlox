@@ -1012,7 +1012,7 @@ Please test the following scenarios:
   - Hold Shift and drag selection box → verify indicator visible during interaction
 
 #### 20.6 Rethink selection tool buttons (if needed) ✅ Complete
-- **Status:** ✅ COMPLETE
+- **Status:** ✅ COMPLETE - Commit ff140d3
 - **Priority:** 4 (Idea/enhancement)
 - **Location:** `client/src/components/level-editor/Toolbar.tsx`, `client/src/types/level.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/hooks/useCanvas.ts`
 - **What was implemented:**
