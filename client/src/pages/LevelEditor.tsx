@@ -119,9 +119,13 @@ export default function LevelEditor() {
         }
     }, [commitBatchToHistory]);
 
-    const handleLineComplete = useCallback(
-        (positions: Position[], tileType: string) => {
-            // Place tiles along the line
+    /**
+     * Generic handler for drawing tool completion (line, rectangle, etc.)
+     * Places tiles/objects at calculated positions and commits as single history entry
+     */
+    const handleDrawingToolComplete = useCallback(
+        (positions: Position[], tileType: string, toolName: string) => {
+            // Place tiles/objects at each position
             for (const position of positions) {
                 if (tileType.includes('platform')) {
                     addTile(position, tileType, true); // Skip history for each individual tile
@@ -129,28 +133,24 @@ export default function LevelEditor() {
                     addObject(position, tileType);
                 }
             }
-            // Commit all tiles as a single history entry
-            commitBatchToHistory(`Drew line with ${positions.length} tile${positions.length > 1 ? 's' : ''}`);
+            // Commit all as a single history entry
+            commitBatchToHistory(`Drew ${toolName} with ${positions.length} tile${positions.length > 1 ? 's' : ''}`);
         },
         [addTile, addObject, commitBatchToHistory]
     );
 
+    const handleLineComplete = useCallback(
+        (positions: Position[], tileType: string) => {
+            handleDrawingToolComplete(positions, tileType, 'line');
+        },
+        [handleDrawingToolComplete]
+    );
+
     const handleRectangleComplete = useCallback(
         (positions: Position[], tileType: string) => {
-            // Place tiles in the filled rectangle
-            for (const position of positions) {
-                if (tileType.includes('platform')) {
-                    addTile(position, tileType, true); // Skip history for each individual tile
-                } else {
-                    addObject(position, tileType);
-                }
-            }
-            // Commit all tiles as a single history entry
-            commitBatchToHistory(
-                `Drew filled rectangle with ${positions.length} tile${positions.length > 1 ? 's' : ''}`
-            );
+            handleDrawingToolComplete(positions, tileType, 'filled rectangle');
         },
-        [addTile, addObject, commitBatchToHistory]
+        [handleDrawingToolComplete]
     );
 
     const handleWheelZoom = useCallback(

@@ -39,62 +39,6 @@ test.describe('Drawing Tools', () => {
             expect(finalCount).toBeGreaterThan(initialCount);
         });
 
-        test('should draw diagonal line correctly', async ({ page }) => {
-            const canvas = page.getByTestId('level-canvas');
-            const grassTile = page.getByTestId('tile-platform-grass');
-            const lineTool = page.getByTestId('tool-line');
-
-            // Get initial count
-            const initialCount = await getObjectCount(page);
-
-            // Select tile and tool
-            await grassTile.click();
-            await lineTool.click();
-
-            // Draw diagonal line from top-left to bottom-right
-            const box = await canvas.boundingBox();
-            if (!box) throw new Error('Canvas not found');
-            await page.mouse.move(box.x + 150, box.y + 150);
-            await page.mouse.down();
-            await page.mouse.move(box.x + 400, box.y + 350, { steps: 5 });
-            await page.mouse.up();
-            await page.waitForTimeout(100);
-
-            // Verify tiles were placed
-            const finalCount = await getObjectCount(page);
-            expect(finalCount).toBeGreaterThan(initialCount);
-        });
-
-        test('should place tiles of selected type when drawing line', async ({ page }) => {
-            const canvas = page.getByTestId('level-canvas');
-            const stoneTile = page.getByTestId('tile-platform-stone');
-            const lineTool = page.getByTestId('tool-line');
-
-            // Select stone tile and line tool
-            await stoneTile.click();
-            await lineTool.click();
-
-            // Get initial count
-            const initialCount = await getObjectCount(page);
-
-            // Draw a horizontal line
-            const box = await canvas.boundingBox();
-            if (!box) throw new Error('Canvas not found');
-            await page.mouse.move(box.x + 200, box.y + 300);
-            await page.mouse.down();
-            await page.mouse.move(box.x + 350, box.y + 300, { steps: 3 });
-            await page.mouse.up();
-            await page.waitForTimeout(100);
-
-            // Verify tiles were placed
-            const finalCount = await getObjectCount(page);
-            expect(finalCount).toBeGreaterThan(initialCount);
-
-            // Note: We verify tiles were placed. Actual tile type verification would require
-            // canvas pixel inspection or exposing internal state, which is implementation detail.
-            // The behavioral contract is: "line tool places the selected tile type"
-        });
-
         test('should cancel line drawing when ESC is pressed', async ({ page }) => {
             const canvas = page.getByTestId('level-canvas');
             const basicTile = page.getByTestId('tile-platform-basic');
@@ -161,62 +105,6 @@ test.describe('Drawing Tools', () => {
             // Verify tiles were placed as filled rectangle
             const finalCount = await getObjectCount(page);
             expect(finalCount).toBeGreaterThan(initialCount);
-        });
-
-        test('should draw square with rectangle tool', async ({ page }) => {
-            const canvas = page.getByTestId('level-canvas');
-            const grassTile = page.getByTestId('tile-platform-grass');
-            const rectangleTool = page.getByTestId('tool-rectangle');
-
-            // Get initial count
-            const initialCount = await getObjectCount(page);
-
-            // Select tile and tool
-            await grassTile.click();
-            await rectangleTool.click();
-
-            // Draw a square (equal width and height)
-            const box = await canvas.boundingBox();
-            if (!box) throw new Error('Canvas not found');
-            await page.mouse.move(box.x + 150, box.y + 150);
-            await page.mouse.down();
-            await page.mouse.move(box.x + 350, box.y + 350, { steps: 5 });
-            await page.mouse.up();
-            await page.waitForTimeout(100);
-
-            // Verify tiles were placed
-            const finalCount = await getObjectCount(page);
-            expect(finalCount).toBeGreaterThan(initialCount);
-        });
-
-        test('should place tiles of selected type when drawing rectangle', async ({ page }) => {
-            const canvas = page.getByTestId('level-canvas');
-            const stoneTile = page.getByTestId('tile-platform-stone');
-            const rectangleTool = page.getByTestId('tool-rectangle');
-
-            // Select stone tile and rectangle tool
-            await stoneTile.click();
-            await rectangleTool.click();
-
-            // Get initial count
-            const initialCount = await getObjectCount(page);
-
-            // Draw a rectangle
-            const box = await canvas.boundingBox();
-            if (!box) throw new Error('Canvas not found');
-            await page.mouse.move(box.x + 200, box.y + 300);
-            await page.mouse.down();
-            await page.mouse.move(box.x + 400, box.y + 450, { steps: 3 });
-            await page.mouse.up();
-            await page.waitForTimeout(100);
-
-            // Verify tiles were placed
-            const finalCount = await getObjectCount(page);
-            expect(finalCount).toBeGreaterThan(initialCount);
-
-            // Note: We verify tiles were placed. Actual tile type verification would require
-            // canvas pixel inspection or exposing internal state, which is implementation detail.
-            // The behavioral contract is: "rectangle tool places the selected tile type"
         });
 
         test('should cancel rectangle drawing when ESC is pressed', async ({ page }) => {

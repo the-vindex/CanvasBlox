@@ -152,30 +152,42 @@ Press ESC                      → null            | null               ❌ clea
   - Verify line tool works in drawing mode tools group
   - Mark as complete after manual testing
 
-#### 11.2 Implement rectangle drawing tool ⏸️ Not Started
-- **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers
-- **Current:** Rectangle tool button exists in toolbar ('r' key) but does nothing when activated
-- **Dependencies:** Requires Task 11.0 (drawing mode tools interaction model) to be complete first
-- **Implementation:**
-  - Similar to line tool (Task 11.1), but draw rectangle instead of line
-  - On mousedown: Record start corner position
-  - On mousemove: Show preview rectangle from start to current position
-  - On mouseup: Place tiles to form rectangle (outline or filled)
-  - Works as part of drawing mode tools group (preserves tile selection)
-- **Rectangle Fill Options:**
-  - **Default:** Outline only (consistent with line tool)
-  - **Optional:** Shift key to toggle filled mode
-  - **Future:** Add toggle button to toolbar for persistent fill preference
-- **Files to modify:**
-  - `client/src/hooks/useCanvas.ts` (add rectangle drawing logic)
-  - `client/src/utils/canvasRenderer.ts` (add drawPreviewRectangle method)
-  - `client/src/utils/rectangleDrawing.ts` (new file - rectangle calculation utility)
-- **Tests to add:**
-  - E2E: Draw outline rectangle
-  - E2E: Draw filled rectangle (if implemented)
-  - E2E: Rectangle with different tile types
-  - Unit: Rectangle position calculation
-- **Note:** Part of drawing mode tools group - must follow same interaction patterns as pen and line tools
+#### 11.2 Implement rectangle drawing tool ✅ Complete
+- **Status:** ✅ COMPLETE - Commit 593549d - Filled rectangle tool implemented
+- **Location:** `client/src/hooks/useCanvas.ts`, `client/src/utils/rectangleDrawing.ts`, `client/src/utils/canvasRenderer.ts`
+- **What was implemented:**
+  1. ✅ **Rectangle drawing algorithm** (`client/src/utils/rectangleDrawing.ts`)
+     - `getRectanglePositions()` function with filled/outline support
+     - Handles all rectangle orientations (any two corners)
+     - 12 unit tests covering all cases
+  2. ✅ **Mouse handlers in useCanvas** (`client/src/hooks/useCanvas.ts`)
+     - Similar pattern to line tool (drag to draw)
+     - Preview while dragging with `rectanglePreview` state
+     - ESC cancellation support
+     - Refs cleared when tool changes
+  3. ✅ **Preview rendering** (`client/src/utils/canvasRenderer.ts`)
+     - `drawPreviewRectangle()` method
+     - 50% opacity ghost preview during drag
+  4. ✅ **Integration with LevelEditor** (`client/src/pages/LevelEditor.tsx`, `client/src/components/level-editor/Canvas.tsx`)
+     - `handleRectangleComplete()` handler
+     - Batch tile placement with single undo entry
+     - Wired through Canvas component props
+  5. ✅ **EditorState updates** (`client/src/types/level.ts`)
+     - Added `rectanglePreview` field matching line tool pattern
+- **Implementation decision:** **Filled rectangles by default** (not outline)
+  - User requested filled rectangles
+  - `getRectanglePositions(start, end, true)` with `filled=true`
+  - Can toggle to outline in future if needed
+- **Tests:**
+  - ✅ 12 unit tests (rectangleDrawing.test.ts) - All passing
+  - ✅ 4 E2E tests (e2e/drawing-tools.spec.ts) - All passing
+  - ✅ Created new drawing-tools.spec.ts file (moved line tests from selection.spec.ts)
+- **Manual Test:**
+  - Select tile → press 'R' for rectangle tool → drag to draw filled rectangle
+  - Preview shows during drag
+  - ESC cancels drawing
+  - Undo/redo works as single batch operation
+- **Note:** Works as part of drawing mode tools group following same patterns as pen and line tools
 
 #### 11.5 Implement linking tool for interactable objects
 - **Location:** `client/src/hooks/useCanvas.ts` - mouse event handlers

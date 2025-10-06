@@ -1071,13 +1071,17 @@ export class CanvasRenderer {
         this.ctx.restore();
     }
 
-    drawPreviewLine(start: Position, end: Position, tileType: string, pan: Position, zoom: number) {
-        const positions = getLinePositions(start, end);
-
+    /**
+     * Generic method to draw preview for any shape (line, rectangle, etc.)
+     * @param positions - Array of grid positions to preview
+     * @param tileType - Type of tile to preview
+     * @param pan - Current pan offset
+     * @param zoom - Current zoom level
+     */
+    private drawPreviewShape(positions: Position[], tileType: string, pan: Position, zoom: number) {
         this.ctx.save();
         this.ctx.globalAlpha = 0.5;
 
-        // Draw preview for each position along the line
         for (const position of positions) {
             this.drawPreviewTile(position, tileType, pan, zoom);
         }
@@ -1085,18 +1089,14 @@ export class CanvasRenderer {
         this.ctx.restore();
     }
 
+    drawPreviewLine(start: Position, end: Position, tileType: string, pan: Position, zoom: number) {
+        const positions = getLinePositions(start, end);
+        this.drawPreviewShape(positions, tileType, pan, zoom);
+    }
+
     drawPreviewRectangle(start: Position, end: Position, tileType: string, pan: Position, zoom: number) {
         const positions = getRectanglePositions(start, end, true); // filled=true
-
-        this.ctx.save();
-        this.ctx.globalAlpha = 0.5;
-
-        // Draw preview for each position in the filled rectangle
-        for (const position of positions) {
-            this.drawPreviewTile(position, tileType, pan, zoom);
-        }
-
-        this.ctx.restore();
+        this.drawPreviewShape(positions, tileType, pan, zoom);
     }
 
     private drawGhostTile(tile: Tile, delta: Position, pan: Position, zoom: number) {
