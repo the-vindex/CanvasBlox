@@ -311,11 +311,11 @@ Press ESC                      → null            | null               ❌ clea
   - `client/src/components/level-editor/PropertiesPanel.tsx` (rotation UI if keeping)
 - **Note:** User requested decision on rotation tool - needs clarification on intended use case
 
-#### 11.9 Implement button numbering system ⏸️ Not Started
+#### 11.9 Implement button numbering system 🧪 Ready for User Testing
+- **Status:** 🧪 Ready for User Testing - Commit: c5e1e37
 - **Location:** `client/src/utils/canvasRenderer.ts`, `client/src/types/level.ts`, `client/src/components/level-editor/PropertiesPanel.tsx`
 - **Current:** Buttons have no visual identification system - hard to track which button links to which door
 - **Purpose:** Add auto-numbered badges to buttons and doors so users can visually identify puzzle connections
-- **Status:** ⏸️ Not Started
 - **Dependencies:** Should be implemented after Task 11.5 (linking tool) for coherent UX
 
 **Design Decisions (User-Approved):**
@@ -397,6 +397,48 @@ Press ESC                      → null            | null               ❌ clea
   - Badge maintains constant size at different zoom levels
 
 **Visual Reference:** Clear, bold badges like Mario Maker - immediately visible and readable
+
+**What was implemented:**
+1. ✅ **Data model and auto-numbering** (`client/src/types/level.ts`, `client/src/hooks/useLevelEditor.ts`)
+   - Added `buttonNumber?: number` property to InteractableObject
+   - Auto-numbering: assignButtonNumber() finds max + 1
+   - Integrated into addObject() function
+2. ✅ **Adaptive contrast system** (`client/src/utils/buttonNumbering.ts`)
+   - Luminance calculation: 0.299*R + 0.587*G + 0.114*B
+   - Light scheme (dark bg): White text, black bg, 70% opacity
+   - Dark scheme (light bg): Black text, white bg, 80% opacity
+3. ✅ **Button badge rendering** (`client/src/utils/canvasRenderer.ts`)
+   - Circular badges at top-center of buttons
+   - Constant screen size (24px diameter) regardless of zoom
+   - Screen-space rendering with transform calculations
+4. ✅ **Door badge rendering** (`client/src/utils/canvasRenderer.ts`)
+   - Shows single button number or "×N" for multiple buttons
+   - getButtonsLinkingToDoor() helper function
+   - Same badge style as buttons
+5. ✅ **Properties Panel integration** (`client/src/components/level-editor/PropertiesPanel.tsx`)
+   - "Button Number" input field for buttons
+   - 1-99 range validation
+   - Duplicate detection with yellow warning
+   - Allows duplicates (warns but doesn't prevent)
+6. ⏸️ **Documentation** - Not implemented (optional, defer to Chapter 12)
+
+**Tests:**
+- ✅ 27 unit tests (buttonNumbering.test.ts) - All passing
+- ✅ 5 E2E tests (button-numbering.spec.ts) - All passing
+- ✅ Test review completed, weak tests removed
+- ✅ Total: 190 unit + 140 E2E tests passing
+
+**Manual Test:**
+Please test the following scenarios:
+1. Place a button → verify badge shows "1"
+2. Place another button → verify badge shows "2"
+3. Select a button → verify Properties Panel shows "Button Number" field
+4. Edit button number to 5 → verify badge updates
+5. Create duplicate number → verify yellow warning appears
+6. Link button to door → verify door shows button's number
+7. Link multiple buttons to door → verify door shows "×N"
+8. Zoom in/out → verify badge stays constant size
+9. Place button on different backgrounds → verify badge has good contrast
 
 #### 11.10 Implement tile overlap logic - newest tile wins ✅ Complete
 - **Status:** ✅ Complete - Commit: 0e8c6dc
