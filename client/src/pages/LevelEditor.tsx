@@ -35,6 +35,7 @@ export default function LevelEditor() {
     const [showImportModal, setShowImportModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [modifierState, setModifierState] = useState<'shift' | 'ctrl' | null>(null);
     const lastLinkToastRef = useRef<number>(0);
 
     const { toast } = useToast();
@@ -640,6 +641,31 @@ export default function LevelEditor() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isInputElement, handleToolShortcut, handleEditorShortcut, handleModifierShortcut]);
 
+    // Track modifier key state for visual feedback
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement;
+            if (isInputElement(target)) return;
+
+            if (e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                setModifierState('shift');
+            } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                setModifierState('ctrl');
+            }
+        };
+
+        const handleKeyUp = (_e: KeyboardEvent) => {
+            setModifierState(null);
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [isInputElement]);
+
     // Track changes to mark as unsaved (skip initial render)
     const isInitialMount = useRef(true);
     useEffect(() => {
@@ -1007,6 +1033,33 @@ export default function LevelEditor() {
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    {modifierState && (
+                        <div
+                            data-testid="modifier-indicator"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '4px 10px',
+                                background:
+                                    modifierState === 'shift' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                                border:
+                                    modifierState === 'shift'
+                                        ? '1px solid rgba(59, 130, 246, 0.4)'
+                                        : '1px solid rgba(168, 85, 247, 0.4)',
+                                borderRadius: '4px',
+                                color: modifierState === 'shift' ? '#60a5fa' : '#c084fc',
+                                fontWeight: 600,
+                            }}
+                        >
+                            <i
+                                className={`fas ${modifierState === 'shift' ? 'fa-mouse-pointer' : 'fa-plus-circle'}`}
+                            ></i>
+                            <span>
+                                {modifierState === 'shift' ? 'Multi-select (Shift)' : 'Add to selection (Ctrl)'}
+                            </span>
+                        </div>
+                    )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: '#666' }}>Objects:</span>
                         <span data-testid="statusbar-object-count" style={{ color: '#e0e0e0', fontWeight: 500 }}>

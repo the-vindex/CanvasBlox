@@ -216,3 +216,29 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 20.5: Visual feedback for modifier states
+
+**Question:** What visual feedback should we provide for modifier key states?
+
+**Assumption/Decision:**
+- **Cursor changes:** Not implementing custom cursors due to complexity and browser compatibility issues
+- **Status bar:** Will add status bar indicator showing modifier state ("Multi-select (Shift)" or "Add to selection (Ctrl)")
+- **Toolbar:** Not implementing toolbar dimming/suspended state - adds complexity without clear UX benefit
+- Focus on simple, clear status bar feedback that works across all browsers
+
+**Question:** Where should the status bar be positioned in the UI?
+
+**Assumption/Decision:**
+- Add status bar at bottom of LevelEditor component
+- Show current mode/modifier state
+- Use existing shadcn/ui components for consistent styling
+- Keep it minimal - only show when modifier is active
+
+**Question:** Should we track modifier key state globally or detect it on-demand?
+
+**Assumption/Decision:**
+- Detect on-demand using event.shiftKey and event.ctrlKey properties
+- No need for global state - simpler and less error-prone
+- Status bar updates based on mouse move events when modifiers are held
+
+---
