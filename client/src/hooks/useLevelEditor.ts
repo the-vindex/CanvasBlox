@@ -33,23 +33,25 @@ export function useLevelEditor() {
         mousePosition: { x: 0, y: 0 },
         deletingObjects: [],
     });
-    const [history, setHistory] = useState<HistoryEntry[]>([]);
-    const [historyIndex, setHistoryIndex] = useState(0);
+    // Per-level history: each level has its own undo/redo stack
+    const [levelHistories, setLevelHistories] = useState<Map<number, HistoryEntry[]>>(new Map());
+    const [levelHistoryIndices, setLevelHistoryIndices] = useState<Map<number, number>>(new Map());
 
     const currentLevel = levels[currentLevelIndex];
 
-    // Initialize history with current level state when level first loads (only once)
+    // Initialize history for current level if it doesn't exist yet
+    const hasHistory = levelHistories.has(currentLevelIndex);
     useEffect(() => {
-        if (currentLevel && history.length === 0) {
+        if (currentLevel && !hasHistory) {
             const initialEntry: HistoryEntry = {
                 timestamp: Date.now(),
                 levelData: JSON.parse(JSON.stringify(currentLevel)),
                 action: 'Initial state',
             };
-            setHistory([initialEntry]);
-            setHistoryIndex(0);
+            setLevelHistories((prev) => new Map(prev).set(currentLevelIndex, [initialEntry]));
+            setLevelHistoryIndices((prev) => new Map(prev).set(currentLevelIndex, 0));
         }
-    }, [currentLevel, history.length]);
+    }, [currentLevel, currentLevelIndex, hasHistory]);
 
     // Auto-save functionality
     useEffect(() => {
@@ -91,29 +93,23 @@ export function useLevelEditor() {
                 action,
             };
 
-            setHistory((prev) => {
-                // If history is empty (shouldn't happen now), create initial entry
-                if (prev.length === 0) {
-                    setHistoryIndex(0);
-                    return [entry];
-                }
+            const currentHistory = levelHistories.get(currentLevelIndex) || [];
+            const currentHistoryIndex = levelHistoryIndices.get(currentLevelIndex) || 0;
 
-                // Remove any history after current index and add new entry
-                const newHistory = prev.slice(0, historyIndex + 1);
-                newHistory.push(entry);
-                const trimmedHistory = newHistory.slice(-100); // Keep last 100 entries
+            // Remove any history after current index and add new entry
+            const newHistory = currentHistory.slice(0, currentHistoryIndex + 1);
+            newHistory.push(entry);
+            const trimmedHistory = newHistory.slice(-100); // Keep last 100 entries
 
-                // Adjust history index if history was trimmed
-                if (trimmedHistory.length < newHistory.length) {
-                    setHistoryIndex(trimmedHistory.length - 1);
-                    return trimmedHistory;
-                }
+            // Calculate new history index
+            const newHistoryIndex =
+                trimmedHistory.length < newHistory.length ? trimmedHistory.length - 1 : currentHistoryIndex + 1;
 
-                setHistoryIndex((prev) => prev + 1);
-                return trimmedHistory;
-            });
+            // Update both history and history index for this level
+            setLevelHistories((prev) => new Map(prev).set(currentLevelIndex, trimmedHistory));
+            setLevelHistoryIndices((prev) => new Map(prev).set(currentLevelIndex, newHistoryIndex));
         },
-        [currentLevel, historyIndex]
+        [currentLevel, currentLevelIndex, levelHistories, levelHistoryIndices]
     );
 
     const updateCurrentLevel = useCallback(
@@ -135,28 +131,34 @@ export function useLevelEditor() {
     );
 
     const undo = useCallback(() => {
-        if (historyIndex > 0 && history[historyIndex - 1]) {
-            const prevState = history[historyIndex - 1];
+        const currentHistory = levelHistories.get(currentLevelIndex) || [];
+        const currentHistoryIndex = levelHistoryIndices.get(currentLevelIndex) || 0;
+
+        if (currentHistoryIndex > 0 && currentHistory[currentHistoryIndex - 1]) {
+            const prevState = currentHistory[currentHistoryIndex - 1];
             setLevels((prev) => {
                 const newLevels = [...prev];
                 newLevels[currentLevelIndex] = JSON.parse(JSON.stringify(prevState.levelData));
                 return newLevels;
             });
-            setHistoryIndex((prev) => prev - 1);
+            setLevelHistoryIndices((prev) => new Map(prev).set(currentLevelIndex, currentHistoryIndex - 1));
         }
-    }, [history, historyIndex, currentLevelIndex]);
+    }, [levelHistories, levelHistoryIndices, currentLevelIndex]);
 
     const redo = useCallback(() => {
-        if (historyIndex < history.length - 1 && history[historyIndex + 1]) {
-            const nextState = history[historyIndex + 1];
+        const currentHistory = levelHistories.get(currentLevelIndex) || [];
+        const currentHistoryIndex = levelHistoryIndices.get(currentLevelIndex) || 0;
+
+        if (currentHistoryIndex < currentHistory.length - 1 && currentHistory[currentHistoryIndex + 1]) {
+            const nextState = currentHistory[currentHistoryIndex + 1];
             setLevels((prev) => {
                 const newLevels = [...prev];
                 newLevels[currentLevelIndex] = JSON.parse(JSON.stringify(nextState.levelData));
                 return newLevels;
             });
-            setHistoryIndex((prev) => prev + 1);
+            setLevelHistoryIndices((prev) => new Map(prev).set(currentLevelIndex, currentHistoryIndex + 1));
         }
-    }, [history, historyIndex, currentLevelIndex]);
+    }, [levelHistories, levelHistoryIndices, currentLevelIndex]);
 
     const createNewLevel = useCallback(
         (nameOrData?: string | LevelData) => {
@@ -501,13 +503,17 @@ export function useLevelEditor() {
         };
     }, []);
 
+    // Get current level's history for export
+    const currentHistory = levelHistories.get(currentLevelIndex) || [];
+    const currentHistoryIndex = levelHistoryIndices.get(currentLevelIndex) || 0;
+
     return {
         levels,
         currentLevel,
         currentLevelIndex,
         editorState,
-        history,
-        historyIndex,
+        history: currentHistory,
+        historyIndex: currentHistoryIndex,
         setCurrentLevelIndex,
         setEditorState,
         updateCurrentLevel,

@@ -840,39 +840,40 @@ Press ESC                      → null            | null               ❌ clea
 
 ## Chapter 19: Undo/Redo History Preservation
 
-**Status:** ⏸️ Not Started
-**Files:** `client/src/hooks/useLevelEditor.ts`
+**Status:** ✅ Complete
+**Files:** `client/src/hooks/useLevelEditor.ts`, `e2e/undo-redo.spec.ts`
 **Priority:** High (P2 - Bugfix)
 
 **Goal:** Fix undo/redo history not being preserved when switching between levels.
 
 ### Tasks:
 
-#### 19.1 Fix undo/redo history preservation across level switches
+#### 19.1 Fix undo/redo history preservation across level switches ✅ COMPLETE
+- **Status:** ✅ COMPLETE - Per-level history implemented
 - **Priority:** 2 (Bugfix)
 - **Location:** `client/src/hooks/useLevelEditor.ts` - level switching and history management
-- **Current:** When switching between levels, undo/redo history is not preserved for each level
-- **Issue:** History state appears to be global instead of per-level, causing loss of undo/redo capability when switching tabs
-- **Affected E2E test:**
-  - "should preserve undo/redo history when switching between levels" (e2e/undo-redo.spec.ts:275) - FAILING
-  - Test expects: Place objects on Level 1 → switch to Level 2 → place objects → switch back to Level 1 → undo should work
-  - Actual behavior: Undo does not work after switching back to Level 1
-- **Expected behavior:**
-  - Each level should maintain its own undo/redo history stack
-  - Switching levels should save current level's history and restore target level's history
-  - History should be preserved in localStorage along with level data
-- **Implementation approach:**
-  - Change history storage from single global array to per-level storage (Map or object keyed by levelId)
-  - On level switch: Save current level's history state, load target level's history state
-  - Update localStorage schema to include history data for each level
-  - Ensure historyIndex is also per-level
-- **Files to modify:**
-  - `client/src/hooks/useLevelEditor.ts` - Refactor history management to be per-level
-  - localStorage schema for level data (add history array and historyIndex)
+- **What was implemented:**
+  - Changed history storage from global array to per-level Map storage
+  - `levelHistories: Map<levelIndex, HistoryEntry[]>` - Each level has its own history stack
+  - `levelHistoryIndices: Map<levelIndex, number>` - Each level has its own history pointer
+  - History automatically preserved when switching levels (already in Map)
+  - New levels automatically get initial history entry on first access
+- **Implementation details:**
+  - Replaced `history` and `historyIndex` state with `levelHistories` and `levelHistoryIndices` Maps
+  - Updated `addToHistory`, `undo`, `redo` to work with per-level history
+  - Return current level's history/index from hook for backward compatibility with UI
+  - Used `useEffect` with `hasHistory` check to prevent infinite initialization loops
+- **Files modified:**
+  - `client/src/hooks/useLevelEditor.ts` - Refactored to use Map-based per-level history
+  - `e2e/undo-redo.spec.ts` - Fixed test selector from `level-tab` to `tab-level-1`
 - **Tests:**
-  - Verify E2E test passes after fix
-  - Manual test: Create actions on multiple levels, switch between them, verify undo/redo works on each
-- **Note:** This is a critical UX bug affecting multi-level workflows
+  - ✅ E2E test "should preserve undo/redo history when switching between levels" now passes
+  - ✅ All 143 unit tests pass
+  - ✅ All 126 E2E tests pass (4 intentionally skipped for Chapter 18)
+- **Test improvements made:**
+  - Fixed "should disable redo button when at end of history" - now checks `toBeDisabled()` instead of `toBeVisible()`
+  - Fixed "should show visual flash feedback" - now uses `toHaveCount(1)` instead of meaningless `>= 0` assertion
+- **Result:** Each level now maintains its own isolated undo/redo stack. Switching between levels preserves all history.
 
 **Dependencies:** None
 **Notes:** Discovered during E2E test run on 2025-10-06. Currently blocking 1 E2E test.
@@ -926,7 +927,7 @@ Press ESC                      → null            | null               ❌ clea
 | 16. Bug Fixes | ✅ Completed | ✓ | All 3 bugs fixed (import/export/toast selector) |
 | 17. E2E Test Optimization | ⏸️ Not Started | ❌ | Phase 3 continuation - auto-save test merge |
 | 18. Enhanced Copy/Paste | ⏸️ Not Started | ❌ | Ghost preview paste workflow |
-| 19. Undo/Redo History | ⏸️ Not Started | ❌ | **HIGH PRIORITY** - Fix per-level history preservation |
+| 19. Undo/Redo History | ✅ Completed | ✓ | Per-level history implemented - 126/126 E2E tests passing |
 | 12. Documentation | ⏸️ Not Started | ❌ | Consolidate and organize project documentation |
 
 **Legend:**
@@ -941,31 +942,26 @@ Press ESC                      → null            | null               ❌ clea
 
 **Recommended Priority Order:**
 
-1. **Chapter 19: Undo/Redo History Preservation** ⚠️ **HIGH PRIORITY**
-   - Fix per-level history bug (1 failing E2E test)
-   - Critical UX issue for multi-level workflows
-
-2. **Chapter 11: Drawing Tools** (5/12 complete, 7 remaining)
+1. **Chapter 11: Drawing Tools** (5/12 complete, 7 remaining)
    - Core feature implementation
    - Tasks: Tile overlap, Link/Unlink, Line/Rectangle, Button numbering, Rotation
 
-3. **Chapter 15: Code Quality**
+2. **Chapter 15: Code Quality**
    - Fix linter warnings (complexity issues in useCanvas.ts, LevelEditor.tsx)
    - Refactor for maintainability
 
-4. **Chapter 18: Enhanced Copy/Paste**
+3. **Chapter 18: Enhanced Copy/Paste**
    - Ghost preview paste workflow
    - Improved UX
 
-5. **Chapter 17: E2E Test Optimization Phase 3**
+4. **Chapter 17: E2E Test Optimization Phase 3**
    - Minor: Merge auto-save tests, remove redundant test
 
-6. **Chapter 12: Documentation** (Low priority)
+5. **Chapter 12: Documentation** (Low priority)
    - Consolidate project documentation
 
 **Current E2E Status:**
-- ✅ 125/126 tests passing (96.2% pass rate)
-- ❌ 1 failing test: Undo/redo history preservation (Chapter 19)
+- ✅ 126/126 tests passing (100% pass rate)
 - ⏸️ 4 skipped tests: Copy/paste (intentionally deferred to Chapter 18)
 
 **Completed Chapters:**
@@ -973,6 +969,7 @@ Press ESC                      → null            | null               ❌ clea
 - ✅ Chapter 13: E2E test simplification (-9 tests, -527 lines, helper functions)
 - ✅ Chapter 14: E2E test organization (13 focused files)
 - ✅ Chapter 16: Bug fixes (import/export/toast selector)
+- ✅ Chapter 19: Undo/redo history preservation (per-level history)
 
 ---
 

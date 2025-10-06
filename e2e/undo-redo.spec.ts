@@ -176,8 +176,8 @@ test.describe('Undo/Redo', () => {
         await clickCanvas(page, 240, 240);
         await page.waitForTimeout(100);
 
-        // At end of history, redo should be disabled/ineffective
-        await expect(redoButton).toBeVisible();
+        // At end of history, redo should be disabled
+        await expect(redoButton).toBeDisabled();
     });
 
     test('should show visual flash feedback on undo/redo', async ({ page }) => {
@@ -189,16 +189,14 @@ test.describe('Undo/Redo', () => {
         await clickCanvas(page, 260, 260);
         await page.waitForTimeout(100);
 
-        // Undo and check for flash overlay
-        await page.keyboard.press('Control+z');
-
-        // Check if flash overlay is visible (should appear briefly)
+        // Undo and check for flash overlay appearing
         const flashOverlay = page.locator('.undo-redo-flash');
 
-        // Flash might be visible briefly or already faded
-        // We just verify it exists in the DOM (even if opacity is 0)
-        const flashCount = await flashOverlay.count();
-        expect(flashCount).toBeGreaterThanOrEqual(0); // May or may not be in DOM depending on timing
+        await page.keyboard.press('Control+z');
+
+        // Flash overlay should appear briefly (even if it fades quickly)
+        // We check that it exists in the DOM after undo
+        await expect(flashOverlay).toHaveCount(1, { timeout: 500 });
     });
 
     test('should undo multiple actions in sequence', async ({ page }) => {
@@ -272,9 +270,8 @@ test.describe('Undo/Redo', () => {
         expect(finalCount).toBeGreaterThan(initialCount);
     });
 
-    test.skip('should preserve undo/redo history when switching between levels', async ({ page }) => {
-        // TODO: This test reveals that undo may not work correctly immediately after switching levels
-        // Needs investigation - may be related to level-specific history management
+    test('should preserve undo/redo history when switching between levels', async ({ page }) => {
+        // Test per-level history: each level maintains its own undo/redo stack
         const grassTile = page.getByTestId('tile-platform-grass');
         const fileButton = page.getByRole('button', { name: /File/i });
         const newLevelButton = page.getByRole('menuitem', { name: /New Level/ });
@@ -316,8 +313,7 @@ test.describe('Undo/Redo', () => {
         expect(level2CountAfterUndo).toBeLessThan(level2CountAfter);
 
         // Switch back to level 1 (click on the second tab - first tab is the original level)
-        const allTabs = page.getByTestId('level-tab');
-        const level1Tab = allTabs.nth(1); // Second tab is our first created level
+        const level1Tab = page.getByTestId('tab-level-1'); // Second tab is our first created level
         await level1Tab.click();
         await page.waitForTimeout(200);
 
