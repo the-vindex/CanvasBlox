@@ -165,11 +165,11 @@ Work through chapters sequentially. After implementing each chapter:
 - **Location:** `client/src/game/collision.ts`
 - **Implementation:** AABB collision functions for rectangles
 
-#### 24.1.9 Write unit test for player not falling through platforms ⏸️ Not Started
+#### 24.1.9 Write unit test for player not falling through platforms ✅ COMPLETE
 - **Location:** `client/src/game/Player.test.ts`
 - **Test:** Player collides with platform tiles, doesn't fall through
 
-#### 24.1.10 Implement platform collision logic ⏸️ Not Started
+#### 24.1.10 Implement platform collision logic ✅ COMPLETE
 - **Location:** `client/src/game/Player.ts`
 - **Implementation:** Collision resolution with tiles, position correction
 

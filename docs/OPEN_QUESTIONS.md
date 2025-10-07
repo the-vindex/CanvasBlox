@@ -47,3 +47,15 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 24.1.9: Write unit test for player not falling through platforms
+
+**Question:** The test expects player at y=50 with vy=10 to end up at y=68 (just above platform at y=100) after 1 second. But mathematically, 50 + 10*1 = 60, which is still above the platform. Should the test have different values, or should we change the collision detection approach?
+
+**Assumption/Decision:** The test values need adjustment. For a player to collide with a platform, the player's bottom (y + height) must reach or pass the platform's top (y). With player at y=50, height=32, the bottom is at 82. After moving with vy=10 for 1 second, the player is at y=60 (bottom at 92), which is still 8 pixels above the platform at y=100. The test should either: (1) start the player closer to the platform (e.g., y=70), (2) increase velocity to vy=20, or (3) start the player already penetrating the platform. I'll adjust the test to use vy=20 so the player penetrates the platform (60+20=80, bottom at 112, which penetrates platform at 100). Expected result: player stops at y=68 (bottom at 100, just touching platform top).
+
+**Files affected:**
+- `client/src/game/Player.test.ts` - Adjust test velocity values
+- `client/src/game/Player.ts` - Implement collision detection and resolution
+
+---
+

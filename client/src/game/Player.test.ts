@@ -98,4 +98,100 @@ describe('Player', () => {
             expect(player.x).toBe(109);
         });
     });
+
+    describe('platform collision', () => {
+        it('should not fall through a platform below', () => {
+            const player = new Player(100, 50, 32, 32);
+            player.vy = 20;
+
+            const platform = {
+                x: 80,
+                y: 100,
+                width: 64,
+                height: 32,
+            };
+
+            player.update(1, [platform]);
+
+            expect(player.y).toBe(68);
+            expect(player.vy).toBe(0);
+        });
+
+        it('should stop at platform edge when colliding', () => {
+            const player = new Player(100, 70);
+            player.vy = 5;
+
+            const platform = {
+                x: 80,
+                y: 100,
+                width: 64,
+                height: 32,
+            };
+
+            player.update(1, [platform]);
+
+            expect(player.y).toBe(68);
+            expect(player.vy).toBe(0);
+        });
+
+        it('should handle collision with multiple platforms', () => {
+            const player = new Player(100, 50);
+            player.vy = 20;
+
+            const platforms = [
+                { x: 0, y: 200, width: 64, height: 32 },
+                { x: 80, y: 100, width: 64, height: 32 },
+                { x: 160, y: 150, width: 64, height: 32 },
+            ];
+
+            player.update(1, platforms);
+
+            expect(player.y).toBe(68);
+            expect(player.vy).toBe(0);
+        });
+
+        it('should not collide when player is above platform', () => {
+            const player = new Player(100, 50);
+            player.vy = 2;
+
+            const platform = {
+                x: 80,
+                y: 150,
+                width: 64,
+                height: 32,
+            };
+
+            player.update(1, [platform]);
+
+            expect(player.y).toBe(52);
+            expect(player.vy).toBe(2);
+        });
+
+        it('should not collide when player is horizontally outside platform', () => {
+            const player = new Player(20, 50);
+            player.vy = 10;
+
+            const platform = {
+                x: 100,
+                y: 80,
+                width: 64,
+                height: 32,
+            };
+
+            player.update(1, [platform]);
+
+            expect(player.y).toBe(60);
+            expect(player.vy).toBe(10);
+        });
+
+        it('should handle update without platforms', () => {
+            const player = new Player(100, 50);
+            player.vy = 5;
+
+            player.update(1);
+
+            expect(player.y).toBe(55);
+            expect(player.vy).toBe(5);
+        });
+    });
 });
