@@ -32,7 +32,6 @@ export function useCanvas({
     onMoveObjectsComplete,
     onLineComplete,
     onRectangleComplete,
-    _onLinkComplete,
 }: UseCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -54,6 +53,7 @@ export function useCanvas({
     const rectangleStartRef = useRef<Position | null>(null);
     const rectangleEndRef = useRef<Position | null>(null);
     const suspendedToolRef = useRef<EditorState['selectedTool']>(null);
+    const hadDragInteractionRef = useRef(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -368,9 +368,27 @@ export function useCanvas({
                 return;
             }
 
+            // Alt key modifier: temporarily engage move tool (only if objects are selected)
+            if (e.altKey && editorState.selectedObjects.length > 0) {
+                // Store current tool so we can restore it later
+                if (!suspendedToolRef.current) {
+                    suspendedToolRef.current = editorState.selectedTool;
+                }
+                startMoving(worldPos);
+                return;
+            }
+
             handleToolMouseDown(worldPos);
         },
-        [getWorldPosition, editorState.selectedTool, startPanning, startMultiSelect, handleToolMouseDown]
+        [
+            getWorldPosition,
+            editorState.selectedTool,
+            editorState.selectedObjects.length,
+            startPanning,
+            startMultiSelect,
+            startMoving,
+            handleToolMouseDown,
+        ]
     );
 
     // Helper: End panning
@@ -437,9 +455,13 @@ export function useCanvas({
         if (!isMovingObjectsRef.current) return;
 
         isMovingObjectsRef.current = false;
-        if (onMoveObjectsComplete && (moveDeltaRef.current.x !== 0 || moveDeltaRef.current.y !== 0)) {
+        const hasMoved = moveDeltaRef.current.x !== 0 || moveDeltaRef.current.y !== 0;
+
+        if (hasMoved && onMoveObjectsComplete) {
             onMoveObjectsComplete(moveDeltaRef.current);
+            hadDragInteractionRef.current = true; // Mark that we had a drag interaction
         }
+
         moveStartPositionRef.current = null;
         moveDeltaRef.current = { x: 0, y: 0 };
 
@@ -455,9 +477,18 @@ export function useCanvas({
         }
 
         isDraggingSelectionRef.current = false;
-        if (onMultiSelectComplete) {
+
+        // Only complete multi-select if there was actual dragging (positions differ)
+        // If start === end, it's a click, not a drag - let click handler deal with it
+        const hasDragged =
+            selectionStartRef.current.x !== selectionEndRef.current.x ||
+            selectionStartRef.current.y !== selectionEndRef.current.y;
+
+        if (hasDragged && onMultiSelectComplete) {
             onMultiSelectComplete(selectionStartRef.current, selectionEndRef.current);
+            hadDragInteractionRef.current = true; // Mark that we had a drag interaction
         }
+
         selectionStartRef.current = null;
         selectionEndRef.current = null;
 
@@ -487,6 +518,12 @@ export function useCanvas({
 
     const handleClick = useCallback(
         (e: MouseEvent) => {
+            // Skip click if we just completed a drag interaction (move or multi-select)
+            if (hadDragInteractionRef.current) {
+                hadDragInteractionRef.current = false;
+                return;
+            }
+
             const worldPos = getWorldPosition(e);
 
             // Only skip canvas click if pen tool is active with a tile

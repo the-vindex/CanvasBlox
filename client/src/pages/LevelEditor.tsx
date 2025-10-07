@@ -35,7 +35,7 @@ export default function LevelEditor() {
     const [showImportModal, setShowImportModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [modifierState, setModifierState] = useState<'shift' | 'ctrl' | null>(null);
+    const [modifierState, setModifierState] = useState<'shift' | 'ctrl' | 'alt' | null>(null);
     const lastLinkToastRef = useRef<number>(0);
 
     const { toast } = useToast();
@@ -238,9 +238,9 @@ export default function LevelEditor() {
                 return;
             }
 
-            // Ctrl+Click for additive selection works from any tool (except drawing tools)
+            // Ctrl+Click or Shift+Click for additive selection works from any tool (except drawing tools)
             const isDrawingTool = ['pen', 'line', 'rectangle'].includes(editorState.selectedTool || '');
-            if ((event.ctrlKey || event.metaKey) && !isDrawingTool) {
+            if ((event.ctrlKey || event.metaKey || event.shiftKey) && !isDrawingTool) {
                 handleSelectToolClick(position, true);
                 return;
             }
@@ -660,10 +660,12 @@ export default function LevelEditor() {
             const target = e.target as HTMLElement;
             if (isInputElement(target)) return;
 
-            if (e.shiftKey && !e.ctrlKey && !e.metaKey) {
+            if (e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 setModifierState('shift');
-            } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+            } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
                 setModifierState('ctrl');
+            } else if (e.altKey && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                setModifierState('alt');
             }
         };
 
@@ -1043,21 +1045,42 @@ export default function LevelEditor() {
                                 gap: '6px',
                                 padding: '4px 10px',
                                 background:
-                                    modifierState === 'shift' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                                    modifierState === 'shift'
+                                        ? 'rgba(59, 130, 246, 0.2)'
+                                        : modifierState === 'ctrl'
+                                          ? 'rgba(168, 85, 247, 0.2)'
+                                          : 'rgba(34, 197, 94, 0.2)',
                                 border:
                                     modifierState === 'shift'
                                         ? '1px solid rgba(59, 130, 246, 0.4)'
-                                        : '1px solid rgba(168, 85, 247, 0.4)',
+                                        : modifierState === 'ctrl'
+                                          ? '1px solid rgba(168, 85, 247, 0.4)'
+                                          : '1px solid rgba(34, 197, 94, 0.4)',
                                 borderRadius: '4px',
-                                color: modifierState === 'shift' ? '#60a5fa' : '#c084fc',
+                                color:
+                                    modifierState === 'shift'
+                                        ? '#60a5fa'
+                                        : modifierState === 'ctrl'
+                                          ? '#c084fc'
+                                          : '#4ade80',
                                 fontWeight: 600,
                             }}
                         >
                             <i
-                                className={`fas ${modifierState === 'shift' ? 'fa-mouse-pointer' : 'fa-plus-circle'}`}
+                                className={`fas ${
+                                    modifierState === 'shift'
+                                        ? 'fa-mouse-pointer'
+                                        : modifierState === 'ctrl'
+                                          ? 'fa-plus-circle'
+                                          : 'fa-arrows-alt'
+                                }`}
                             ></i>
                             <span>
-                                {modifierState === 'shift' ? 'Multi-select (Shift)' : 'Add to selection (Ctrl)'}
+                                {modifierState === 'shift'
+                                    ? 'Multi-select (Shift)'
+                                    : modifierState === 'ctrl'
+                                      ? 'Add to selection (Ctrl)'
+                                      : 'Move objects (Alt)'}
                             </span>
                         </div>
                     )}

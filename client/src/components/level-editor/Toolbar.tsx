@@ -117,7 +117,7 @@ export function Toolbar({
                 <ToolButton
                     tool="move"
                     icon={MoveIcon}
-                    title="Move Tool (H)"
+                    title="Move Tool (H) - Hold Alt to move selected objects"
                     testId="tool-move"
                     isActive={editorState.selectedTool === 'move'}
                     onToolChange={onToolChange}
