@@ -29,81 +29,6 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
-<!-- CHAPTER_START: 13 -->
-
-<!-- CHAPTER_START: 16 -->
-
----
-
----
-
-<!-- CHAPTER_START: 14 -->
-
----
-
-<!-- CHAPTER_START: 18 -->
-## Chapter 18: Enhanced Copy/Paste with Ghost Preview
-
-**Status:** ✅ Complete
-**Files:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useLevelEditor.ts`, `client/src/utils/canvasRenderer.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/types/level.ts`
-**Priority:** Medium
-
-**Goal:** Change paste behavior to show ghost preview instead of immediate placement. Paste becomes a "complex palette mode" similar to other drawing tools.
-
-### Tasks:
-
-#### 18.1 Rethink copy/paste workflow with ghost preview ✅ Complete
-- **Status:** ✅ COMPLETE
-- **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/utils/canvasRenderer.ts`, `client/src/types/level.ts`
-- **Current:** Paste immediately places tiles at clipboard position
-- **Change:** Paste shows ghost preview, waits for click to place
-- **What was implemented:**
-  1. ✅ **Ghost preview rendering** (`client/src/utils/canvasRenderer.ts`)
-     - Added `drawPastePreview()` method
-     - Renders clipboard items at 50% opacity following cursor
-     - Positions items relative to mouse position
-     - Supports tiles, interactable objects, and spawn points
-  2. ✅ **Paste mode state management** (`client/src/types/level.ts`, `client/src/hooks/useLevelEditor.ts`)
-     - Added `pastePreview` to EditorState (items + offset)
-     - Added `showLargeClipboardDialog` flag
-     - `pasteObjects()` now initiates paste preview mode
-     - `completePaste()` places items at clicked position
-     - `cancelPaste()` cancels paste mode
-  3. ✅ **Click-to-place workflow** (`client/src/pages/LevelEditor.tsx`)
-     - Canvas click handler checks for active paste preview
-     - Clicking places pasted items at cursor position
-     - ESC key cancels paste mode
-     - Tool clears after successful paste
-  4. ✅ **Large clipboard handling** (`client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`)
-     - Threshold: 20 objects
-     - Shows AlertDialog for large clipboards (>20 objects)
-     - Dialog message: "Paste [N] objects at cursor position?"
-     - On confirm: Paste immediately without preview
-     - Prevents performance issues with massive ghost previews
-  5. ✅ **Paste button integration** (`client/src/pages/LevelEditor.tsx`)
-     - Toolbar paste button triggers ghost preview mode
-     - Works same as Ctrl+V keyboard shortcut
-- **New workflow:**
-  - **Copy:** Selected tiles → clipboard (unchanged)
-  - **Paste (Ctrl+V or button):** Shows ghost preview following cursor
-  - **Placement:** Click to place at cursor position
-  - **Cancel:** ESC key cancels paste mode
-  - **Large clipboard (>20 objects):** Shows confirmation dialog, pastes immediately on confirm
-- **Tests:**
-  - ✅ 5 E2E tests (paste-ghost-preview.spec.ts) - All passing
-  - ✅ 1 updated unit test (useLevelEditor.test.ts) - Paste with ghost preview
-  - ✅ Total: 189 unit + 150 E2E tests passing
-- **Manual Test:** Ready for user testing
-  - Copy object → press Ctrl+V → verify ghost preview follows cursor
-  - Click canvas → verify object placed at cursor position
-  - Copy object → press Ctrl+V → press ESC → verify paste cancelled
-  - Copy 25 objects → press Ctrl+V → verify dialog appears
-  - Paste button → verify ghost preview mode activates
-
-**Dependencies:** Task 11.10 (tile overlap logic) should be completed first for consistent overwrite behavior
-**Notes:** More intuitive paste workflow. User has control over where pasted content goes.
-
-<!-- CHAPTER_END: 18 -->
 ---
 
 ---
@@ -185,6 +110,310 @@ Work through chapters sequentially. After implementing each chapter:
 <!-- CHAPTER_END: 23 -->
 ---
 
+<!-- CHAPTER_START: 24 -->
+## Chapter 24: Playable Levels - Game Mode Implementation
+
+**Status:** ⏸️ Not Started
+**Files:** `client/src/components/play-mode/`, `client/src/game/`, `client/src/types/game.ts`
+**Priority:** High (P1 - Core Feature)
+
+**Goal:** Implement playable game mode where users can test their levels with player movement, physics, enemies, and win/lose conditions. Build as vertical slices - each slice fully functional before moving to next.
+
+### Architecture Decisions:
+- **Play Mode Integration:** Separate route `/play/:levelId` OR overlay mode on editor (TBD in 24.1)
+- **Physics Engine:** Custom lightweight AABB collision (~100 LOC)
+- **Rendering:** Reuse `CanvasRenderer` with game object extensions
+- **State Management:** New `usePlayMode` hook with game loop (requestAnimationFrame)
+
+---
+
+### Slice 1: Basic Player Movement
+
+#### 24.1.1 Write unit test for Player class ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Player class with position (x, y), dimensions (width, height), velocity (vx, vy)
+- **Verify:** Constructor initializes properties, getters return correct values
+
+#### 24.1.2 Implement Player class with basic properties ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** Player entity class with position, dimensions, velocity properties
+- **Properties:** `x`, `y`, `width`, `height`, `vx`, `vy`
+
+#### 24.1.3 Write unit test for keyboard input handler ⏸️ Not Started
+- **Location:** `client/src/game/InputHandler.test.ts`
+- **Test:** Keyboard input captures ArrowLeft/ArrowRight/A/D keys
+- **Verify:** Key down sets direction, key up clears direction
+
+#### 24.1.4 Implement keyboard input handler ⏸️ Not Started
+- **Location:** `client/src/game/InputHandler.ts`
+- **Implementation:** Event listeners for keyboard input, state tracking for active keys
+
+#### 24.1.5 Write unit test for horizontal movement with velocity ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Player moves left/right based on input, velocity applies correctly
+
+#### 24.1.6 Implement horizontal movement logic ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** `update()` method applies velocity to position
+
+#### 24.1.7 Write unit test for AABB collision detection with tiles ⏸️ Not Started
+- **Location:** `client/src/game/collision.test.ts`
+- **Test:** AABB collision detection between rectangles (player vs tile)
+- **Verify:** Detects overlaps, returns collision info
+
+#### 24.1.8 Implement AABB collision detection utility ⏸️ Not Started
+- **Location:** `client/src/game/collision.ts`
+- **Implementation:** AABB collision functions for rectangles
+
+#### 24.1.9 Write unit test for player not falling through platforms ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Player collides with platform tiles, doesn't fall through
+
+#### 24.1.10 Implement platform collision logic ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** Collision resolution with tiles, position correction
+
+#### 24.1.11 Write E2E test for play mode toggle button ⏸️ Not Started
+- **Location:** `e2e/play-mode/play-mode-toggle.spec.ts`
+- **Test:** Toggle between edit and play mode, verify UI changes
+
+#### 24.1.12 Implement PlayMode component with edit/play toggle ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`
+- **Implementation:** Component with game canvas, play/edit toggle button
+- **Decision:** Determine if separate route or overlay mode
+
+#### 24.1.13 Write E2E test for player keyboard controls ⏸️ Not Started
+- **Location:** `e2e/play-mode/player-movement.spec.ts`
+- **Test:** Enter play mode, press arrow keys, verify player moves
+
+#### 24.1.14 Integrate Player rendering into PlayMode canvas ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`, `client/src/utils/canvasRenderer.ts`
+- **Implementation:** Game loop with requestAnimationFrame, player rendering
+
+#### 24.1.15 Run full test suite and lint for Slice 1 ⏸️ Not Started
+- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
+- **Verify:** All tests pass, no lint errors, player movement works
+
+---
+
+### Slice 2: Jumping & Gravity
+
+#### 24.2.1 Write unit test for gravity constant and falling ⏸️ Not Started
+- **Location:** `client/src/game/physics.test.ts`
+- **Test:** Gravity constant applies downward acceleration
+
+#### 24.2.2 Implement gravity system with velocity accumulation ⏸️ Not Started
+- **Location:** `client/src/game/physics.ts`, `client/src/game/Player.ts`
+- **Implementation:** Gravity constant, velocity accumulation in update loop
+
+#### 24.2.3 Write unit test for jump input (spacebar) ⏸️ Not Started
+- **Location:** `client/src/game/InputHandler.test.ts`
+- **Test:** Spacebar triggers jump action
+
+#### 24.2.4 Implement jump mechanics with upward velocity ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** Jump applies negative velocity when on ground
+
+#### 24.2.5 Write unit test for vertical collision (ceiling/floor) ⏸️ Not Started
+- **Location:** `client/src/game/collision.test.ts`
+- **Test:** Detect collision from above/below
+
+#### 24.2.6 Implement vertical collision detection ⏸️ Not Started
+- **Location:** `client/src/game/collision.ts`
+- **Implementation:** Vertical collision resolution
+
+#### 24.2.7 Write unit test for jump arc physics ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Jump creates realistic arc with gravity
+
+#### 24.2.8 Tune jump velocity and gravity constants ⏸️ Not Started
+- **Location:** `client/src/game/physics.ts`
+- **Implementation:** Adjust constants for good game feel
+
+#### 24.2.9 Write E2E test for jumping over gaps ⏸️ Not Started
+- **Location:** `e2e/play-mode/player-jump.spec.ts`
+- **Test:** Player jumps, clears gaps, lands on platforms
+
+#### 24.2.10 Wire up spacebar jump input to game loop ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`
+- **Implementation:** Connect input handler to player jump
+
+#### 24.2.11 Run full test suite and lint for Slice 2 ⏸️ Not Started
+- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
+- **Verify:** Jump and gravity work correctly
+
+---
+
+### Slice 3: Death & Respawn
+
+#### 24.3.1 Write unit test for health state (3 hearts) ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Player has health property (max 3), can take damage
+
+#### 24.3.2 Implement health system in Player class ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** Health property, takeDamage(), isDead() methods
+
+#### 24.3.3 Write unit test for lava tile collision detection ⏸️ Not Started
+- **Location:** `client/src/game/collision.test.ts`
+- **Test:** Detect when player touches lava tile
+
+#### 24.3.4 Implement lava detection in collision system ⏸️ Not Started
+- **Location:** `client/src/game/collision.ts`
+- **Implementation:** Check tile material type, return lava collision
+
+#### 24.3.5 Write unit test for death state and respawn ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Death sets state, respawn resets position and health
+
+#### 24.3.6 Implement death logic and respawn at spawn point ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** Death state, respawn() method
+
+#### 24.3.7 Write unit test for Hearts UI component ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/Hearts.test.tsx`
+- **Test:** Renders 3 hearts, shows filled/empty based on health
+
+#### 24.3.8 Implement Hearts UI component (3 hearts display) ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/Hearts.tsx`
+- **Implementation:** React component showing heart icons
+
+#### 24.3.9 Write E2E test for lava death and respawn ⏸️ Not Started
+- **Location:** `e2e/play-mode/death-respawn.spec.ts`
+- **Test:** Player touches lava, dies, respawns at spawn point
+
+#### 24.3.10 Integrate health UI into PlayMode overlay ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`
+- **Implementation:** Render Hearts component on top of canvas
+
+#### 24.3.11 Run full test suite and lint for Slice 3 ⏸️ Not Started
+- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
+- **Verify:** Death, respawn, and health UI work
+
+---
+
+### Slice 4: Enemy Collision
+
+#### 24.4.1 Write unit test for player-enemy AABB collision ⏸️ Not Started
+- **Location:** `client/src/game/collision.test.ts`
+- **Test:** Detect collision between player and enemy rectangles
+
+#### 24.4.2 Implement player-enemy collision detection ⏸️ Not Started
+- **Location:** `client/src/game/collision.ts`
+- **Implementation:** AABB check for player-enemy overlap
+
+#### 24.4.3 Write unit test for directional collision (top vs side) ⏸️ Not Started
+- **Location:** `client/src/game/collision.test.ts`
+- **Test:** Determine if collision from top (stomp) or side (damage)
+
+#### 24.4.4 Implement directional collision logic ⏸️ Not Started
+- **Location:** `client/src/game/collision.ts`
+- **Implementation:** Compare velocities/positions to determine direction
+
+#### 24.4.5 Write unit test for damage system (lose 1 heart) ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** Side collision with enemy reduces health by 1
+
+#### 24.4.6 Implement damage on side collision ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** takeDamage() called on side collision
+
+#### 24.4.7 Write unit test for enemy death from top collision ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.test.ts`
+- **Test:** Top collision (stomp) kills enemy
+
+#### 24.4.8 Implement enemy death on stomp ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.ts`
+- **Implementation:** Enemy class with death state, kill() method
+
+#### 24.4.9 Write unit test for invulnerability frames ⏸️ Not Started
+- **Location:** `client/src/game/Player.test.ts`
+- **Test:** After taking damage, player is invulnerable briefly
+
+#### 24.4.10 Implement invulnerability system (brief immunity) ⏸️ Not Started
+- **Location:** `client/src/game/Player.ts`
+- **Implementation:** Invulnerability timer, visual feedback (flashing)
+
+#### 24.4.11 Write E2E test for enemy collision interactions ⏸️ Not Started
+- **Location:** `e2e/play-mode/enemy-collision.spec.ts`
+- **Test:** Walk into zombie (lose heart), jump on zombie (kill it)
+
+#### 24.4.12 Wire up enemy collision checks in game loop ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`
+- **Implementation:** Check collisions each frame, apply effects
+
+#### 24.4.13 Run full test suite and lint for Slice 4 ⏸️ Not Started
+- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
+- **Verify:** Enemy collision mechanics work correctly
+
+---
+
+### Slice 5: Enemy AI Movement
+
+#### 24.5.1 Write unit test for enemy horizontal movement ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.test.ts`
+- **Test:** Enemy moves left/right with velocity
+
+#### 24.5.2 Implement basic enemy movement (left/right) ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.ts`
+- **Implementation:** Enemy update() moves in current direction
+
+#### 24.5.3 Write unit test for enemy gravity application ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.test.ts`
+- **Test:** Gravity affects enemies like player
+
+#### 24.5.4 Apply gravity physics to enemies ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.ts`
+- **Implementation:** Enemy affected by gravity in update()
+
+#### 24.5.5 Write unit test for edge detection and turn around ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.test.ts`
+- **Test:** Enemy detects platform edge, reverses direction
+
+#### 24.5.6 Implement turn around at platform edges ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.ts`
+- **Implementation:** Raycast or lookahead check for edges
+
+#### 24.5.7 Write unit test for wall collision turn around ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.test.ts`
+- **Test:** Enemy hits wall, reverses direction
+
+#### 24.5.8 Implement turn around at walls ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.ts`
+- **Implementation:** Tile collision reverses direction
+
+#### 24.5.9 Write unit test for patrol state machine ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.test.ts`
+- **Test:** Enemy state (patrolLeft, patrolRight) controls behavior
+
+#### 24.5.10 Implement patrol behavior with direction state ⏸️ Not Started
+- **Location:** `client/src/game/Enemy.ts`
+- **Implementation:** State machine for patrol direction
+
+#### 24.5.11 Write E2E test for enemy AI patrol ⏸️ Not Started
+- **Location:** `e2e/play-mode/enemy-ai.spec.ts`
+- **Test:** Enemy patrols platform, turns at edges and walls
+
+#### 24.5.12 Integrate enemy AI updates into game loop ⏸️ Not Started
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`
+- **Implementation:** Update all enemies each frame
+
+#### 24.5.13 Run full test suite and lint for Slice 5 ⏸️ Not Started
+- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
+- **Verify:** Enemy AI works, full playable level complete
+
+---
+
+**Notes:**
+- Each slice is fully functional before moving to next
+- TDD approach: Write test first, then implement
+- Run both unit tests (`npm test`) and E2E tests (`npm run test:e2e`) after each slice
+- Start with simple colored rectangles for sprites, add art later
+- Physics tuning (jump height, gravity) happens iteratively
+
+<!-- CHAPTER_END: 24 -->
+---
+
 ## Technical Context
 
 ### Current Architecture:
@@ -222,14 +451,9 @@ Work through chapters sequentially. After implementing each chapter:
 
 | Chapter | Status | Approved | Notes |
 |---------|--------|----------|-------|
-| 8. Color & Theme | ✅ Completed | ✓ | Shadow system, tile borders |
-| 9. Context & Feedback | ✅ Completed | ✓ | Undo/redo fixes, batched tile placement, properties panel toggle |
-| 10. Special Effects | ✅ Completed | ✓ | Parallax, glow pulse, scanlines, improved zoom |
-| 18. Enhanced Copy/Paste | ✅ Completed | ❌ | Ghost preview paste workflow (needs user testing) |
 | 22. Future Enhancements | ⏭️ Skipped | N/A | Zoom fit-to-view skipped (not needed) |
-
-**🎉 ALL TASKS COMPLETE! 🎉**
-All chapters have been completed or skipped. The CanvasBlox level editor is feature-complete for the current roadmap.
+| 23. Cleanup & Feature Removal | ⏸️ Not Started | N/A | Remove scanline feature |
+| 24. Playable Levels | ⏸️ Not Started | N/A | Game mode with player movement, physics, enemies (63 tasks across 5 slices) |
 
 **Legend - use only these statuses:**
 - ⏸️ Not Started
@@ -245,27 +469,6 @@ All chapters have been completed or skipped. The CanvasBlox level editor is feat
 
 **Recommended Priority Order:**
 
-1. **Chapter 11: Drawing Tools** (12/17 complete, 5 remaining)
-   - Core feature implementation
-   - Tasks: Rotation decision (11.7), UI improvements (11.14-11.16: Select All/Copy/Paste buttons, close dialog)
-
-2. **Chapter 15: Code Quality**
-   - Fix linter warnings (complexity issues in useCanvas.ts, LevelEditor.tsx)
-   - Refactor for maintainability
-
-3. **Chapter 18: Enhanced Copy/Paste**
-   - Ghost preview paste workflow
-   - Improved UX
-
-4. **Chapter 17: E2E Test Optimization Phase 3**
-   - Minor: Merge auto-save tests, remove redundant test
-
-5. **Chapter 12: Documentation** (Low priority)
-   - Consolidate project documentation
-
-**Current E2E Status:**
-- ✅ 126/126 tests passing (100% pass rate)
-- ⏸️ 4 skipped tests: Copy/paste (intentionally deferred to Chapter 18)
 
 **Completed Chapters:**
 - ✅ Chapter 8-10: Visual enhancements

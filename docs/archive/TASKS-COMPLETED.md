@@ -1923,3 +1923,70 @@ Please test the following scenarios:
 <!-- CHAPTER_END: 21 -->
 
 ---
+## Archived: 2025-10-07 - Chapter 18: Enhanced Copy/Paste with Ghost Preview
+
+<!-- CHAPTER_START: 18 -->
+## Chapter 18: Enhanced Copy/Paste with Ghost Preview
+
+**Status:** ✅ Complete
+**Files:** `client/src/hooks/useCanvas.ts`, `client/src/hooks/useLevelEditor.ts`, `client/src/utils/canvasRenderer.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/types/level.ts`
+**Priority:** Medium
+
+**Goal:** Change paste behavior to show ghost preview instead of immediate placement. Paste becomes a "complex palette mode" similar to other drawing tools.
+
+### Tasks:
+
+#### 18.1 Rethink copy/paste workflow with ghost preview ✅ Complete
+- **Status:** ✅ COMPLETE
+- **Location:** `client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`, `client/src/utils/canvasRenderer.ts`, `client/src/types/level.ts`
+- **Current:** Paste immediately places tiles at clipboard position
+- **Change:** Paste shows ghost preview, waits for click to place
+- **What was implemented:**
+  1. ✅ **Ghost preview rendering** (`client/src/utils/canvasRenderer.ts`)
+     - Added `drawPastePreview()` method
+     - Renders clipboard items at 50% opacity following cursor
+     - Positions items relative to mouse position
+     - Supports tiles, interactable objects, and spawn points
+  2. ✅ **Paste mode state management** (`client/src/types/level.ts`, `client/src/hooks/useLevelEditor.ts`)
+     - Added `pastePreview` to EditorState (items + offset)
+     - Added `showLargeClipboardDialog` flag
+     - `pasteObjects()` now initiates paste preview mode
+     - `completePaste()` places items at clicked position
+     - `cancelPaste()` cancels paste mode
+  3. ✅ **Click-to-place workflow** (`client/src/pages/LevelEditor.tsx`)
+     - Canvas click handler checks for active paste preview
+     - Clicking places pasted items at cursor position
+     - ESC key cancels paste mode
+     - Tool clears after successful paste
+  4. ✅ **Large clipboard handling** (`client/src/hooks/useLevelEditor.ts`, `client/src/pages/LevelEditor.tsx`)
+     - Threshold: 20 objects
+     - Shows AlertDialog for large clipboards (>20 objects)
+     - Dialog message: "Paste [N] objects at cursor position?"
+     - On confirm: Paste immediately without preview
+     - Prevents performance issues with massive ghost previews
+  5. ✅ **Paste button integration** (`client/src/pages/LevelEditor.tsx`)
+     - Toolbar paste button triggers ghost preview mode
+     - Works same as Ctrl+V keyboard shortcut
+- **New workflow:**
+  - **Copy:** Selected tiles → clipboard (unchanged)
+  - **Paste (Ctrl+V or button):** Shows ghost preview following cursor
+  - **Placement:** Click to place at cursor position
+  - **Cancel:** ESC key cancels paste mode
+  - **Large clipboard (>20 objects):** Shows confirmation dialog, pastes immediately on confirm
+- **Tests:**
+  - ✅ 5 E2E tests (paste-ghost-preview.spec.ts) - All passing
+  - ✅ 1 updated unit test (useLevelEditor.test.ts) - Paste with ghost preview
+  - ✅ Total: 189 unit + 150 E2E tests passing
+- **Manual Test:** Ready for user testing
+  - Copy object → press Ctrl+V → verify ghost preview follows cursor
+  - Click canvas → verify object placed at cursor position
+  - Copy object → press Ctrl+V → press ESC → verify paste cancelled
+  - Copy 25 objects → press Ctrl+V → verify dialog appears
+  - Paste button → verify ghost preview mode activates
+
+**Dependencies:** Task 11.10 (tile overlap logic) should be completed first for consistent overwrite behavior
+**Notes:** More intuitive paste workflow. User has control over where pasted content goes.
+
+<!-- CHAPTER_END: 18 -->
+
+---
