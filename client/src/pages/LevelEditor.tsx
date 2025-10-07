@@ -620,7 +620,18 @@ export default function LevelEditor() {
         [_undo, _redo, _copySelectedObjects, _pasteObjects, _selectAllObjects, triggerUndoRedoFlash]
     );
 
-    // Keyboard shortcut handlers
+    // Use refs to avoid re-registering keyboard event listeners
+    const handleToolShortcutRef = useRef(handleToolShortcut);
+    const handleEditorShortcutRef = useRef(handleEditorShortcut);
+    const handleModifierShortcutRef = useRef(handleModifierShortcut);
+
+    useEffect(() => {
+        handleToolShortcutRef.current = handleToolShortcut;
+        handleEditorShortcutRef.current = handleEditorShortcut;
+        handleModifierShortcutRef.current = handleModifierShortcut;
+    });
+
+    // Keyboard shortcut handlers (stable event listener)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
@@ -631,8 +642,8 @@ export default function LevelEditor() {
             const noModifiers = !hasModifiers && !e.shiftKey && !e.altKey;
 
             const handled =
-                (noModifiers && (handleToolShortcut(key) || handleEditorShortcut(key))) ||
-                (hasModifiers && handleModifierShortcut(key, e.shiftKey));
+                (noModifiers && (handleToolShortcutRef.current(key) || handleEditorShortcutRef.current(key))) ||
+                (hasModifiers && handleModifierShortcutRef.current(key, e.shiftKey));
 
             if (handled) {
                 e.preventDefault();
@@ -641,7 +652,7 @@ export default function LevelEditor() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isInputElement, handleToolShortcut, handleEditorShortcut, handleModifierShortcut]);
+    }, [isInputElement]);
 
     // Track modifier key state for visual feedback
     useEffect(() => {
