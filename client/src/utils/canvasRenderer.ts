@@ -1294,7 +1294,6 @@ export class CanvasRenderer {
     private drawPastePreview(
         pastePreview: {
             items: (Tile | InteractableObject | SpawnPoint)[];
-            offset: Position;
         },
         mousePosition: Position,
         pan: Position,
@@ -1304,17 +1303,12 @@ export class CanvasRenderer {
         this.ctx.globalAlpha = 0.5;
 
         pastePreview.items.forEach((item) => {
-            // Calculate position relative to mouse cursor
-            const relativePos = {
-                x: item.position.x - pastePreview.items[0].position.x,
-                y: item.position.y - pastePreview.items[0].position.y,
-            };
-
+            // Items are already normalized (top-left at 0,0), just add mouse position
             const ghostItem = {
                 ...item,
                 position: {
-                    x: mousePosition.x + relativePos.x,
-                    y: mousePosition.y + relativePos.y,
+                    x: mousePosition.x + item.position.x,
+                    y: mousePosition.y + item.position.y,
                 },
             };
 

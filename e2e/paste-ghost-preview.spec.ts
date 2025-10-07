@@ -42,8 +42,8 @@ test.describe('Paste Ghost Preview', () => {
         const finalCount = await getObjectCount(page);
         expect(finalCount).toBe(countBeforePaste + 1);
 
-        // Verify paste toast appears after placement
-        const pasteToast = page.getByText('Pasted 1 items.', { exact: true });
+        // Verify paste toast appears after placement with multi-paste instructions
+        const pasteToast = page.getByText('Pasted 1 items. Click to paste again or press ESC to cancel.').first();
         await expect(pasteToast).toBeVisible();
     });
 

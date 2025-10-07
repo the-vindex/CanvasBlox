@@ -208,6 +208,26 @@ export default function LevelEditor() {
         [findObjectAtPosition, editorState.unlinkSourceId, setEditorState, unlinkObjects, toast]
     );
 
+    const drawingSessionTileCount = useRef(0);
+
+    const handleTilePlaced = useCallback(
+        (position: Position, tileType: string, isDrawing = false) => {
+            if (tileType.startsWith('spawn-')) {
+                addObject(position, tileType);
+            } else if (tileType.includes('platform')) {
+                if (isDrawing) {
+                    addTile(position, tileType, true); // Skip history
+                    drawingSessionTileCount.current++;
+                } else {
+                    addTile(position, tileType, false);
+                }
+            } else {
+                addObject(position, tileType);
+            }
+        },
+        [addTile, addObject]
+    );
+
     const handleCanvasClick = useCallback(
         (position: Position, event: MouseEvent) => {
             if (!currentLevel) return;
@@ -231,37 +251,22 @@ export default function LevelEditor() {
                 handleLinkToolClick(position);
             } else if (editorState.selectedTool === 'unlink') {
                 handleUnlinkToolClick(position);
+            } else if (editorState.selectedTileType && !editorState.selectedTool) {
+                // Place tile/object when tile type is selected but no tool is active
+                handleTilePlaced(position, editorState.selectedTileType);
             }
         },
         [
             currentLevel,
             editorState.selectedTool,
+            editorState.selectedTileType,
             editorState.pastePreview,
             completePaste,
             handleSelectToolClick,
             handleLinkToolClick,
             handleUnlinkToolClick,
+            handleTilePlaced,
         ]
-    );
-
-    const drawingSessionTileCount = useRef(0);
-
-    const handleTilePlaced = useCallback(
-        (position: Position, tileType: string, isDrawing = false) => {
-            if (tileType.startsWith('spawn-')) {
-                addObject(position, tileType);
-            } else if (tileType.includes('platform')) {
-                if (isDrawing) {
-                    addTile(position, tileType, true); // Skip history
-                    drawingSessionTileCount.current++;
-                } else {
-                    addTile(position, tileType, false);
-                }
-            } else {
-                addObject(position, tileType);
-            }
-        },
-        [addTile, addObject]
     );
 
     const handleDrawingSessionEnd = useCallback(() => {
@@ -565,10 +570,7 @@ export default function LevelEditor() {
                 return true;
             }
             if (key === 'escape') {
-                // Cancel paste mode if active
-                if (editorState.pastePreview) {
-                    cancelPaste();
-                }
+                // Clear all selection state (including paste mode)
                 setEditorState((prev) => ({
                     ...prev,
                     ...selectionState.clearAll(),
@@ -581,7 +583,7 @@ export default function LevelEditor() {
             }
             return false;
         },
-        [_deleteSelectedObjects, selectionState, setEditorState, editorState.pastePreview, cancelPaste]
+        [_deleteSelectedObjects, selectionState, setEditorState]
     );
 
     // Helper: Handle Ctrl/Cmd shortcuts
@@ -867,35 +869,22 @@ export default function LevelEditor() {
                     >
                         Redo
                     </button>
-                    <div
-                        data-testid="save-indicator"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 12px',
-                            background: 'rgba(255, 255, 255, 0.15)',
-                            borderRadius: '4px',
-                        }}
-                    >
-                        <i className={`fas fa-save ${hasUnsavedChanges ? 'text-orange-500' : 'text-green-500'}`}></i>
-                        <span>{hasUnsavedChanges ? 'Unsaved' : 'Saved'}</span>
-                    </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'white', fontSize: '13px' }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 12px',
-                            background: 'rgba(255, 255, 255, 0.15)',
-                            borderRadius: '4px',
-                        }}
-                    >
-                        <span>{currentLevel.objects.length + currentLevel.spawnPoints.length} Objects</span>
-                    </div>
+                <div
+                    data-testid="save-indicator"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 12px',
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        borderRadius: '4px',
+                        color: 'white',
+                    }}
+                >
+                    <i className={`fas fa-save ${hasUnsavedChanges ? 'text-orange-500' : 'text-green-500'}`}></i>
+                    <span>{hasUnsavedChanges ? 'Unsaved' : 'Saved'}</span>
                 </div>
             </header>
 

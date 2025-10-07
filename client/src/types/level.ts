@@ -103,8 +103,7 @@ export interface EditorState {
         tileType: string;
     };
     pastePreview?: {
-        items: (Tile | InteractableObject | SpawnPoint)[];
-        offset: Position; // Offset from original positions to cursor
+        items: (Tile | InteractableObject | SpawnPoint)[]; // Items already normalized (top-left at 0,0)
     };
     showLargeClipboardDialog?: boolean;
 }

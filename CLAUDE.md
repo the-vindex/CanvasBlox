@@ -104,6 +104,16 @@ client/src/hooks/useLevelEditor.test.ts  # ← Test next to source
 - Run BOTH unit and e2e tests before committing
 - Don't skip linting
 
+**Test Execution Strategy (when being observed):**
+During active development:
+- Run **targeted tests first**: `npm test <file>` or `npx playwright test <file>` / `-g "pattern"`
+- Discover test structure with `ls e2e/` or `grep` if needed
+- Faster feedback, lower token costs, better observability
+
+Before marking task complete or committing:
+- Run **full test suites**: `npm test && npm run test:e2e`
+- Ensures no regressions in unrelated code
+
 **Detailed guides:**
 - `docs/TASK_MANAGEMENT.md` - Full TDD workflow and task structure
 - `docs/TDD_PRINCIPLES.md` - Red-Green-Refactor cycle

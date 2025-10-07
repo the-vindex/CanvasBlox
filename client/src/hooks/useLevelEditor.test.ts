@@ -546,6 +546,13 @@ describe('useLevelEditor', () => {
 
             // Verify tile was pasted
             expect(result.current.currentLevel.tiles).toHaveLength(initialTileCount + 2);
+            // Paste preview remains active for multi-paste (not cleared)
+            expect(result.current.editorState.pastePreview).toBeDefined();
+
+            // Cancel paste mode with ESC
+            act(() => {
+                result.current.cancelPaste();
+            });
             expect(result.current.editorState.pastePreview).toBeUndefined();
         });
 

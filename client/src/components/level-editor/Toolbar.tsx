@@ -148,12 +148,13 @@ export function Toolbar({
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="w-8 h-8 p-0"
+                    className={cn('w-8 h-8 p-0', editorState.pastePreview && 'bg-green-600 hover:bg-green-700')}
                     onClick={onPaste}
                     title="Paste (Ctrl+V)"
                     aria-label="Paste"
                     data-testid="button-paste"
                     disabled={!hasClipboard}
+                    aria-pressed={editorState.pastePreview ? 'true' : 'false'}
                 >
                     <PasteIcon className="w-4 h-4" />
                 </Button>

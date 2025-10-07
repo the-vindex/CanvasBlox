@@ -443,7 +443,20 @@ export function useLevelEditor() {
             ...currentLevel.spawnPoints.filter((spawn) => editorState.selectedObjects.includes(spawn.id)),
         ];
 
-        setEditorState((prev) => ({ ...prev, clipboard: selectedItems }));
+        // Normalize coordinates - find min x and y to make top-left item at (0, 0)
+        const minX = Math.min(...selectedItems.map((item) => item.position.x));
+        const minY = Math.min(...selectedItems.map((item) => item.position.y));
+
+        // Create normalized copies with positions relative to top-left
+        const normalizedItems = selectedItems.map((item) => ({
+            ...item,
+            position: {
+                x: item.position.x - minX,
+                y: item.position.y - minY,
+            },
+        }));
+
+        setEditorState((prev) => ({ ...prev, clipboard: normalizedItems }));
         toast({
             title: 'Copied',
             description: `Copied ${selectedItems.length} items to clipboard.`,
@@ -465,19 +478,11 @@ export function useLevelEditor() {
         }
 
         // For normal clipboards, initiate paste mode with ghost preview
-        const minPosition = editorState.clipboard.reduce(
-            (min, item) => ({
-                x: Math.min(min.x, item.position.x),
-                y: Math.min(min.y, item.position.y),
-            }),
-            { x: Infinity, y: Infinity }
-        );
-
+        // Items are already normalized (top-left at 0,0) from copy operation
         setEditorState((prev) => ({
             ...prev,
             pastePreview: {
                 items: editorState.clipboard,
-                offset: { x: -minPosition.x, y: -minPosition.y }, // Offset to position relative to cursor
             },
         }));
     }, [editorState.clipboard]);
@@ -486,18 +491,13 @@ export function useLevelEditor() {
         (position: Position) => {
             if (!editorState.pastePreview) return;
 
+            // Items are already normalized (top-left at 0,0), just add click position
             const pastedItems = editorState.pastePreview.items.map((item) => ({
                 ...JSON.parse(JSON.stringify(item)),
                 id: `${item.id}_copy_${Date.now()}`,
                 position: {
-                    x:
-                        position.x +
-                        editorState.pastePreview.offset.x +
-                        (item.position.x - editorState.pastePreview.items[0].position.x),
-                    y:
-                        position.y +
-                        editorState.pastePreview.offset.y +
-                        (item.position.y - editorState.pastePreview.items[0].position.y),
+                    x: position.x + item.position.x,
+                    y: position.y + item.position.y,
                 },
             }));
 
@@ -532,15 +532,11 @@ export function useLevelEditor() {
 
             toast({
                 title: 'Pasted',
-                description: `Pasted ${pastedItems.length} items.`,
+                description: `Pasted ${pastedItems.length} items. Click to paste again or press ESC to cancel.`,
             });
 
-            // Clear paste preview and tool
-            setEditorState((prev) => ({
-                ...prev,
-                pastePreview: undefined,
-                selectedTool: null,
-            }));
+            // Keep paste preview active for multiple placements
+            // User can press ESC or change tools to exit paste mode
         },
         [editorState.pastePreview, updateCurrentLevel, toast]
     );
@@ -557,12 +553,13 @@ export function useLevelEditor() {
         (position: Position) => {
             if (editorState.clipboard.length === 0) return;
 
+            // Items are already normalized (top-left at 0,0), just add click position
             const pastedItems = editorState.clipboard.map((item) => ({
                 ...JSON.parse(JSON.stringify(item)),
                 id: `${item.id}_copy_${Date.now()}`,
                 position: {
-                    x: position.x + (item.position.x - editorState.clipboard[0].position.x),
-                    y: position.y + (item.position.y - editorState.clipboard[0].position.y),
+                    x: position.x + item.position.x,
+                    y: position.y + item.position.y,
                 },
             }));
 

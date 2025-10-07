@@ -28,6 +28,7 @@ export function useSelectionState() {
         selectedTool: null,
         selectedTileType: null,
         selectedObjects: [],
+        pastePreview: undefined, // Clear paste mode
     });
 
     /**
@@ -68,6 +69,7 @@ export function useSelectionState() {
             ...(isDrawingTool ? {} : { selectedTileType: null }), // Only clear tile for non-drawing tools
             linkSourceId: null, // Clear link source when changing tools
             unlinkSourceId: null, // Clear unlink source when changing tools
+            pastePreview: undefined, // Cancel paste mode when changing tools
             // selectedObjects preserved for multi-step workflows
         };
     };
