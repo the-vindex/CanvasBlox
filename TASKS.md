@@ -139,12 +139,12 @@ Work through chapters sequentially. After implementing each chapter:
 - **Implementation:** Player entity class with position, dimensions, velocity properties
 - **Properties:** `x`, `y`, `width`, `height`, `vx`, `vy`
 
-#### 24.1.3 Write unit test for keyboard input handler ⏸️ Not Started
+#### 24.1.3 Write unit test for keyboard input handler ✅ COMPLETE
 - **Location:** `client/src/game/InputHandler.test.ts`
 - **Test:** Keyboard input captures ArrowLeft/ArrowRight/A/D keys
 - **Verify:** Key down sets direction, key up clears direction
 
-#### 24.1.4 Implement keyboard input handler ⏸️ Not Started
+#### 24.1.4 Implement keyboard input handler ✅ COMPLETE
 - **Location:** `client/src/game/InputHandler.ts`
 - **Implementation:** Event listeners for keyboard input, state tracking for active keys
 
