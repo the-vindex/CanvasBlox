@@ -102,7 +102,10 @@ export function Toolbar({
     const showGridId = useId();
 
     return (
-        <div className="h-12 bg-[#252525] border-b border-[#333] flex items-center px-3 gap-2" data-testid="toolbar">
+        <div
+            className="h-12 bg-[#252525] border-b border-[#333] flex items-center px-3 gap-2 relative z-[100]"
+            data-testid="toolbar"
+        >
             {/* Selection Tools */}
             <div className="flex items-center gap-1 pr-2 border-r border-[#333]">
                 <ToolButton
@@ -258,6 +261,18 @@ export function Toolbar({
                         Grid
                     </Label>
                 </div>
+
+                <Button
+                    variant={editorState.isPlayMode ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onStateChange({ isPlayMode: !editorState.isPlayMode })}
+                    className="h-8 px-3"
+                    title={editorState.isPlayMode ? 'Exit Play Mode' : 'Enter Play Mode'}
+                    data-testid="button-play-mode"
+                >
+                    <i className={`fas ${editorState.isPlayMode ? 'fa-edit' : 'fa-play'} text-sm mr-2`}></i>
+                    {editorState.isPlayMode ? 'Edit' : 'Play'}
+                </Button>
 
                 {onTogglePropertiesPanel && (
                     <Button

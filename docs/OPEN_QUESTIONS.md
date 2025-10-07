@@ -59,3 +59,51 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 24.1.11-24.1.12: Play mode toggle and PlayMode component
+
+**Question:** Should play mode be a separate route (`/play/:levelId`) or an overlay mode within the editor?
+
+**Assumption/Decision:** Using overlay mode within the editor (not a separate route). Reasons:
+1. **Simpler UX**: Users can toggle play/edit instantly without navigation
+2. **State preservation**: Editor state (level data, zoom, pan) is already loaded
+3. **Faster testing**: Quick iteration between editing and playing
+4. **Less complexity**: No routing, URL params, or level loading logic needed
+5. **Better for kids**: One-click "Test Your Level" button is more intuitive than navigating to a different page
+
+Architecture:
+- Add `isPlayMode: boolean` to EditorState
+- Toggle button in Toolbar (similar to grid toggle)
+- When `isPlayMode === true`, show PlayMode component overlay that covers the editor canvas
+- PlayMode component has its own game canvas with game loop (requestAnimationFrame)
+- Easy to switch back to edit mode with same toggle button
+
+Test structure:
+- E2E test location: `e2e/play-mode-toggle.spec.ts` (not in subdirectory, following existing pattern)
+- Test IDs: `button-play-mode` (toggle button), `play-mode-container` (overlay), `play-mode-canvas` (game canvas)
+
+**Files affected:**
+- `client/src/types/level.ts` - Add `isPlayMode` to EditorState
+- `client/src/components/level-editor/Toolbar.tsx` - Add play mode toggle button
+- `client/src/components/play-mode/PlayMode.tsx` - New PlayMode component
+- `client/src/pages/LevelEditor.tsx` - Conditionally render PlayMode overlay
+- `e2e/play-mode-toggle.spec.ts` - E2E test for toggle functionality
+
+---
+
+## Task 24.1.12: PlayMode component implementation - Z-index and accessibility
+
+**Question:** How should the PlayMode overlay be positioned to ensure the toolbar Play/Edit button remains clickable?
+
+**Assumption/Decision:** The PlayMode overlay should NOT cover the toolbar. Current implementation has issues:
+1. PlayMode has `z-50` and `position: fixed` starting at `top: '96px'`
+2. Even with `pointerEvents: 'none'` on the container, the toolbar's Play button is hard to click
+3. The E2E tests show that clicking with `force: true` isn't properly toggling the state
+
+Solution: Ensure the Toolbar has explicit z-index higher than PlayMode overlay (z-100). Also verify that the onClick handler is working correctly.
+
+**Files to check/modify:**
+- `client/src/components/level-editor/Toolbar.tsx` - Add z-index to toolbar container
+- `client/src/components/play-mode/PlayMode.tsx` - Verify pointerEvents and positioning
+
+---
+

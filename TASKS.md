@@ -173,38 +173,45 @@ Work through chapters sequentially. After implementing each chapter:
 - **Location:** `client/src/game/Player.ts`
 - **Implementation:** Collision resolution with tiles, position correction
 
-#### 24.1.11 Write E2E test for play mode toggle button ⏸️ Not Started
-- **Location:** `e2e/play-mode/play-mode-toggle.spec.ts`
+#### 24.1.11 Write E2E test for play mode toggle button ✅ COMPLETE
+- **Location:** `e2e/play-mode-toggle.spec.ts`
 - **Test:** Toggle between edit and play mode, verify UI changes
+- **Note:** Test file created, all 6 tests passing
 
-#### 24.1.12 Implement PlayMode component with edit/play toggle ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`
-- **Implementation:** Component with game canvas, play/edit toggle button
-- **Decision:** Determine if separate route or overlay mode
+#### 24.1.12 Implement PlayMode component with edit/play toggle ✅ COMPLETE
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`, `client/src/components/level-editor/Toolbar.tsx`
+- **Implementation:** Component with game canvas, play/edit toggle button in toolbar
+- **Decision:** Implemented as overlay mode (not separate route) - see OPEN_QUESTIONS.md
+- **Note:** Added z-index to toolbar to ensure button remains clickable
 
-#### 24.1.13 Write E2E test for player keyboard controls ⏸️ Not Started
-- **Location:** `e2e/play-mode/player-movement.spec.ts`
+#### 24.1.13 Write E2E test for player keyboard controls ✅ COMPLETE
+- **Location:** `e2e/player-movement.spec.ts`
 - **Test:** Enter play mode, press arrow keys, verify player moves
+- **Note:** Created 6 tests covering ArrowLeft, ArrowRight, A, D keys and movement states
 
-#### 24.1.14 Integrate Player rendering into PlayMode canvas ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`, `client/src/utils/canvasRenderer.ts`
-- **Implementation:** Game loop with requestAnimationFrame, player rendering
+#### 24.1.14 Integrate Player rendering into PlayMode canvas ✅ COMPLETE
+- **Location:** `client/src/components/play-mode/PlayMode.tsx`
+- **Implementation:** Game loop with requestAnimationFrame, player rendering, input handling, collision detection
+- **Note:** Integrated Player, InputHandler, and collision system. Player renders as blue square, platforms render as gray squares
 
-#### 24.1.15 Run full test suite and lint for Slice 1 ⏸️ Not Started
+#### 24.1.15 Run full test suite and lint for Slice 1 ✅ COMPLETE
 - **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
 - **Verify:** All tests pass, no lint errors, player movement works
+- **Results:** ✅ Unit tests: 235 passed | ✅ E2E tests: 177 passed, 6 skipped | ✅ Linter: 3 files fixed
 
 ---
 
 ### Slice 2: Jumping & Gravity
 
-#### 24.2.1 Write unit test for gravity constant and falling ⏸️ Not Started
+#### 24.2.1 Write unit test for gravity constant and falling ✅ COMPLETE
 - **Location:** `client/src/game/physics.test.ts`
 - **Test:** Gravity constant applies downward acceleration
+- **Note:** Created 5 comprehensive tests covering gravity constant, downward acceleration, velocity accumulation, upward movement, and variable delta time
 
-#### 24.2.2 Implement gravity system with velocity accumulation ⏸️ Not Started
-- **Location:** `client/src/game/physics.ts`, `client/src/game/Player.ts`
-- **Implementation:** Gravity constant, velocity accumulation in update loop
+#### 24.2.2 Implement gravity system with velocity accumulation ✅ COMPLETE
+- **Location:** `client/src/game/physics.ts`
+- **Implementation:** Gravity constant (800 px/s²), applyGravity() function for velocity accumulation
+- **Note:** Simple physics module with GRAVITY constant and applyGravity utility function
 
 #### 24.2.3 Write unit test for jump input (spacebar) ⏸️ Not Started
 - **Location:** `client/src/game/InputHandler.test.ts`

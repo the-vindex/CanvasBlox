@@ -81,6 +81,7 @@ export interface EditorState {
     zoom: number;
     pan: Position;
     showGrid: boolean;
+    isPlayMode: boolean;
     mousePosition: Position;
     deletingObjects: string[];
     deletionStartTimes?: Map<string, number>; // Object ID -> deletion start timestamp

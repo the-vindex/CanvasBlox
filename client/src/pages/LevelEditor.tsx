@@ -6,6 +6,7 @@ import { LevelTabs } from '@/components/level-editor/LevelTabs';
 import { PropertiesPanel } from '@/components/level-editor/PropertiesPanel';
 import { TilePalette } from '@/components/level-editor/TilePalette';
 import { Toolbar } from '@/components/level-editor/Toolbar';
+import { PlayMode } from '@/components/play-mode/PlayMode';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -947,7 +948,14 @@ export default function LevelEditor() {
                     />
 
                     {/* Canvas Component with CanvasRenderer */}
-                    <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+                    <div
+                        style={{
+                            flex: 1,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            display: editorState.isPlayMode ? 'none' : 'block',
+                        }}
+                    >
                         <Canvas
                             levelData={currentLevel}
                             editorState={editorState}
@@ -1165,6 +1173,14 @@ export default function LevelEditor() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Play Mode Overlay */}
+            {editorState.isPlayMode && (
+                <PlayMode
+                    level={currentLevel}
+                    onExit={() => setEditorState((prev) => ({ ...prev, isPlayMode: false }))}
+                />
+            )}
         </div>
     );
 }
