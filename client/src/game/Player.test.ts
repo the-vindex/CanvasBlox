@@ -99,6 +99,86 @@ describe('Player', () => {
         });
     });
 
+    describe('jump mechanics', () => {
+        it('should apply upward velocity when jump is called while grounded', () => {
+            const player = new Player(100, 50);
+            player.vy = 20;
+            const platform = { x: 80, y: 100, width: 64, height: 32 };
+
+            // Make player grounded by landing on platform
+            player.update(1, [platform]);
+            expect(player.isGrounded()).toBe(true);
+
+            player.jump();
+
+            expect(player.vy).toBeLessThan(0); // Negative velocity means upward movement
+        });
+
+        it('should only allow jump when on ground', () => {
+            const player = new Player(100, 50);
+            player.vy = 20;
+            const platform = { x: 80, y: 100, width: 64, height: 32 };
+
+            // Make player grounded
+            player.update(1, [platform]);
+            expect(player.isGrounded()).toBe(true);
+
+            player.jump();
+            const firstJumpVelocity = player.vy;
+
+            // Try to jump again while in air
+            player.jump();
+
+            expect(player.vy).toBe(firstJumpVelocity); // Velocity should not change
+        });
+
+        it('should set grounded state to false when jumping', () => {
+            const player = new Player(100, 50);
+            player.vy = 20;
+            const platform = { x: 80, y: 100, width: 64, height: 32 };
+
+            // Make player grounded
+            player.update(1, [platform]);
+            expect(player.isGrounded()).toBe(true);
+
+            player.jump();
+
+            expect(player.isGrounded()).toBe(false);
+        });
+
+        it('should not jump when already in air', () => {
+            const player = new Player(100, 100);
+            player.vy = -10; // Already moving upward
+
+            expect(player.isGrounded()).toBe(false);
+            const beforeJumpVelocity = player.vy;
+            player.jump();
+
+            expect(player.vy).toBe(beforeJumpVelocity); // Should not change
+        });
+
+        it('should become grounded when landing on platform', () => {
+            const player = new Player(100, 50);
+            player.vy = 20;
+            const platform = { x: 80, y: 100, width: 64, height: 32 };
+
+            expect(player.isGrounded()).toBe(false);
+
+            player.update(1, [platform]);
+
+            expect(player.isGrounded()).toBe(true);
+        });
+
+        it('should not be grounded when in air', () => {
+            const player = new Player(100, 50);
+            player.vy = 5;
+
+            player.update(1);
+
+            expect(player.isGrounded()).toBe(false);
+        });
+    });
+
     describe('platform collision', () => {
         it('should not fall through a platform below', () => {
             const player = new Player(100, 50, 32, 32);

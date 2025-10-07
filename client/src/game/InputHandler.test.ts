@@ -114,6 +114,58 @@ describe('InputHandler', () => {
         });
     });
 
+    describe('jump input', () => {
+        it('should detect spacebar key press for jump', () => {
+            const event = new KeyboardEvent('keydown', { key: ' ' });
+            window.dispatchEvent(event);
+
+            expect(inputHandler.isJumpPressed()).toBe(true);
+        });
+
+        it('should detect W key press for jump', () => {
+            const event = new KeyboardEvent('keydown', { key: 'w' });
+            window.dispatchEvent(event);
+
+            expect(inputHandler.isJumpPressed()).toBe(true);
+        });
+
+        it('should clear jump state on key up', () => {
+            const keyDown = new KeyboardEvent('keydown', { key: ' ' });
+            const keyUp = new KeyboardEvent('keyup', { key: ' ' });
+
+            window.dispatchEvent(keyDown);
+            expect(inputHandler.isJumpPressed()).toBe(true);
+
+            window.dispatchEvent(keyUp);
+            expect(inputHandler.isJumpPressed()).toBe(false);
+        });
+
+        it('should handle W and spacebar as same jump input', () => {
+            const wDown = new KeyboardEvent('keydown', { key: 'w' });
+            window.dispatchEvent(wDown);
+
+            expect(inputHandler.isJumpPressed()).toBe(true);
+
+            const wUp = new KeyboardEvent('keyup', { key: 'w' });
+            window.dispatchEvent(wUp);
+
+            expect(inputHandler.isJumpPressed()).toBe(false);
+        });
+
+        it('should keep jump active if one key is released but alternate key is still pressed', () => {
+            const wDown = new KeyboardEvent('keydown', { key: 'w' });
+            const spaceDown = new KeyboardEvent('keydown', { key: ' ' });
+            const wUp = new KeyboardEvent('keyup', { key: 'w' });
+
+            window.dispatchEvent(wDown);
+            window.dispatchEvent(spaceDown);
+            expect(inputHandler.isJumpPressed()).toBe(true);
+
+            window.dispatchEvent(wUp);
+            expect(inputHandler.isJumpPressed()).toBe(true); // Spacebar still pressed
+        });
+    });
+
     describe('cleanup', () => {
         it('should remove event listeners on cleanup', () => {
             inputHandler.cleanup();

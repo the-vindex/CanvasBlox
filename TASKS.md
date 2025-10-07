@@ -213,13 +213,15 @@ Work through chapters sequentially. After implementing each chapter:
 - **Implementation:** Gravity constant (800 px/s²), applyGravity() function for velocity accumulation
 - **Note:** Simple physics module with GRAVITY constant and applyGravity utility function
 
-#### 24.2.3 Write unit test for jump input (spacebar) ⏸️ Not Started
+#### 24.2.3 Write unit test for jump input (spacebar) ✅ COMPLETE
 - **Location:** `client/src/game/InputHandler.test.ts`
 - **Test:** Spacebar triggers jump action
+- **Note:** Added 5 tests covering spacebar, W key, key release, and simultaneous key presses
 
-#### 24.2.4 Implement jump mechanics with upward velocity ⏸️ Not Started
+#### 24.2.4 Implement jump mechanics with upward velocity ✅ COMPLETE
 - **Location:** `client/src/game/Player.ts`
 - **Implementation:** Jump applies negative velocity when on ground
+- **Note:** Added jump() method, isGrounded() method, grounded state tracking, and JUMP_VELOCITY constant (-400 px/s)
 
 #### 24.2.5 Write unit test for vertical collision (ceiling/floor) ⏸️ Not Started
 - **Location:** `client/src/game/collision.test.ts`

@@ -35,6 +35,13 @@ export class InputHandler {
     }
 
     /**
+     * Check if jump keys are pressed (Spacebar or W).
+     */
+    isJumpPressed(): boolean {
+        return this.keys.has(' ') || this.keys.has('w');
+    }
+
+    /**
      * Remove event listeners. Call this when the input handler is no longer needed.
      */
     cleanup(): void {

@@ -1,6 +1,11 @@
 import { type AABB, checkAABBCollision } from './collision';
 
 /**
+ * Jump velocity constant (pixels per second, negative = upward)
+ */
+const JUMP_VELOCITY = -400;
+
+/**
  * Player entity for the game mode.
  * Handles player position, dimensions, and velocity.
  */
@@ -11,6 +16,7 @@ export class Player {
     public height: number;
     public vx: number;
     public vy: number;
+    private grounded: boolean;
 
     constructor(x: number, y: number, width: number = 32, height: number = 32) {
         this.x = x;
@@ -19,6 +25,24 @@ export class Player {
         this.height = height;
         this.vx = 0;
         this.vy = 0;
+        this.grounded = false;
+    }
+
+    /**
+     * Check if player is currently on the ground.
+     */
+    isGrounded(): boolean {
+        return this.grounded;
+    }
+
+    /**
+     * Make the player jump (only if grounded).
+     */
+    jump(): void {
+        if (this.grounded) {
+            this.vy = JUMP_VELOCITY;
+            this.grounded = false;
+        }
     }
 
     /**
@@ -31,6 +55,9 @@ export class Player {
         // Apply velocity to position
         this.x += this.vx * deltaTime;
         this.y += this.vy * deltaTime;
+
+        // Assume not grounded until proven otherwise by collision
+        this.grounded = false;
 
         // If no platforms provided, skip collision detection
         if (!platforms || platforms.length === 0) {
@@ -57,6 +84,7 @@ export class Player {
                         // Player is landing on top of platform
                         this.y = platform.y - this.height;
                         this.vy = 0;
+                        this.grounded = true;
                     }
                 } else {
                     // Horizontal collision (side of platform)
