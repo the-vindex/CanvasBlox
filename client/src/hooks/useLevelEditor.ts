@@ -464,31 +464,32 @@ export function useLevelEditor() {
     }, [currentLevel, editorState.selectedObjects, toast]);
 
     const pasteObjects = useCallback(() => {
-        if (editorState.clipboard.length === 0) return;
+        setEditorState((prev) => {
+            if (prev.clipboard.length === 0) return prev;
 
-        const LARGE_CLIPBOARD_THRESHOLD = 20;
+            const LARGE_CLIPBOARD_THRESHOLD = 20;
 
-        // For large clipboards (>20 objects), show confirmation dialog with ghost preview
-        if (editorState.clipboard.length > LARGE_CLIPBOARD_THRESHOLD) {
-            setEditorState((prev) => ({
+            // For large clipboards (>20 objects), show confirmation dialog with ghost preview
+            if (prev.clipboard.length > LARGE_CLIPBOARD_THRESHOLD) {
+                return {
+                    ...prev,
+                    showLargeClipboardDialog: true,
+                    pastePreview: {
+                        items: prev.clipboard,
+                    },
+                };
+            }
+
+            // For normal clipboards, initiate paste mode with ghost preview
+            // Items are already normalized (top-left at 0,0) from copy operation
+            return {
                 ...prev,
-                showLargeClipboardDialog: true,
                 pastePreview: {
-                    items: editorState.clipboard,
+                    items: prev.clipboard,
                 },
-            }));
-            return;
-        }
-
-        // For normal clipboards, initiate paste mode with ghost preview
-        // Items are already normalized (top-left at 0,0) from copy operation
-        setEditorState((prev) => ({
-            ...prev,
-            pastePreview: {
-                items: editorState.clipboard,
-            },
-        }));
-    }, [editorState.clipboard]);
+            };
+        });
+    }, []);
 
     const completePaste = useCallback(
         (position: Position) => {
