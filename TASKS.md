@@ -156,12 +156,12 @@ Work through chapters sequentially. After implementing each chapter:
 - **Location:** `client/src/game/Player.ts`
 - **Implementation:** `update()` method applies velocity to position
 
-#### 24.1.7 Write unit test for AABB collision detection with tiles ⏸️ Not Started
+#### 24.1.7 Write unit test for AABB collision detection with tiles ✅ COMPLETE
 - **Location:** `client/src/game/collision.test.ts`
 - **Test:** AABB collision detection between rectangles (player vs tile)
 - **Verify:** Detects overlaps, returns collision info
 
-#### 24.1.8 Implement AABB collision detection utility ⏸️ Not Started
+#### 24.1.8 Implement AABB collision detection utility ✅ COMPLETE
 - **Location:** `client/src/game/collision.ts`
 - **Implementation:** AABB collision functions for rectangles
 

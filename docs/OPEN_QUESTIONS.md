@@ -35,3 +35,15 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 24.1.7: Write unit test for AABB collision detection
+
+**Question:** Should edge-touching rectangles (where edges are exactly aligned but not overlapping) be considered a collision?
+
+**Assumption/Decision:** Edge-touching should NOT be considered a collision in the AABB system. In physics engines, touching but not overlapping typically means no collision. The AABB check uses `<` and `>` operators (not `<=` and `>=`), which is standard for AABB collision detection. This prevents false positives when objects are perfectly adjacent. For gameplay, this means a player standing exactly at a tile's edge won't register as colliding, which is the correct behavior for platform games.
+
+**Files affected:**
+- `client/src/game/collision.ts` - AABB implementation using strict inequality
+- `client/src/game/collision.test.ts` - Updated test expectations
+
+---
+
