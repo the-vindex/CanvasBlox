@@ -148,11 +148,11 @@ Work through chapters sequentially. After implementing each chapter:
 - **Location:** `client/src/game/InputHandler.ts`
 - **Implementation:** Event listeners for keyboard input, state tracking for active keys
 
-#### 24.1.5 Write unit test for horizontal movement with velocity ⏸️ Not Started
+#### 24.1.5 Write unit test for horizontal movement with velocity ✅ COMPLETE
 - **Location:** `client/src/game/Player.test.ts`
 - **Test:** Player moves left/right based on input, velocity applies correctly
 
-#### 24.1.6 Implement horizontal movement logic ⏸️ Not Started
+#### 24.1.6 Implement horizontal movement logic ✅ COMPLETE
 - **Location:** `client/src/game/Player.ts`
 - **Implementation:** `update()` method applies velocity to position
 

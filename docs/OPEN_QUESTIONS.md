@@ -23,3 +23,15 @@ Review this file after the auto-implementation is complete.
 
 ---
 
+## Task 24.1.5: Write unit test for horizontal movement with velocity
+
+**Question:** Should the update method take delta time in seconds or milliseconds? What should be the movement speed constant?
+
+**Assumption/Decision:** Using delta time in seconds (common in game engines). The velocity (vx, vy) will be in pixels per second. This allows for frame-rate independent movement. Update method signature: `update(deltaTime: number)` where deltaTime is in seconds (e.g., 0.016 for 60fps).
+
+**Files affected:**
+- `client/src/game/Player.ts` - Add `update(deltaTime: number)` method
+- `client/src/game/Player.test.ts` - Tests verify velocity * deltaTime = position change
+
+---
+

@@ -49,4 +49,53 @@ describe('Player', () => {
             expect(player.vy).toBe(-10);
         });
     });
+
+    describe('horizontal movement', () => {
+        it('should move right when positive velocity is applied', () => {
+            const player = new Player(100, 100);
+            player.vx = 5;
+
+            player.update(1);
+
+            expect(player.x).toBe(105);
+        });
+
+        it('should move left when negative velocity is applied', () => {
+            const player = new Player(100, 100);
+            player.vx = -5;
+
+            player.update(1);
+
+            expect(player.x).toBe(95);
+        });
+
+        it('should not move horizontally when velocity is zero', () => {
+            const player = new Player(100, 100);
+            player.vx = 0;
+
+            player.update(1);
+
+            expect(player.x).toBe(100);
+        });
+
+        it('should apply velocity proportional to delta time', () => {
+            const player = new Player(100, 100);
+            player.vx = 10;
+
+            player.update(0.5);
+
+            expect(player.x).toBe(105);
+        });
+
+        it('should accumulate position over multiple updates', () => {
+            const player = new Player(100, 100);
+            player.vx = 3;
+
+            player.update(1);
+            player.update(1);
+            player.update(1);
+
+            expect(player.x).toBe(109);
+        });
+    });
 });

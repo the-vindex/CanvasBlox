@@ -18,4 +18,13 @@ export class Player {
         this.vx = 0;
         this.vy = 0;
     }
+
+    /**
+     * Update player position based on velocity and delta time.
+     * @param deltaTime - Time elapsed since last update in seconds
+     */
+    update(deltaTime: number): void {
+        this.x += this.vx * deltaTime;
+        this.y += this.vy * deltaTime;
+    }
 }
