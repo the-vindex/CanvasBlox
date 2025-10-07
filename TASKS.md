@@ -129,12 +129,12 @@ Work through chapters sequentially. After implementing each chapter:
 
 ### Slice 1: Basic Player Movement
 
-#### 24.1.1 Write unit test for Player class ⏸️ Not Started
+#### 24.1.1 Write unit test for Player class ✅ COMPLETE
 - **Location:** `client/src/game/Player.test.ts`
 - **Test:** Player class with position (x, y), dimensions (width, height), velocity (vx, vy)
 - **Verify:** Constructor initializes properties, getters return correct values
 
-#### 24.1.2 Implement Player class with basic properties ⏸️ Not Started
+#### 24.1.2 Implement Player class with basic properties ✅ COMPLETE
 - **Location:** `client/src/game/Player.ts`
 - **Implementation:** Player entity class with position, dimensions, velocity properties
 - **Properties:** `x`, `y`, `width`, `height`, `vx`, `vy`
