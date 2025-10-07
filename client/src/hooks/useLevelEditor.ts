@@ -468,11 +468,14 @@ export function useLevelEditor() {
 
         const LARGE_CLIPBOARD_THRESHOLD = 20;
 
-        // For large clipboards (>20 objects), show confirmation dialog
+        // For large clipboards (>20 objects), show confirmation dialog with ghost preview
         if (editorState.clipboard.length > LARGE_CLIPBOARD_THRESHOLD) {
             setEditorState((prev) => ({
                 ...prev,
                 showLargeClipboardDialog: true,
+                pastePreview: {
+                    items: editorState.clipboard,
+                },
             }));
             return;
         }
@@ -597,10 +600,11 @@ export function useLevelEditor() {
                 description: `Pasted ${pastedItems.length} items.`,
             });
 
-            // Close dialog
+            // Close dialog and clear ghost preview (large paste doesn't support multi-paste)
             setEditorState((prev) => ({
                 ...prev,
                 showLargeClipboardDialog: false,
+                pastePreview: undefined,
             }));
         },
         [editorState.clipboard, updateCurrentLevel, toast]
