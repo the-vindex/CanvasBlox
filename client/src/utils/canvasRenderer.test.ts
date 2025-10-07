@@ -330,7 +330,6 @@ describe('CanvasRenderer', () => {
                 zoom: 1,
                 pan: { x: 0, y: 0 },
                 showGrid: true,
-                showScanlines: false,
                 mousePosition: null,
                 isDrawing: false,
                 isPanning: false,
@@ -372,7 +371,6 @@ describe('CanvasRenderer', () => {
                 zoom: 1,
                 pan: { x: 0, y: 0 },
                 showGrid: true,
-                showScanlines: false,
                 mousePosition: { x: 5, y: 5 },
                 isDrawing: false,
                 isPanning: false,
@@ -473,7 +471,6 @@ describe('CanvasRenderer', () => {
                 zoom: 1,
                 pan: { x: 0, y: 0 },
                 showGrid: true,
-                showScanlines: false,
                 mousePosition: { x: 0, y: 0 },
             };
 
@@ -517,7 +514,6 @@ describe('CanvasRenderer', () => {
                 zoom: 1,
                 pan: { x: 0, y: 0 },
                 showGrid: true,
-                showScanlines: false,
                 mousePosition: { x: 0, y: 0 },
             };
 
@@ -560,7 +556,6 @@ describe('CanvasRenderer', () => {
                 zoom: 1,
                 pan: { x: 0, y: 0 },
                 showGrid: true,
-                showScanlines: false,
                 mousePosition: { x: 0, y: 0 },
             };
 
@@ -603,7 +598,6 @@ describe('CanvasRenderer', () => {
                 zoom: 1,
                 pan: { x: 0, y: 0 },
                 showGrid: true,
-                showScanlines: false,
                 mousePosition: { x: 0, y: 0 },
             };
 

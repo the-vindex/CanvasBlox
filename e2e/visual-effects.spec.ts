@@ -6,45 +6,6 @@ test.describe('Visual Effects', () => {
         await page.goto('/');
     });
 
-    test('scanlines toggle should show/hide overlay', async ({ page }) => {
-        const scanlinesToggle = page.getByTestId('switch-show-scanlines');
-        const scanlinesOverlay = page.locator('.scanlines-overlay');
-
-        // Initially scanlines should be off
-        await expect(scanlinesToggle).toBeVisible();
-        await expect(scanlinesOverlay).not.toBeVisible();
-
-        // Click toggle to turn on scanlines
-        await scanlinesToggle.click();
-        await expect(scanlinesOverlay).toBeVisible();
-
-        // Click toggle to turn off scanlines
-        await scanlinesToggle.click();
-        await expect(scanlinesOverlay).not.toBeVisible();
-    });
-
-    test('scanlines overlay should not block mouse interactions', async ({ page }) => {
-        const scanlinesToggle = page.getByTestId('switch-show-scanlines');
-        const grassTile = page.getByTestId('tile-platform-grass');
-
-        // Enable scanlines
-        await scanlinesToggle.click();
-
-        // Verify scanlines are visible
-        const scanlinesOverlay = page.locator('.scanlines-overlay');
-        await expect(scanlinesOverlay).toBeVisible();
-
-        // Try to place a tile - should work despite scanlines overlay
-        await grassTile.click();
-        const initialObjectCount = await getObjectCount(page);
-        await clickCanvas(page, 150, 150);
-        await page.waitForTimeout(100);
-
-        // Verify tile was placed (object count should increase)
-        const newObjectCount = await getObjectCount(page);
-        expect(newObjectCount).toBeGreaterThan(initialObjectCount);
-    });
-
     test('grid toggle should be visible and interactive', async ({ page }) => {
         const gridToggle = page.getByTestId('switch-show-grid');
 

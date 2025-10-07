@@ -345,36 +345,6 @@
     z-index: 10;
 }
 
-/* Scanline effect for retro/tech aesthetic */
-@keyframes scanlines {
-    0% {
-        background-position: 0 0;
-    }
-    100% {
-        background-position: 0 4px;
-    }
-}
-
-.scanlines-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 5;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.15) 0px,
-        transparent 1px,
-        transparent 2px,
-        rgba(0, 0, 0, 0.15) 3px
-    );
-    background-size: 100% 4px;
-    animation: scanlines 0.5s linear infinite;
-    opacity: 0.3;
-}
-
 /* Flash animation for undo/redo feedback */
 @keyframes flash {
     0% {

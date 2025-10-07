@@ -33,7 +33,6 @@ describe('Canvas Component - Scanlines Toggle', () => {
         pan: { x: 0, y: 0 },
         mousePosition: { x: 0, y: 0 },
         showGrid: true,
-        showScanlines: false,
         clipboard: [],
         isPainting: false,
         multiSelectStart: null,
@@ -48,59 +47,8 @@ describe('Canvas Component - Scanlines Toggle', () => {
         onTilePlaced: vi.fn(),
     };
 
-    it('should not render scanlines overlay when showScanlines is false', () => {
+    it('should render canvas overlay info', () => {
         render(<Canvas {...mockProps} />);
-
-        const scanlinesOverlay = document.querySelector('.scanlines-overlay');
-        expect(scanlinesOverlay).toBeNull();
-    });
-
-    it('should render scanlines overlay when showScanlines is true', () => {
-        const propsWithScanlines = {
-            ...mockProps,
-            editorState: {
-                ...mockEditorState,
-                showScanlines: true,
-            },
-        };
-
-        render(<Canvas {...propsWithScanlines} />);
-
-        const scanlinesOverlay = document.querySelector('.scanlines-overlay');
-        expect(scanlinesOverlay).not.toBeNull();
-    });
-
-    it('should have pointer-events: none on scanlines overlay', () => {
-        const propsWithScanlines = {
-            ...mockProps,
-            editorState: {
-                ...mockEditorState,
-                showScanlines: true,
-            },
-        };
-
-        render(<Canvas {...propsWithScanlines} />);
-
-        const scanlinesOverlay = document.querySelector('.scanlines-overlay') as HTMLElement;
-        expect(scanlinesOverlay).not.toBeNull();
-        expect(scanlinesOverlay.style.pointerEvents).toBe('none');
-    });
-
-    it('should render canvas overlay info regardless of scanlines state', () => {
-        // Test with scanlines off
-        const { rerender } = render(<Canvas {...mockProps} />);
-        expect(screen.getByTestId('canvas-overlay')).toBeInTheDocument();
-
-        // Test with scanlines on
-        rerender(
-            <Canvas
-                {...mockProps}
-                editorState={{
-                    ...mockEditorState,
-                    showScanlines: true,
-                }}
-            />
-        );
         expect(screen.getByTestId('canvas-overlay')).toBeInTheDocument();
     });
 });

@@ -100,7 +100,6 @@ export function Toolbar({
     hasClipboard,
 }: ToolbarProps) {
     const showGridId = useId();
-    const showScanlinesId = useId();
 
     return (
         <div className="h-12 bg-[#252525] border-b border-[#333] flex items-center px-3 gap-2" data-testid="toolbar">
@@ -257,19 +256,6 @@ export function Toolbar({
                     />
                     <Label htmlFor={showGridId} className="text-xs text-muted-foreground cursor-pointer">
                         Grid
-                    </Label>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <Switch
-                        id={showScanlinesId}
-                        checked={editorState.showScanlines}
-                        onCheckedChange={(checked) => onStateChange({ showScanlines: checked })}
-                        data-testid="switch-show-scanlines"
-                        className="scale-75"
-                    />
-                    <Label htmlFor={showScanlinesId} className="text-xs text-muted-foreground cursor-pointer">
-                        Scanlines
                     </Label>
                 </div>
 

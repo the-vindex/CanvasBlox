@@ -41,9 +41,8 @@ test.describe('Toolbar', () => {
         await expect(zoomLevel).toHaveText(/^\d+%$/);
     });
 
-    test('should have grid and scanlines toggles', async ({ page }) => {
+    test('should have grid toggle', async ({ page }) => {
         await expect(page.getByTestId('switch-show-grid')).toBeVisible();
-        await expect(page.getByTestId('switch-show-scanlines')).toBeVisible();
     });
 
     test('should have properties panel toggle button', async ({ page }) => {

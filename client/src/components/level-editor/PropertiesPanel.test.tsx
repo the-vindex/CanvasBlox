@@ -27,7 +27,6 @@ describe('PropertiesPanel', () => {
         selectedObjects: [],
         clipboard: [],
         showGrid: true,
-        showScanlines: false,
         zoom: 1,
         pan: { x: 0, y: 0 },
         mousePosition: { x: 0, y: 0 },

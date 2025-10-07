@@ -98,21 +98,6 @@ export function Canvas({
                     }}
                 />
 
-                {/* Scanlines Overlay - absolutely positioned relative to wrapper */}
-                {editorState.showScanlines && (
-                    <div
-                        className="scanlines-overlay"
-                        style={{
-                            position: 'absolute',
-                            top: '20px',
-                            left: '20px',
-                            right: '20px',
-                            bottom: '20px',
-                            pointerEvents: 'none',
-                        }}
-                    />
-                )}
-
                 {/* Info Overlay - absolutely positioned relative to wrapper */}
                 <div
                     data-testid="canvas-overlay"

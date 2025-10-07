@@ -49,7 +49,6 @@ vi.mock('@/hooks/useLevelEditor', () => ({
                 sourceObject: null,
             },
             showGrid: true,
-            showScanlines: false,
         },
         history: [{ levels: [], description: 'Initial state' }],
         historyIndex: 0,
