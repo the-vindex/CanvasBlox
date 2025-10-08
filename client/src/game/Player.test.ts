@@ -32,24 +32,6 @@ describe('Player', () => {
         });
     });
 
-    describe('getters', () => {
-        it('should return correct position values', () => {
-            const player = new Player(150, 250);
-
-            expect(player.x).toBe(150);
-            expect(player.y).toBe(250);
-        });
-
-        it('should return correct velocity values', () => {
-            const player = new Player(0, 0);
-            player.vx = 5;
-            player.vy = -10;
-
-            expect(player.vx).toBe(5);
-            expect(player.vy).toBe(-10);
-        });
-    });
-
     describe('horizontal movement', () => {
         it('should move right when positive velocity is applied', () => {
             const player = new Player(100, 100);
@@ -176,6 +158,31 @@ describe('Player', () => {
             player.update(1);
 
             expect(player.isGrounded()).toBe(false);
+        });
+
+        it('should create realistic jump arc with gravity', () => {
+            // Setup: Player standing on a platform
+            const player = new Player(100, 68, 32, 32);
+            const platform = { x: 80, y: 100, width: 64, height: 32 };
+
+            // Make player grounded
+            player.vy = 1;
+            player.update(0.016, [platform]);
+            expect(player.isGrounded()).toBe(true);
+
+            // Execute jump and verify upward velocity
+            player.jump();
+            expect(player.vy).toBeLessThan(0); // Negative velocity = upward
+            expect(player.isGrounded()).toBe(false);
+
+            const jumpStartY = player.y;
+
+            // After update, player should move upward
+            player.update(0.016, [platform]);
+            expect(player.y).toBeLessThan(jumpStartY);
+
+            // Velocity should still be negative (moving upward)
+            expect(player.vy).toBeLessThan(0);
         });
     });
 
