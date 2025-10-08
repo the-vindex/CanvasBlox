@@ -11,3 +11,8 @@ This file tracks decisions made during autonomous development when questions wou
 **Question:** Should we use setTimeout for respawn delay, or implement a proper timer system in the game loop?
 **Assumption/Decision:** Using setTimeout for the 500ms respawn delay is acceptable for this implementation. It keeps the code simple and the delay is short enough that timing precision isn't critical. A proper game loop timer system can be added later if needed for more complex game mechanics.
 ---
+
+## Task 24.4.1: Implement Enemy Collision Physics
+**Question:** Should I commit the uncommitted "hand tool" feature changes before starting task 24.4.1?
+**Assumption/Decision:** The uncommitted changes implement a hand tool for panning (H shortcut, left mouse drag with hand tool selected, visual icon, tests). This is not part of Chapter 24 (Playable Levels). Since it appears to be complete work with tests, I will commit it first to avoid losing work, then proceed with task 24.4.1 (Enemy Collision Physics).
+---

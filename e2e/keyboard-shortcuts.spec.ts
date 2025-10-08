@@ -17,15 +17,26 @@ test.describe('Keyboard Shortcuts', () => {
         await expect(selectTool).toHaveAttribute('aria-pressed', 'true');
     });
 
-    test('should select move tool with H shortcut', async ({ page }) => {
+    test('should select move tool with M shortcut', async ({ page }) => {
         const moveTool = page.getByTestId('tool-move');
         await expect(moveTool).toBeVisible();
+
+        // Press M key
+        await page.keyboard.press('m');
+
+        // Move tool should be selected
+        await expect(moveTool).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('should select hand tool with H shortcut', async ({ page }) => {
+        const handTool = page.getByTestId('tool-hand');
+        await expect(handTool).toBeVisible();
 
         // Press H key
         await page.keyboard.press('h');
 
-        // Move tool should be selected
-        await expect(moveTool).toHaveAttribute('aria-pressed', 'true');
+        // Hand tool should be selected
+        await expect(handTool).toHaveAttribute('aria-pressed', 'true');
     });
 
     test('should select line tool with L shortcut', async ({ page }) => {

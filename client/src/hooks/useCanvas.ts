@@ -350,7 +350,8 @@ export function useCanvas({
             }
 
             // Middle mouse button (button === 1) for panning
-            if (e.button === 1) {
+            // OR left mouse button (button === 0) with hand tool selected
+            if (e.button === 1 || (e.button === 0 && editorState.selectedTool === 'hand')) {
                 startPanning(e);
                 return;
             }

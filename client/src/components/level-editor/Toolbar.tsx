@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import CopyIcon from '@/assets/icons/copy.svg?react';
+import HandIcon from '@/assets/icons/hand.svg?react';
 import LineIcon from '@/assets/icons/line.svg?react';
 import LinkIcon from '@/assets/icons/link.svg?react';
 import MoveIcon from '@/assets/icons/move.svg?react';
@@ -37,6 +38,9 @@ function getToolGroupColor(tool: EditorState['selectedTool']) {
     if (tool === 'select' || tool === 'move') {
         return 'blue'; // Selection tools
     }
+    if (tool === 'hand') {
+        return 'orange'; // Navigation tool
+    }
     if (tool === 'pen' || tool === 'line' || tool === 'rectangle') {
         return 'green'; // Drawing tools
     }
@@ -51,6 +55,7 @@ function getActiveColor(color: string) {
         blue: 'bg-blue-600 hover:bg-blue-700',
         green: 'bg-green-600 hover:bg-green-700',
         purple: 'bg-purple-600 hover:bg-purple-700',
+        orange: 'bg-orange-600 hover:bg-orange-700',
     };
     return colors[color as keyof typeof colors] || colors.blue;
 }
@@ -109,6 +114,14 @@ export function Toolbar({
             {/* Selection Tools */}
             <div className="flex items-center gap-1 pr-2 border-r border-[#333]">
                 <ToolButton
+                    tool="hand"
+                    icon={HandIcon}
+                    title="Hand Tool (H) - Pan the canvas (or use middle mouse button)"
+                    testId="tool-hand"
+                    isActive={editorState.selectedTool === 'hand'}
+                    onToolChange={onToolChange}
+                />
+                <ToolButton
                     tool="select"
                     icon={SelectIcon}
                     title="Select Tool (V) • Hold Shift to multi-select"
@@ -119,7 +132,7 @@ export function Toolbar({
                 <ToolButton
                     tool="move"
                     icon={MoveIcon}
-                    title="Move Tool (H) - Hold Alt to move selected objects"
+                    title="Move Tool (M) - Hold Alt to move selected objects"
                     testId="tool-move"
                     isActive={editorState.selectedTool === 'move'}
                     onToolChange={onToolChange}

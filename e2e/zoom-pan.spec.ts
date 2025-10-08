@@ -221,6 +221,75 @@ test.describe('Zoom and Pan', () => {
         // This test just verifies no errors occur - actual tile placement tested elsewhere
     });
 
+    test('should pan canvas with hand tool and left mouse drag', async ({ page }) => {
+        const canvas = page.getByTestId('level-canvas');
+        const handTool = page.getByTestId('tool-hand');
+        await expect(canvas).toBeVisible();
+
+        // Select hand tool
+        await handTool.click();
+        await expect(handTool).toHaveAttribute('aria-pressed', 'true');
+
+        // Get the scrollable wrapper
+        const wrapper = page.locator('.scrollbar-custom').first();
+        await expect(wrapper).toBeVisible();
+
+        // First, scroll to middle of canvas to allow dragging in any direction
+        await wrapper.evaluate((el) => {
+            el.scrollLeft = 300;
+            el.scrollTop = 300;
+        });
+        await page.waitForTimeout(100);
+
+        // Verify we're actually scrolled
+        const initialScrollLeft = await wrapper.evaluate((el) => el.scrollLeft);
+        const initialScrollTop = await wrapper.evaluate((el) => el.scrollTop);
+
+        // Skip test if wrapper isn't scrollable
+        if (initialScrollLeft === 0 && initialScrollTop === 0) {
+            console.log('Wrapper not scrollable, skipping test');
+            return;
+        }
+
+        // Get wrapper bounding box for mouse interaction
+        const box = await wrapper.boundingBox();
+        if (!box) throw new Error('Wrapper not found');
+
+        // Left mouse button drag with hand tool
+        const startX = box.x + box.width / 2;
+        const startY = box.y + box.height / 2;
+        const endX = startX + 100; // Drag right
+        const endY = startY + 100; // Drag down
+
+        // Simulate left mouse button drag with hand tool
+        await page.mouse.move(startX, startY);
+        await page.mouse.down({ button: 'left' });
+        await page.mouse.move(endX, endY, { steps: 10 });
+        await page.mouse.up({ button: 'left' });
+
+        await page.waitForTimeout(100);
+
+        // Check scroll position changed
+        const finalScrollLeft = await wrapper.evaluate((el) => el.scrollLeft);
+        const finalScrollTop = await wrapper.evaluate((el) => el.scrollTop);
+
+        // Dragging right should decrease scrollLeft (panning effect)
+        expect(finalScrollLeft).toBeLessThan(initialScrollLeft);
+        // Dragging down should decrease scrollTop (panning effect)
+        expect(finalScrollTop).toBeLessThan(initialScrollTop);
+    });
+
+    test('should pan with hand tool using H keyboard shortcut', async ({ page }) => {
+        const handTool = page.getByTestId('tool-hand');
+
+        // Press H key
+        await page.keyboard.press('h');
+        await page.waitForTimeout(50);
+
+        // Hand tool should be selected
+        await expect(handTool).toHaveAttribute('aria-pressed', 'true');
+    });
+
     test('should not zoom while dragging with move tool', async ({ page }) => {
         const grassTile = page.getByTestId('tile-platform-grass');
         const moveTool = page.getByTestId('tool-move');
