@@ -76,15 +76,19 @@ export class Player {
                 // If vertical overlap is smaller, resolve vertically (more common for platforms)
                 if (collision.overlapY < collision.overlapX) {
                     // Player is colliding from top or bottom
-                    // If player is moving down (positive vy) or was above the platform, push up
                     const playerBottom = this.y + this.height;
                     const platformTop = platform.y;
+                    const platformBottom = platform.y + platform.height;
 
                     if (playerBottom > platformTop && this.y < platform.y) {
-                        // Player is landing on top of platform
+                        // Player is landing on top of platform (falling down)
                         this.y = platform.y - this.height;
                         this.vy = 0;
                         this.grounded = true;
+                    } else if (this.y < platformBottom && this.y + this.height > platform.y) {
+                        // Player is hitting ceiling (jumping up into platform from below)
+                        this.y = platformBottom;
+                        this.vy = 0; // Stop upward movement
                     }
                 } else {
                     // Horizontal collision (side of platform)

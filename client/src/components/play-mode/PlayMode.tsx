@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { AABB } from '@/game/collision';
 import { InputHandler } from '@/game/InputHandler';
 import { Player } from '@/game/Player';
+import { applyGravity } from '@/game/physics';
 import type { LevelData } from '@/types/level';
 
 interface PlayModeProps {
@@ -12,7 +13,7 @@ interface PlayModeProps {
 const PLAYER_SPEED = 200; // pixels per second
 const GRID_SIZE = 32; // pixels
 
-export function PlayMode({ level, onExit }: PlayModeProps) {
+export function PlayMode({ level }: PlayModeProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -62,6 +63,14 @@ export function PlayMode({ level, onExit }: PlayModeProps) {
             } else {
                 player.vx = 0;
             }
+
+            // Handle jump input
+            if (inputHandler.isJumpPressed()) {
+                player.jump();
+            }
+
+            // Apply gravity to player
+            player.vy = applyGravity(player.vy, deltaTime);
 
             // Update player position and handle collisions
             player.update(deltaTime, platforms);
