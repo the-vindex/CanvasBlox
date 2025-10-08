@@ -50,6 +50,19 @@ export function PlayMode({ level }: PlayModeProps) {
             height: GRID_SIZE,
         }));
 
+        // Convert level tiles to pixel coordinates for enemy AI
+        const pixelTiles = level.tiles.map((tile) => ({
+            ...tile,
+            position: {
+                x: tile.position.x * GRID_SIZE,
+                y: tile.position.y * GRID_SIZE,
+            },
+            dimensions: {
+                width: tile.dimensions.width * GRID_SIZE,
+                height: tile.dimensions.height * GRID_SIZE,
+            },
+        }));
+
         // Initialize enemies from spawn points
         const enemies: Enemy[] = level.spawnPoints
             .filter((sp) => sp.type === 'enemy')
@@ -94,7 +107,7 @@ export function PlayMode({ level }: PlayModeProps) {
 
             // Update enemies
             for (const enemy of enemies) {
-                enemy.update(deltaTime, level.tiles);
+                enemy.update(deltaTime, pixelTiles);
             }
 
             // Check enemy collision

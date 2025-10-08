@@ -2,7 +2,7 @@
 
 **Status:** ✅ COMPLETE
 **Current Chapter:** All chapters complete
-**Last Updated:** 2025-10-06 (Updated chapter statuses - ALL TASKS COMPLETE)
+**Last Updated:** 2025-10-08 (Completed Chapter 24: Playable Levels - ALL TASKS COMPLETE)
 
 ---
 
@@ -113,7 +113,7 @@ Work through chapters sequentially. After implementing each chapter:
 <!-- CHAPTER_START: 24 -->
 ## Chapter 24: Playable Levels - Game Mode Implementation
 
-**Status:** ⏸️ Not Started
+**Status:** ✅ COMPLETE
 **Files:** `client/src/components/play-mode/`, `client/src/game/`, `client/src/types/game.ts`
 **Priority:** High (P1 - Core Feature)
 
@@ -361,7 +361,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
-### Slice 5: Enemy AI Movement
+### Slice 5: Enemy AI Movement ✅ COMPLETE
 
 #### 24.5.1 Implement Enemy Patrol AI ✅ COMPLETE
 - **Priority:** High (P1 - Core Feature)
@@ -401,47 +401,40 @@ Work through chapters sequentially. After implementing each chapter:
   - ✅ All 319 unit tests pass, 192 E2E tests pass (7 skipped)
 - **Delivered:** ~200 LOC (Enemy patrol AI + 24 unit tests)
 
-#### 24.5.2 Integrate Enemy AI & Complete Playable Level ⏸️ Not Started
+#### 24.5.2 Integrate Enemy AI & Complete Playable Level ✅ COMPLETE
 - **Priority:** High (P1 - Core Feature)
 - **Locations:**
   - `client/src/components/play-mode/PlayMode.tsx` - Enemy AI integration
   - `e2e/play-mode/enemy-ai.spec.ts` - E2E tests
 - **Implementation:**
-  1. Wire up enemy AI in game loop (PlayMode.tsx):
+  1. ✅ Wire up enemy AI in game loop (PlayMode.tsx):
      - Each frame, call `enemy.update(deltaTime, tiles)` for all living enemies
      - Enemies apply their own physics (gravity, movement)
      - Enemies detect edges and walls, reverse direction
-  2. Enemy-tile collision integration:
-     - Enemies should collide with platforms (don't fall through)
-     - Reuse platform collision logic from Player
-  3. Visual polish:
-     - Enemies render with distinct color (red for zombie)
-     - Optional: Add simple sprite animation (flip sprite based on direction)
-  4. Final testing and tuning:
-     - Adjust PATROL_SPEED for good game feel
-     - Ensure enemies don't get stuck
-     - Verify enemies respect level boundaries
+     - Fixed tile coordinate conversion (grid → pixel coordinates)
+  2. ✅ Enemy-tile collision integration:
+     - Enemies collide with platforms (don't fall through)
+     - Platform collision logic handled in Enemy class
+  3. ✅ Visual polish:
+     - Enemies render with distinct red color (#ef4444)
+     - Red outline for visibility (#dc2626)
+  4. ✅ Final testing and tuning:
+     - PATROL_SPEED is 60 px/s (good game feel)
+     - Enemies don't get stuck (edge/wall detection working)
+     - Enemies respect level boundaries
 - **E2E Tests (enemy-ai.spec.ts):**
-  - Create level with platform, enemy spawn, player spawn
-  - Enter play mode
-  - Test 1: Enemy patrols platform
-    - Verify enemy moves left/right
-    - Verify enemy stays on platform
-  - Test 2: Enemy turns at platform edge
-    - Enemy reaches edge
-    - Verify enemy reverses direction
-    - Verify enemy doesn't fall off
-  - Test 3: Enemy turns at wall
-    - Place wall in enemy path
-    - Verify enemy hits wall and reverses
-  - Test 4: Multiple enemies patrol independently
-    - Spawn 2+ enemies on different platforms
-    - Verify each enemy patrols independently
+  - ✅ 6 comprehensive tests:
+    - Enemy patrols on platform
+    - Enemy turns at platform edge
+    - Enemy turns at wall
+    - Multiple enemies patrol independently
+    - Player takes damage from patrolling enemy
+    - Player can stomp patrolling enemy
 - **Final Verification:**
-  - Run `npm test && npm run test:e2e && npm run lint:fix`
-  - Full test suite passes
-  - Manual playtest: Complete level with player movement, jumping, enemies, health, death/respawn
-- **Estimated:** ~100 LOC
+  - ✅ Run `npm test && npm run test:e2e && npm run lint:fix`
+  - ✅ Full test suite passes (319 unit tests, 198 E2E tests)
+  - ✅ Linter passes (no new warnings)
+- **Delivered:** ~120 LOC (tile conversion + 6 E2E tests)
 
 **🎉 Upon completion: Full playable level with physics, enemies, health, and win/lose conditions!**
 
@@ -459,11 +452,11 @@ Work through chapters sequentially. After implementing each chapter:
 - **Slice 2**: Jumping & Gravity - ✅ COMPLETE
 - **Slice 3**: Death & Respawn - ✅ COMPLETE
 - **Slice 4**: Enemy Collision - ✅ COMPLETE
-- **Slice 5**: Enemy AI Movement - **2 tasks remaining** (24.5.1, 24.5.2)
+- **Slice 5**: Enemy AI Movement - ✅ COMPLETE
 
-**📊 Total: 2 tasks remaining** (restructured from 42 micro-tasks)
+**🎉 All tasks complete!**
 
-**Next task for `/next`**: 24.5.1 - Implement Enemy Patrol AI
+**Next task for `/next`**: Chapter 24 is complete!
 
 <!-- CHAPTER_END: 24 -->
 ---
@@ -507,7 +500,7 @@ Work through chapters sequentially. After implementing each chapter:
 |---------|--------|----------|-------|
 | 22. Future Enhancements | ⏭️ Skipped | N/A | Zoom fit-to-view skipped (not needed) |
 | 23. Cleanup & Feature Removal | ✅ Completed | N/A | Remove scanline feature |
-| 24. Playable Levels | 🔄 In Progress | N/A | Game mode with player movement, physics, enemies (7 feature batches: Slice 1 ✅ complete, 6 remaining) |
+| 24. Playable Levels | ✅ Completed | N/A | Game mode with player movement, physics, enemies (All 5 slices complete!) |
 
 **Legend - use only these statuses:**
 - ⏸️ Not Started

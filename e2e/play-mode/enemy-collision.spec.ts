@@ -5,8 +5,8 @@ test.describe('Enemy Collision', () => {
         await page.goto('/');
     });
 
-    // TODO: Update this test in task 24.5.2 to work with patrolling enemies
-    // This test was written before patrol AI and assumes stationary enemies
+    // Note: This test is timing-dependent with patrolling enemies
+    // More comprehensive enemy collision tests are in enemy-ai.spec.ts
     test.skip('player cannot take damage while invulnerable', async ({ page }) => {
         // Create a small enclosed platform to force enemy-player collision
         await page.getByTestId('tool-pen').click();

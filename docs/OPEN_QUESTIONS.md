@@ -26,3 +26,8 @@ This file tracks decisions made during autonomous development when questions wou
 **Question:** The enemy-collision.spec.ts E2E test is now failing because enemies patrol and move, making collision timing unpredictable. Should I fix this test or skip it for now?
 **Assumption/Decision:** Task 24.5.1 is about implementing patrol AI logic (unit tests + implementation). Task 24.5.2 will add E2E tests for AI behavior. The existing enemy-collision.spec.ts test was written before patrol AI existed and assumes stationary enemies. I will skip this test temporarily and it will be replaced/updated in 24.5.2 when comprehensive AI E2E tests are added. The patrol AI is fully validated by 24 passing unit tests covering movement, gravity, edge detection, wall collision, and direction reversal.
 ---
+
+## Task 24.5.2: Integrate Enemy AI & Complete Playable Level
+**Question:** The Enemy.update() method expects Tile objects with pixel coordinates, but level.tiles are in grid coordinates (0-indexed). Should I convert tiles to pixel coordinates or modify the Enemy class?
+**Assumption/Decision:** The Enemy class is already well-tested with the current API expecting Tile objects. Rather than modify Enemy (which would require updating 24 unit tests), I'll convert the level tiles to use pixel coordinates in the position/dimensions fields before passing to enemy.update(). This is a simple transformation: multiply grid coordinates by GRID_SIZE (32). This keeps the Enemy class pure and the conversion logic in PlayMode where it belongs.
+---
