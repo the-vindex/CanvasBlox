@@ -304,7 +304,7 @@ Work through chapters sequentially. After implementing each chapter:
   - ✅ All tests pass (294 unit, 192 E2E)
 - **Delivered:** ~150 LOC (Enemy class + collision detection + 19 unit tests)
 
-#### 24.4.2 Implement Invulnerability & Game Loop Integration ⏸️ Not Started
+#### 24.4.2 Implement Invulnerability & Game Loop Integration ✅ COMPLETE
 - **Priority:** High (P1 - Core Feature)
 - **Locations:**
   - `client/src/game/Player.ts` - Invulnerability system
@@ -455,14 +455,14 @@ Work through chapters sequentially. After implementing each chapter:
 
 **Task Summary:**
 - **Slice 1**: Basic Player Movement - ✅ COMPLETE
-- **Slice 2**: Jumping & Gravity - **1 task remaining** (24.2)
-- **Slice 3**: Death & Respawn - **2 tasks remaining** (24.3.1, 24.3.2)
-- **Slice 4**: Enemy Collision - **2 tasks remaining** (24.4.1, 24.4.2)
+- **Slice 2**: Jumping & Gravity - ✅ COMPLETE
+- **Slice 3**: Death & Respawn - ✅ COMPLETE
+- **Slice 4**: Enemy Collision - ✅ COMPLETE
 - **Slice 5**: Enemy AI Movement - **2 tasks remaining** (24.5.1, 24.5.2)
 
-**📊 Total: 7 tasks remaining** (restructured from 42 micro-tasks)
+**📊 Total: 2 tasks remaining** (restructured from 42 micro-tasks)
 
-**Next task for `/next`**: 24.2 - Complete Jump & Gravity Integration
+**Next task for `/next`**: 24.5.1 - Implement Enemy Patrol AI
 
 <!-- CHAPTER_END: 24 -->
 ---
