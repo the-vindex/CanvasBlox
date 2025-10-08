@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Tile } from '../types/level';
-import { type AABB, checkAABBCollision, checkLavaCollision, resolveVerticalCollision } from './collision';
+import {
+    type AABB,
+    checkAABBCollision,
+    checkEnemyCollision,
+    checkLavaCollision,
+    resolveVerticalCollision,
+} from './collision';
+import { Enemy } from './Enemy';
 
 describe('AABB Collision Detection', () => {
     describe('checkAABBCollision', () => {
@@ -266,6 +273,109 @@ describe('AABB Collision Detection', () => {
             const result = checkLavaCollision(player, tiles);
 
             expect(result).toBe(false);
+        });
+    });
+
+    describe('checkEnemyCollision', () => {
+        it('should detect collision when player overlaps enemy', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const enemy = new Enemy({ x: 90, y: 110, width: 32, height: 32 });
+
+            const result = checkEnemyCollision(player, enemy);
+
+            expect(result.collided).toBe(true);
+        });
+
+        it('should not detect collision when player and enemy do not overlap', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const enemy = new Enemy({ x: 200, y: 200, width: 32, height: 32 });
+
+            const result = checkEnemyCollision(player, enemy);
+
+            expect(result.collided).toBe(false);
+        });
+
+        it('should detect stomp when player falls on enemy from above', () => {
+            // Player falling downward (vy > 0), landing on top of enemy
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 }; // Bottom at y=132
+            const enemy = new Enemy({ x: 95, y: 120, width: 32, height: 32 }); // Top at y=120
+            const playerVy = 5; // Falling downward
+
+            const result = checkEnemyCollision(player, enemy, playerVy);
+
+            expect(result.collided).toBe(true);
+            expect(result.fromTop).toBe(true);
+        });
+
+        it('should detect side collision when player hits enemy from side', () => {
+            // Player moving horizontally or upward, hitting enemy from side
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const enemy = new Enemy({ x: 90, y: 100, width: 32, height: 32 });
+            const playerVy = 0; // Not falling
+
+            const result = checkEnemyCollision(player, enemy, playerVy);
+
+            expect(result.collided).toBe(true);
+            expect(result.fromTop).toBe(false);
+        });
+
+        it('should detect side collision when player is moving upward', () => {
+            // Player jumping upward (vy < 0), hitting enemy from side
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const enemy = new Enemy({ x: 90, y: 95, width: 32, height: 32 });
+            const playerVy = -3; // Jumping upward
+
+            const result = checkEnemyCollision(player, enemy, playerVy);
+
+            expect(result.collided).toBe(true);
+            expect(result.fromTop).toBe(false);
+        });
+
+        it('should detect stomp only when player bottom is near enemy top', () => {
+            // Player falling, bottom edge close to enemy top edge
+            const player: AABB = { x: 100, y: 115, width: 32, height: 32 }; // Bottom at y=147
+            const enemy = new Enemy({ x: 95, y: 140, width: 32, height: 32 }); // Top at y=140
+            const playerVy = 5; // Falling downward
+
+            const result = checkEnemyCollision(player, enemy, playerVy);
+
+            expect(result.collided).toBe(true);
+            expect(result.fromTop).toBe(true);
+        });
+
+        it('should not detect stomp when player is falling but collision is from side', () => {
+            // Player falling but more of a side collision than top collision
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 }; // Bottom at y=132
+            const enemy = new Enemy({ x: 110, y: 95, width: 32, height: 32 }); // Top at y=95
+            const playerVy = 5; // Falling downward
+
+            const result = checkEnemyCollision(player, enemy, playerVy);
+
+            expect(result.collided).toBe(true);
+            // Player bottom (132) not close to enemy top (95) - threshold is 15px
+            expect(result.fromTop).toBe(false);
+        });
+
+        it('should handle no collision gracefully', () => {
+            const player: AABB = { x: 0, y: 0, width: 32, height: 32 };
+            const enemy = new Enemy({ x: 100, y: 100, width: 32, height: 32 });
+
+            const result = checkEnemyCollision(player, enemy, 0);
+
+            expect(result.collided).toBe(false);
+            expect(result.fromTop).toBe(false);
+        });
+
+        it('should default playerVy to 0 when not provided', () => {
+            // Test that playerVy defaults to 0 (side collision)
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const enemy = new Enemy({ x: 90, y: 100, width: 32, height: 32 });
+
+            // Not passing playerVy
+            const result = checkEnemyCollision(player, enemy);
+
+            expect(result.collided).toBe(true);
+            expect(result.fromTop).toBe(false);
         });
     });
 });

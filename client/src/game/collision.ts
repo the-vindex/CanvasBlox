@@ -4,6 +4,7 @@
  */
 
 import type { Tile } from '../types/level';
+import type { Enemy } from './Enemy';
 
 /**
  * Axis-Aligned Bounding Box representation.
@@ -39,6 +40,14 @@ export interface VerticalCollisionResult {
     side: 'top' | 'bottom' | null;
     correctedY: number;
     shouldStopVerticalVelocity: boolean;
+}
+
+/**
+ * Result of checking collision between player and enemy.
+ */
+export interface EnemyCollisionResult {
+    collided: boolean;
+    fromTop: boolean;
 }
 
 /**
@@ -183,4 +192,51 @@ export function checkLavaCollision(player: AABB, tiles: Tile[]): boolean {
     }
 
     return false;
+}
+
+/**
+ * Check collision between player and enemy, determining if it's a stomp (from top) or side collision.
+ * A stomp occurs when:
+ * 1. Player is falling (vy > 0)
+ * 2. Player's bottom edge is near enemy's top edge (within threshold)
+ *
+ * @param player - Player bounding box
+ * @param enemy - Enemy object
+ * @param playerVy - Player's vertical velocity (defaults to 0)
+ * @returns Collision result with collision state and direction
+ */
+export function checkEnemyCollision(player: AABB, enemy: Enemy, playerVy = 0): EnemyCollisionResult {
+    // Convert enemy to AABB
+    const enemyAABB: AABB = {
+        x: enemy.x,
+        y: enemy.y,
+        width: enemy.width,
+        height: enemy.height,
+    };
+
+    // Check basic AABB collision
+    const collision = checkAABBCollision(player, enemyAABB);
+
+    if (!collision.isColliding) {
+        return {
+            collided: false,
+            fromTop: false,
+        };
+    }
+
+    // Determine if collision is from top (stomp) or side (damage)
+    // Stomp conditions:
+    // 1. Player is falling (vy > 0)
+    // 2. Player's bottom is near enemy's top (within threshold)
+    const STOMP_THRESHOLD = 15; // pixels
+    const playerBottom = player.y + player.height;
+    const enemyTop = enemy.y;
+    const distanceToTop = Math.abs(playerBottom - enemyTop);
+
+    const isFromTop = playerVy > 0 && distanceToTop <= STOMP_THRESHOLD;
+
+    return {
+        collided: true,
+        fromTop: isFromTop,
+    };
 }

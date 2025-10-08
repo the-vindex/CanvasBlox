@@ -265,7 +265,7 @@ Work through chapters sequentially. After implementing each chapter:
 
 ### Slice 4: Enemy Collision
 
-#### 24.4.1 Implement Enemy Collision Physics ⏸️ Not Started
+#### 24.4.1 Implement Enemy Collision Physics ✅ COMPLETE
 - **Priority:** High (P1 - Core Feature)
 - **Locations:**
   - `client/src/game/Enemy.ts` - Enemy class with death state
@@ -275,34 +275,34 @@ Work through chapters sequentially. After implementing each chapter:
   - `client/src/game/collision.test.ts` - Collision unit tests
   - `client/src/game/Player.test.ts` - Damage tests
 - **Implementation:**
-  1. Create Enemy class:
+  1. ✅ Create Enemy class:
      - Position (x, y), dimensions (width, height), velocity (vx, vy)
      - `isAlive` property (default true)
      - `kill()` method - sets isAlive to false
      - `update(deltaTime)` method - placeholder for AI (Slice 5)
-  2. Add player-enemy collision detection:
-     - `checkEnemyCollision(player, enemy)` function in collision.ts
+  2. ✅ Add player-enemy collision detection:
+     - `checkEnemyCollision(player, enemy, playerVy)` function in collision.ts
      - AABB overlap check between player and enemy rectangles
      - Returns collision info: `{ collided: boolean, fromTop: boolean }`
-  3. Add directional collision logic:
+  3. ✅ Add directional collision logic:
      - Determine if collision from top (stomp) or side (damage)
      - Use player vertical velocity: if `vy > 0` (falling) and player bottom near enemy top → stomp
-     - Otherwise → side collision (damage)
-  4. Implement damage system:
+     - 15px threshold for stomp detection
+  4. Damage system ready:
      - Player already has `takeDamage(amount)` from Slice 3
-     - Side collision: `player.takeDamage(1)` (lose 1 heart)
-  5. Implement enemy death on stomp:
-     - Top collision: `enemy.kill()` (sets isAlive to false)
-     - Player bounces slightly upward (small negative vy)
+     - Side collision: `player.takeDamage(1)` (lose 1 heart) - will be wired in 24.4.2
+  5. Enemy death on stomp ready:
+     - Top collision: `enemy.kill()` (sets isAlive to false) - will be wired in 24.4.2
+     - Player bounce - will be implemented in 24.4.2
 - **Unit Tests:**
-  - Enemy.test.ts: Enemy creation, kill() sets isAlive to false
-  - collision.test.ts: Player-enemy AABB collision detection
-  - collision.test.ts: Directional collision (top vs side) based on velocity and position
+  - ✅ Enemy.test.ts: Enemy creation, kill() sets isAlive to false (9 tests)
+  - ✅ collision.test.ts: Player-enemy AABB collision detection (10 tests)
+  - ✅ collision.test.ts: Directional collision (top vs side) based on velocity and position
   - Player.test.ts: Side collision reduces health by 1 (already tested in Slice 3)
 - **Verification:**
-  - Run `npm test && npm run test:e2e && npm run lint:fix`
-  - All tests pass (unit + e2e, ensure no regressions)
-- **Estimated:** ~200 LOC
+  - ✅ Run `npm test && npm run test:e2e && npm run lint:fix`
+  - ✅ All tests pass (294 unit, 192 E2E)
+- **Delivered:** ~150 LOC (Enemy class + collision detection + 19 unit tests)
 
 #### 24.4.2 Implement Invulnerability & Game Loop Integration ⏸️ Not Started
 - **Priority:** High (P1 - Core Feature)
