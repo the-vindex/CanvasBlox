@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AABB } from '@/game/collision';
+import { checkLavaCollision } from '@/game/collision';
 import { InputHandler } from '@/game/InputHandler';
 import { Player } from '@/game/Player';
 import { applyGravity } from '@/game/physics';
 import type { LevelData } from '@/types/level';
+import { Hearts } from './Hearts';
 
 interface PlayModeProps {
     level: LevelData;
@@ -15,6 +17,7 @@ const GRID_SIZE = 32; // pixels
 
 export function PlayMode({ level }: PlayModeProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [playerHealth, setPlayerHealth] = useState(3);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -75,6 +78,30 @@ export function PlayMode({ level }: PlayModeProps) {
             // Update player position and handle collisions
             player.update(deltaTime, platforms);
 
+            // Check for lava collision
+            const playerAABB = {
+                x: player.x,
+                y: player.y,
+                width: player.width,
+                height: player.height,
+            };
+            if (checkLavaCollision(playerAABB, level.tiles)) {
+                player.takeDamage(3); // Instant death
+            }
+
+            // Handle death and respawn
+            if (player.isDead() && !player.isDying) {
+                player.die();
+                // Respawn after a short delay
+                setTimeout(() => {
+                    player.respawn({ x: spawnX, y: spawnY });
+                    setPlayerHealth(player.health);
+                }, 500);
+            }
+
+            // Update health UI
+            setPlayerHealth(player.health);
+
             // Clear canvas
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -121,6 +148,7 @@ export function PlayMode({ level }: PlayModeProps) {
                 pointerEvents: 'none',
             }}
         >
+            <Hearts health={playerHealth} />
             <canvas
                 ref={canvasRef}
                 data-testid="play-mode-canvas"
