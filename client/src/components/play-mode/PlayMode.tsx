@@ -94,7 +94,7 @@ export function PlayMode({ level }: PlayModeProps) {
 
             // Update enemies
             for (const enemy of enemies) {
-                enemy.update(deltaTime);
+                enemy.update(deltaTime, level.tiles);
             }
 
             // Check enemy collision
