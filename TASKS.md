@@ -127,301 +127,341 @@ Work through chapters sequentially. After implementing each chapter:
 
 ---
 
-### Slice 1: Basic Player Movement
+### Slice 1: Basic Player Movement ✅ COMPLETE
 
-#### 24.1.1 Write unit test for Player class ✅ COMPLETE
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Player class with position (x, y), dimensions (width, height), velocity (vx, vy)
-- **Verify:** Constructor initializes properties, getters return correct values
+**What was delivered:**
+- ✅ Player class with position, dimensions, velocity (`client/src/game/Player.ts`)
+- ✅ Keyboard input handler for ArrowKeys/WASD (`client/src/game/InputHandler.ts`)
+- ✅ Horizontal movement with velocity-based physics
+- ✅ AABB collision detection system (`client/src/game/collision.ts`)
+- ✅ Platform collision resolution (player doesn't fall through platforms)
+- ✅ PlayMode component with edit/play toggle (overlay mode)
+- ✅ Game loop with requestAnimationFrame, player rendering, input handling
+- ✅ Comprehensive unit tests (Player.test.ts, InputHandler.test.ts, collision.test.ts)
+- ✅ E2E tests (play-mode-toggle.spec.ts, player-movement.spec.ts)
+- ✅ All tests passing: 235 unit tests, 177 E2E tests
 
-#### 24.1.2 Implement Player class with basic properties ✅ COMPLETE
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** Player entity class with position, dimensions, velocity properties
-- **Properties:** `x`, `y`, `width`, `height`, `vx`, `vy`
+**Key files:**
+- `client/src/game/Player.ts` - Player entity
+- `client/src/game/InputHandler.ts` - Keyboard handling
+- `client/src/game/collision.ts` - AABB collision utilities
+- `client/src/components/play-mode/PlayMode.tsx` - Game canvas and loop
 
-#### 24.1.3 Write unit test for keyboard input handler ✅ COMPLETE
-- **Location:** `client/src/game/InputHandler.test.ts`
-- **Test:** Keyboard input captures ArrowLeft/ArrowRight/A/D keys
-- **Verify:** Key down sets direction, key up clears direction
-
-#### 24.1.4 Implement keyboard input handler ✅ COMPLETE
-- **Location:** `client/src/game/InputHandler.ts`
-- **Implementation:** Event listeners for keyboard input, state tracking for active keys
-
-#### 24.1.5 Write unit test for horizontal movement with velocity ✅ COMPLETE
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Player moves left/right based on input, velocity applies correctly
-
-#### 24.1.6 Implement horizontal movement logic ✅ COMPLETE
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** `update()` method applies velocity to position
-
-#### 24.1.7 Write unit test for AABB collision detection with tiles ✅ COMPLETE
-- **Location:** `client/src/game/collision.test.ts`
-- **Test:** AABB collision detection between rectangles (player vs tile)
-- **Verify:** Detects overlaps, returns collision info
-
-#### 24.1.8 Implement AABB collision detection utility ✅ COMPLETE
-- **Location:** `client/src/game/collision.ts`
-- **Implementation:** AABB collision functions for rectangles
-
-#### 24.1.9 Write unit test for player not falling through platforms ✅ COMPLETE
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Player collides with platform tiles, doesn't fall through
-
-#### 24.1.10 Implement platform collision logic ✅ COMPLETE
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** Collision resolution with tiles, position correction
-
-#### 24.1.11 Write E2E test for play mode toggle button ✅ COMPLETE
-- **Location:** `e2e/play-mode-toggle.spec.ts`
-- **Test:** Toggle between edit and play mode, verify UI changes
-- **Note:** Test file created, all 6 tests passing
-
-#### 24.1.12 Implement PlayMode component with edit/play toggle ✅ COMPLETE
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`, `client/src/components/level-editor/Toolbar.tsx`
-- **Implementation:** Component with game canvas, play/edit toggle button in toolbar
-- **Decision:** Implemented as overlay mode (not separate route) - see OPEN_QUESTIONS.md
-- **Note:** Added z-index to toolbar to ensure button remains clickable
-
-#### 24.1.13 Write E2E test for player keyboard controls ✅ COMPLETE
-- **Location:** `e2e/player-movement.spec.ts`
-- **Test:** Enter play mode, press arrow keys, verify player moves
-- **Note:** Created 6 tests covering ArrowLeft, ArrowRight, A, D keys and movement states
-
-#### 24.1.14 Integrate Player rendering into PlayMode canvas ✅ COMPLETE
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`
-- **Implementation:** Game loop with requestAnimationFrame, player rendering, input handling, collision detection
-- **Note:** Integrated Player, InputHandler, and collision system. Player renders as blue square, platforms render as gray squares
-
-#### 24.1.15 Run full test suite and lint for Slice 1 ✅ COMPLETE
-- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
-- **Verify:** All tests pass, no lint errors, player movement works
-- **Results:** ✅ Unit tests: 235 passed | ✅ E2E tests: 177 passed, 6 skipped | ✅ Linter: 3 files fixed
+**Result:** Player can move left/right with arrow keys, collides with platforms, render as blue square on canvas.
 
 ---
 
 ### Slice 2: Jumping & Gravity
 
-#### 24.2.1 Write unit test for gravity constant and falling ✅ COMPLETE
-- **Location:** `client/src/game/physics.test.ts`
-- **Test:** Gravity constant applies downward acceleration
-- **Note:** Created 5 comprehensive tests covering gravity constant, downward acceleration, velocity accumulation, upward movement, and variable delta time
+**Completed Foundation Work:**
+- ✅ Gravity physics system (constant, applyGravity function)
+- ✅ Jump input handling (spacebar/W key detection)
+- ✅ Jump mechanics (upward velocity, grounded state tracking)
+- ✅ Vertical collision detection (ceiling/floor resolution)
+- ✅ Unit tests for all physics, jump, and collision logic
 
-#### 24.2.2 Implement gravity system with velocity accumulation ✅ COMPLETE
-- **Location:** `client/src/game/physics.ts`
-- **Implementation:** Gravity constant (800 px/s²), applyGravity() function for velocity accumulation
-- **Note:** Simple physics module with GRAVITY constant and applyGravity utility function
-
-#### 24.2.3 Write unit test for jump input (spacebar) ✅ COMPLETE
-- **Location:** `client/src/game/InputHandler.test.ts`
-- **Test:** Spacebar triggers jump action
-- **Note:** Added 5 tests covering spacebar, W key, key release, and simultaneous key presses
-
-#### 24.2.4 Implement jump mechanics with upward velocity ✅ COMPLETE
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** Jump applies negative velocity when on ground
-- **Note:** Added jump() method, isGrounded() method, grounded state tracking, and JUMP_VELOCITY constant (-400 px/s)
-
-#### 24.2.5 Write unit test for vertical collision (ceiling/floor) ✅ COMPLETE
-- **Location:** `client/src/game/collision.test.ts`
-- **Test:** Detect collision from above/below
-- **Note:** Added 6 comprehensive tests covering ceiling hits, floor landings, no collision, corner collisions, zero velocity, and velocity-based side detection
-
-#### 24.2.6 Implement vertical collision detection ✅ COMPLETE
-- **Location:** `client/src/game/collision.ts`
-- **Implementation:** Vertical collision resolution
-- **Note:** resolveVerticalCollision function determines collision side (top/bottom), calculates corrected Y position, handles zero velocity by comparing object centers
-
-#### 24.2.7 Write unit test for jump arc physics ✅ COMPLETE
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Jump creates realistic arc with gravity
-- **Note:** Test refactored based on code review - removed manual gravity simulation, focuses on Player behavior
-
-#### 24.2.8 Tune jump velocity and gravity constants ⏸️ Not Started
-- **Location:** `client/src/game/physics.ts`
-- **Implementation:** Adjust constants for good game feel
-
-#### 24.2.9 Write E2E test for jumping over gaps ⏸️ Not Started
-- **Location:** `e2e/play-mode/player-jump.spec.ts`
-- **Test:** Player jumps, clears gaps, lands on platforms
-
-#### 24.2.10 Wire up spacebar jump input to game loop ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`
-- **Implementation:** Connect input handler to player jump
-
-#### 24.2.11 Run full test suite and lint for Slice 2 ⏸️ Not Started
-- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
-- **Verify:** Jump and gravity work correctly
+#### 24.2 Complete Jump & Gravity Integration ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/game/physics.ts` - Tune constants
+  - `client/src/components/play-mode/PlayMode.tsx` - Wire up jump input
+  - `e2e/play-mode/player-jump.spec.ts` - E2E tests
+- **Implementation:**
+  1. Wire up spacebar/W jump input to game loop (connect InputHandler to Player.jump())
+  2. Integrate gravity application to player in game loop
+  3. Integrate vertical collision resolution with platforms
+  4. Tune GRAVITY (currently 800 px/s²) and JUMP_VELOCITY (currently -400 px/s) for good game feel
+  5. Test jumping: Should feel responsive, arc should look natural, landing should be smooth
+- **E2E Tests:** Create `e2e/play-mode/player-jump.spec.ts`:
+  - Player can jump with spacebar and W key
+  - Player jumps in realistic arc with gravity
+  - Player lands smoothly on platforms
+  - Player can jump over gaps
+  - Player hits ceiling and falls back down
+  - Player cannot jump while in air (no double jump)
+- **Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - Manually test jump feel (height, arc, responsiveness)
+- **Estimated:** ~150 LOC (game loop integration + E2E tests + tuning)
 
 ---
 
 ### Slice 3: Death & Respawn
 
-#### 24.3.1 Write unit test for health state (3 hearts) ⏸️ Not Started
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Player has health property (max 3), can take damage
+#### 24.3.1 Implement Health & Death System ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/game/Player.ts` - Health system, death, respawn
+  - `client/src/game/collision.ts` - Lava detection
+  - `client/src/game/Player.test.ts` - Unit tests for health/death/respawn
+  - `client/src/game/collision.test.ts` - Unit tests for lava collision
+- **Implementation:**
+  1. Add health system to Player class:
+     - `health` property (default 3, max 3)
+     - `takeDamage(amount)` method - reduces health, triggers death if health <= 0
+     - `isDead()` method - returns true if health <= 0
+     - `isDying` state - for death animation (optional)
+  2. Add death and respawn logic:
+     - `die()` method - sets isDying state, stops input
+     - `respawn(spawnPoint)` method - resets position to spawn point, restores health to 3
+  3. Add lava collision detection:
+     - `checkLavaCollision(tiles)` function in collision.ts
+     - Checks if player overlaps tile with material type "lava"
+     - Returns true if player touches lava
+  4. Wire up lava damage in game loop:
+     - Check lava collision each frame
+     - Call `player.takeDamage(3)` on lava touch (instant death)
+     - Call `player.respawn(spawnPoint)` when player dies
+- **Unit Tests:**
+  - Player.test.ts: Health state (initial 3, max 3), takeDamage reduces health, isDead when health <= 0
+  - Player.test.ts: Death state, respawn resets position and health
+  - collision.test.ts: Lava detection when player overlaps lava tile
+  - collision.test.ts: No lava collision on regular tiles
+- **Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - All tests pass (unit + e2e, ensure no regressions)
+- **Estimated:** ~150 LOC
 
-#### 24.3.2 Implement health system in Player class ⏸️ Not Started
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** Health property, takeDamage(), isDead() methods
-
-#### 24.3.3 Write unit test for lava tile collision detection ⏸️ Not Started
-- **Location:** `client/src/game/collision.test.ts`
-- **Test:** Detect when player touches lava tile
-
-#### 24.3.4 Implement lava detection in collision system ⏸️ Not Started
-- **Location:** `client/src/game/collision.ts`
-- **Implementation:** Check tile material type, return lava collision
-
-#### 24.3.5 Write unit test for death state and respawn ⏸️ Not Started
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Death sets state, respawn resets position and health
-
-#### 24.3.6 Implement death logic and respawn at spawn point ⏸️ Not Started
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** Death state, respawn() method
-
-#### 24.3.7 Write unit test for Hearts UI component ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/Hearts.test.tsx`
-- **Test:** Renders 3 hearts, shows filled/empty based on health
-
-#### 24.3.8 Implement Hearts UI component (3 hearts display) ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/Hearts.tsx`
-- **Implementation:** React component showing heart icons
-
-#### 24.3.9 Write E2E test for lava death and respawn ⏸️ Not Started
-- **Location:** `e2e/play-mode/death-respawn.spec.ts`
-- **Test:** Player touches lava, dies, respawns at spawn point
-
-#### 24.3.10 Integrate health UI into PlayMode overlay ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`
-- **Implementation:** Render Hearts component on top of canvas
-
-#### 24.3.11 Run full test suite and lint for Slice 3 ⏸️ Not Started
-- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
-- **Verify:** Death, respawn, and health UI work
+#### 24.3.2 Implement Health UI & Integration ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/components/play-mode/Hearts.tsx` - Hearts component
+  - `client/src/components/play-mode/Hearts.test.tsx` - Component unit tests
+  - `client/src/components/play-mode/PlayMode.tsx` - Integration
+  - `e2e/play-mode/death-respawn.spec.ts` - E2E tests
+- **Implementation:**
+  1. Create Hearts UI component:
+     - Display 3 heart icons in top-left corner
+     - Filled hearts for current health (red/pink)
+     - Empty hearts for lost health (gray outline)
+     - Props: `health` (current), `maxHealth` (default 3)
+     - Use Font Awesome heart icons or custom SVG
+  2. Integrate Hearts into PlayMode:
+     - Render Hearts component on top of canvas
+     - Pass player.health as prop
+     - Position in top-left with padding (absolute positioning)
+  3. Visual polish:
+     - Heart animation on damage (shake/pulse)
+     - Death screen overlay (optional - "You Died" message)
+- **Component Tests (Hearts.test.tsx):**
+  - Renders 3 hearts with full health
+  - Shows correct filled/empty hearts based on health (3/3, 2/3, 1/3, 0/3)
+  - Accepts custom maxHealth prop
+- **E2E Tests (death-respawn.spec.ts):**
+  - Create level with lava tile and spawn point
+  - Enter play mode
+  - Verify 3 hearts visible
+  - Move player onto lava
+  - Verify player dies (health reaches 0)
+  - Verify player respawns at spawn point
+  - Verify health restored to 3
+- **Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - Visual test: Hearts display correctly, update on damage
+- **Estimated:** ~100 LOC
 
 ---
 
 ### Slice 4: Enemy Collision
 
-#### 24.4.1 Write unit test for player-enemy AABB collision ⏸️ Not Started
-- **Location:** `client/src/game/collision.test.ts`
-- **Test:** Detect collision between player and enemy rectangles
+#### 24.4.1 Implement Enemy Collision Physics ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/game/Enemy.ts` - Enemy class with death state
+  - `client/src/game/collision.ts` - Player-enemy collision detection
+  - `client/src/game/Player.ts` - Damage system integration
+  - `client/src/game/Enemy.test.ts` - Enemy unit tests
+  - `client/src/game/collision.test.ts` - Collision unit tests
+  - `client/src/game/Player.test.ts` - Damage tests
+- **Implementation:**
+  1. Create Enemy class:
+     - Position (x, y), dimensions (width, height), velocity (vx, vy)
+     - `isAlive` property (default true)
+     - `kill()` method - sets isAlive to false
+     - `update(deltaTime)` method - placeholder for AI (Slice 5)
+  2. Add player-enemy collision detection:
+     - `checkEnemyCollision(player, enemy)` function in collision.ts
+     - AABB overlap check between player and enemy rectangles
+     - Returns collision info: `{ collided: boolean, fromTop: boolean }`
+  3. Add directional collision logic:
+     - Determine if collision from top (stomp) or side (damage)
+     - Use player vertical velocity: if `vy > 0` (falling) and player bottom near enemy top → stomp
+     - Otherwise → side collision (damage)
+  4. Implement damage system:
+     - Player already has `takeDamage(amount)` from Slice 3
+     - Side collision: `player.takeDamage(1)` (lose 1 heart)
+  5. Implement enemy death on stomp:
+     - Top collision: `enemy.kill()` (sets isAlive to false)
+     - Player bounces slightly upward (small negative vy)
+- **Unit Tests:**
+  - Enemy.test.ts: Enemy creation, kill() sets isAlive to false
+  - collision.test.ts: Player-enemy AABB collision detection
+  - collision.test.ts: Directional collision (top vs side) based on velocity and position
+  - Player.test.ts: Side collision reduces health by 1 (already tested in Slice 3)
+- **Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - All tests pass (unit + e2e, ensure no regressions)
+- **Estimated:** ~200 LOC
 
-#### 24.4.2 Implement player-enemy collision detection ⏸️ Not Started
-- **Location:** `client/src/game/collision.ts`
-- **Implementation:** AABB check for player-enemy overlap
-
-#### 24.4.3 Write unit test for directional collision (top vs side) ⏸️ Not Started
-- **Location:** `client/src/game/collision.test.ts`
-- **Test:** Determine if collision from top (stomp) or side (damage)
-
-#### 24.4.4 Implement directional collision logic ⏸️ Not Started
-- **Location:** `client/src/game/collision.ts`
-- **Implementation:** Compare velocities/positions to determine direction
-
-#### 24.4.5 Write unit test for damage system (lose 1 heart) ⏸️ Not Started
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** Side collision with enemy reduces health by 1
-
-#### 24.4.6 Implement damage on side collision ⏸️ Not Started
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** takeDamage() called on side collision
-
-#### 24.4.7 Write unit test for enemy death from top collision ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.test.ts`
-- **Test:** Top collision (stomp) kills enemy
-
-#### 24.4.8 Implement enemy death on stomp ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.ts`
-- **Implementation:** Enemy class with death state, kill() method
-
-#### 24.4.9 Write unit test for invulnerability frames ⏸️ Not Started
-- **Location:** `client/src/game/Player.test.ts`
-- **Test:** After taking damage, player is invulnerable briefly
-
-#### 24.4.10 Implement invulnerability system (brief immunity) ⏸️ Not Started
-- **Location:** `client/src/game/Player.ts`
-- **Implementation:** Invulnerability timer, visual feedback (flashing)
-
-#### 24.4.11 Write E2E test for enemy collision interactions ⏸️ Not Started
-- **Location:** `e2e/play-mode/enemy-collision.spec.ts`
-- **Test:** Walk into zombie (lose heart), jump on zombie (kill it)
-
-#### 24.4.12 Wire up enemy collision checks in game loop ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`
-- **Implementation:** Check collisions each frame, apply effects
-
-#### 24.4.13 Run full test suite and lint for Slice 4 ⏸️ Not Started
-- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
-- **Verify:** Enemy collision mechanics work correctly
+#### 24.4.2 Implement Invulnerability & Game Loop Integration ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/game/Player.ts` - Invulnerability system
+  - `client/src/components/play-mode/PlayMode.tsx` - Game loop integration
+  - `client/src/game/Player.test.ts` - Invulnerability unit tests
+  - `e2e/play-mode/enemy-collision.spec.ts` - E2E tests
+- **Implementation:**
+  1. Add invulnerability system to Player:
+     - `isInvulnerable` property (default false)
+     - `invulnerabilityTimer` property (seconds remaining)
+     - `INVULNERABILITY_DURATION` constant (e.g., 1.5 seconds)
+     - Update `takeDamage(amount)`:
+       - If `isInvulnerable`, return early (no damage)
+       - Otherwise, reduce health and set `isInvulnerable = true`, `invulnerabilityTimer = INVULNERABILITY_DURATION`
+     - Update `update(deltaTime)`:
+       - If `isInvulnerable`, decrease `invulnerabilityTimer`
+       - If timer reaches 0, set `isInvulnerable = false`
+  2. Add visual feedback for invulnerability:
+     - In PlayMode rendering, flash player sprite (toggle visibility every 100ms)
+     - Use `isInvulnerable` state to determine flashing
+  3. Wire up enemy collision in game loop:
+     - Load enemies from level data (spawn points with type "enemy")
+     - Each frame:
+       - Update all enemies (position, AI - placeholder for Slice 5)
+       - Check collision between player and each enemy
+       - If collision from top: `enemy.kill()`, player bounces
+       - If collision from side: `player.takeDamage(1)` (respects invulnerability)
+     - Remove dead enemies from game state
+  4. Enemy rendering:
+     - Render enemies as colored rectangles (e.g., red for zombie)
+     - Don't render if `!enemy.isAlive`
+- **Unit Tests (Player.test.ts):**
+  - After taking damage, player is invulnerable
+  - Player cannot take damage while invulnerable
+  - Invulnerability expires after duration
+  - Invulnerability timer decrements correctly
+- **E2E Tests (enemy-collision.spec.ts):**
+  - Create level with player spawn, enemy spawn (zombie), and platform
+  - Enter play mode
+  - Test 1: Walk into enemy from side
+    - Verify player loses 1 heart
+    - Verify player flashes (invulnerable)
+    - Verify player cannot lose another heart immediately
+  - Test 2: Jump on top of enemy
+    - Verify enemy dies (disappears)
+    - Verify player bounces slightly
+    - Verify player health unchanged
+  - Test 3: Stomp all enemies
+    - Verify dead enemies no longer collide
+- **Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - Visual test: Player flashes when invulnerable, enemies die on stomp
+- **Estimated:** ~150 LOC
 
 ---
 
 ### Slice 5: Enemy AI Movement
 
-#### 24.5.1 Write unit test for enemy horizontal movement ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.test.ts`
-- **Test:** Enemy moves left/right with velocity
+#### 24.5.1 Implement Enemy Patrol AI ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/game/Enemy.ts` - Patrol AI logic
+  - `client/src/game/Enemy.test.ts` - AI unit tests
+- **Implementation:**
+  1. Add movement to Enemy class:
+     - `direction` property: "left" | "right" (patrol direction)
+     - `PATROL_SPEED` constant (e.g., 60 px/s)
+     - Update `update(deltaTime, tiles)`:
+       - Apply horizontal velocity based on direction (`vx = direction === "left" ? -PATROL_SPEED : PATROL_SPEED`)
+       - Apply gravity (reuse `applyGravity` from physics.ts)
+       - Update position based on velocity
+  2. Add platform edge detection:
+     - Lookahead check: Cast ray downward from front edge of enemy (1 tile ahead)
+     - If no ground detected below → edge detected
+     - Reverse direction: `direction = direction === "left" ? "right" : "left"`
+  3. Add wall collision detection:
+     - Check for tile collision ahead of enemy (horizontal AABB check)
+     - If tile detected → wall collision
+     - Reverse direction
+  4. Patrol state machine:
+     - States: "patrolLeft", "patrolRight"
+     - `reverseDirection()` method - toggles between states, reverses velocity
+     - Called on edge detection or wall collision
+- **Unit Tests (Enemy.test.ts):**
+  - Enemy moves left/right with velocity based on direction
+  - Gravity applies to enemies (vy increases over time)
+  - Enemy detects platform edge and reverses direction
+  - Enemy detects wall collision and reverses direction
+  - Enemy patrol state machine (patrolLeft ↔ patrolRight)
+  - Enemy respects platform boundaries
+- **Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - All tests pass (unit + e2e, ensure no regressions)
+- **Estimated:** ~200 LOC
 
-#### 24.5.2 Implement basic enemy movement (left/right) ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.ts`
-- **Implementation:** Enemy update() moves in current direction
+#### 24.5.2 Integrate Enemy AI & Complete Playable Level ⏸️ Not Started
+- **Priority:** High (P1 - Core Feature)
+- **Locations:**
+  - `client/src/components/play-mode/PlayMode.tsx` - Enemy AI integration
+  - `e2e/play-mode/enemy-ai.spec.ts` - E2E tests
+- **Implementation:**
+  1. Wire up enemy AI in game loop (PlayMode.tsx):
+     - Each frame, call `enemy.update(deltaTime, tiles)` for all living enemies
+     - Enemies apply their own physics (gravity, movement)
+     - Enemies detect edges and walls, reverse direction
+  2. Enemy-tile collision integration:
+     - Enemies should collide with platforms (don't fall through)
+     - Reuse platform collision logic from Player
+  3. Visual polish:
+     - Enemies render with distinct color (red for zombie)
+     - Optional: Add simple sprite animation (flip sprite based on direction)
+  4. Final testing and tuning:
+     - Adjust PATROL_SPEED for good game feel
+     - Ensure enemies don't get stuck
+     - Verify enemies respect level boundaries
+- **E2E Tests (enemy-ai.spec.ts):**
+  - Create level with platform, enemy spawn, player spawn
+  - Enter play mode
+  - Test 1: Enemy patrols platform
+    - Verify enemy moves left/right
+    - Verify enemy stays on platform
+  - Test 2: Enemy turns at platform edge
+    - Enemy reaches edge
+    - Verify enemy reverses direction
+    - Verify enemy doesn't fall off
+  - Test 3: Enemy turns at wall
+    - Place wall in enemy path
+    - Verify enemy hits wall and reverses
+  - Test 4: Multiple enemies patrol independently
+    - Spawn 2+ enemies on different platforms
+    - Verify each enemy patrols independently
+- **Final Verification:**
+  - Run `npm test && npm run test:e2e && npm run lint:fix`
+  - Full test suite passes
+  - Manual playtest: Complete level with player movement, jumping, enemies, health, death/respawn
+- **Estimated:** ~100 LOC
 
-#### 24.5.3 Write unit test for enemy gravity application ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.test.ts`
-- **Test:** Gravity affects enemies like player
-
-#### 24.5.4 Apply gravity physics to enemies ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.ts`
-- **Implementation:** Enemy affected by gravity in update()
-
-#### 24.5.5 Write unit test for edge detection and turn around ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.test.ts`
-- **Test:** Enemy detects platform edge, reverses direction
-
-#### 24.5.6 Implement turn around at platform edges ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.ts`
-- **Implementation:** Raycast or lookahead check for edges
-
-#### 24.5.7 Write unit test for wall collision turn around ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.test.ts`
-- **Test:** Enemy hits wall, reverses direction
-
-#### 24.5.8 Implement turn around at walls ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.ts`
-- **Implementation:** Tile collision reverses direction
-
-#### 24.5.9 Write unit test for patrol state machine ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.test.ts`
-- **Test:** Enemy state (patrolLeft, patrolRight) controls behavior
-
-#### 24.5.10 Implement patrol behavior with direction state ⏸️ Not Started
-- **Location:** `client/src/game/Enemy.ts`
-- **Implementation:** State machine for patrol direction
-
-#### 24.5.11 Write E2E test for enemy AI patrol ⏸️ Not Started
-- **Location:** `e2e/play-mode/enemy-ai.spec.ts`
-- **Test:** Enemy patrols platform, turns at edges and walls
-
-#### 24.5.12 Integrate enemy AI updates into game loop ⏸️ Not Started
-- **Location:** `client/src/components/play-mode/PlayMode.tsx`
-- **Implementation:** Update all enemies each frame
-
-#### 24.5.13 Run full test suite and lint for Slice 5 ⏸️ Not Started
-- **Commands:** `npm test && npm run test:e2e && npm run lint:fix`
-- **Verify:** Enemy AI works, full playable level complete
+**🎉 Upon completion: Full playable level with physics, enemies, health, and win/lose conditions!**
 
 ---
 
 **Notes:**
-- Each slice is fully functional before moving to next
-- TDD approach: Write test first, then implement
-- Run both unit tests (`npm test`) and E2E tests (`npm run test:e2e`) after each slice
+- Each task delivers a complete, working feature (not micro-steps)
+- TDD approach: Write tests and implementation together in same commit
+- Run both unit tests (`npm test`) and E2E tests (`npm run test:e2e`) before marking complete
 - Start with simple colored rectangles for sprites, add art later
-- Physics tuning (jump height, gravity) happens iteratively
+- Physics tuning (jump height, gravity, patrol speed) happens during implementation
+
+**Task Summary:**
+- **Slice 1**: Basic Player Movement - ✅ COMPLETE
+- **Slice 2**: Jumping & Gravity - **1 task remaining** (24.2)
+- **Slice 3**: Death & Respawn - **2 tasks remaining** (24.3.1, 24.3.2)
+- **Slice 4**: Enemy Collision - **2 tasks remaining** (24.4.1, 24.4.2)
+- **Slice 5**: Enemy AI Movement - **2 tasks remaining** (24.5.1, 24.5.2)
+
+**📊 Total: 7 tasks remaining** (restructured from 42 micro-tasks)
+
+**Next task for `/next`**: 24.2 - Complete Jump & Gravity Integration
 
 <!-- CHAPTER_END: 24 -->
 ---
@@ -465,7 +505,7 @@ Work through chapters sequentially. After implementing each chapter:
 |---------|--------|----------|-------|
 | 22. Future Enhancements | ⏭️ Skipped | N/A | Zoom fit-to-view skipped (not needed) |
 | 23. Cleanup & Feature Removal | ✅ Completed | N/A | Remove scanline feature |
-| 24. Playable Levels | ⏸️ Not Started | N/A | Game mode with player movement, physics, enemies (63 tasks across 5 slices) |
+| 24. Playable Levels | 🔄 In Progress | N/A | Game mode with player movement, physics, enemies (7 feature batches: Slice 1 ✅ complete, 6 remaining) |
 
 **Legend - use only these statuses:**
 - ⏸️ Not Started
