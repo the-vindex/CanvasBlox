@@ -3,6 +3,8 @@
  * Used for detecting collisions between game objects like players, tiles, and enemies.
  */
 
+import type { Tile } from '../types/level';
+
 /**
  * Axis-Aligned Bounding Box representation.
  */
@@ -148,4 +150,37 @@ export function resolveVerticalCollision(moving: AABB, stationary: AABB, velocit
         correctedY,
         shouldStopVerticalVelocity: true,
     };
+}
+
+/**
+ * Check if player is colliding with any lava tiles.
+ * Lava tiles are identified by the 'lava' material property.
+ *
+ * @param player - Player bounding box
+ * @param tiles - Array of tiles to check against
+ * @returns True if player is touching lava, false otherwise
+ */
+export function checkLavaCollision(player: AABB, tiles: Tile[]): boolean {
+    for (const tile of tiles) {
+        // Check if tile has lava material
+        if (tile.properties.material !== 'lava') {
+            continue;
+        }
+
+        // Convert tile to AABB
+        const tileAABB: AABB = {
+            x: tile.position.x,
+            y: tile.position.y,
+            width: tile.dimensions.width,
+            height: tile.dimensions.height,
+        };
+
+        // Check collision
+        const collision = checkAABBCollision(player, tileAABB);
+        if (collision.isColliding) {
+            return true;
+        }
+    }
+
+    return false;
 }

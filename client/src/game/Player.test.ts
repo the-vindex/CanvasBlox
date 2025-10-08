@@ -186,6 +186,111 @@ describe('Player', () => {
         });
     });
 
+    describe('health system', () => {
+        it('should initialize with 3 health points', () => {
+            const player = new Player(100, 100);
+
+            expect(player.health).toBe(3);
+        });
+
+        it('should have maximum health of 3', () => {
+            const player = new Player(100, 100);
+
+            expect(player.maxHealth).toBe(3);
+        });
+
+        it('should reduce health when taking damage', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+
+            expect(player.health).toBe(2);
+        });
+
+        it('should allow multiple damage hits', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+            player.takeDamage(1);
+
+            expect(player.health).toBe(1);
+        });
+
+        it('should not allow health to go below 0', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(5);
+
+            expect(player.health).toBe(0);
+        });
+
+        it('should return true for isDead when health is 0', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(3);
+
+            expect(player.isDead()).toBe(true);
+        });
+
+        it('should return false for isDead when health is above 0', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+
+            expect(player.isDead()).toBe(false);
+        });
+
+        it('should set isDying state when die is called', () => {
+            const player = new Player(100, 100);
+
+            player.die();
+
+            expect(player.isDying).toBe(true);
+        });
+    });
+
+    describe('death and respawn', () => {
+        it('should respawn at spawn point position', () => {
+            const player = new Player(100, 100);
+            player.takeDamage(3);
+
+            player.respawn({ x: 50, y: 75 });
+
+            expect(player.x).toBe(50);
+            expect(player.y).toBe(75);
+        });
+
+        it('should restore health to 3 on respawn', () => {
+            const player = new Player(100, 100);
+            player.takeDamage(3);
+
+            player.respawn({ x: 50, y: 75 });
+
+            expect(player.health).toBe(3);
+        });
+
+        it('should clear isDying state on respawn', () => {
+            const player = new Player(100, 100);
+            player.die();
+
+            player.respawn({ x: 50, y: 75 });
+
+            expect(player.isDying).toBe(false);
+        });
+
+        it('should reset velocity on respawn', () => {
+            const player = new Player(100, 100);
+            player.vx = 100;
+            player.vy = -50;
+            player.die();
+
+            player.respawn({ x: 50, y: 75 });
+
+            expect(player.vx).toBe(0);
+            expect(player.vy).toBe(0);
+        });
+    });
+
     describe('platform collision', () => {
         it('should not fall through a platform below', () => {
             const player = new Player(100, 50, 32, 32);

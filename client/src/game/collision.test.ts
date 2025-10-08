@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { type AABB, checkAABBCollision, resolveVerticalCollision } from './collision';
+import type { Tile } from '../types/level';
+import { type AABB, checkAABBCollision, checkLavaCollision, resolveVerticalCollision } from './collision';
 
 describe('AABB Collision Detection', () => {
     describe('checkAABBCollision', () => {
@@ -148,6 +149,123 @@ describe('AABB Collision Detection', () => {
             // Moving up
             const resultUp = resolveVerticalCollision(player, tile, { x: 0, y: -5 });
             expect(resultUp.side).toBe('top');
+        });
+    });
+
+    describe('checkLavaCollision', () => {
+        it('should detect collision when player overlaps lava tile', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const lavaTile: Tile = {
+                id: 'tile1',
+                type: 'platform',
+                position: { x: 90, y: 110 },
+                dimensions: { width: 64, height: 32 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true, material: 'lava' },
+            };
+
+            const result = checkLavaCollision(player, [lavaTile]);
+
+            expect(result).toBe(true);
+        });
+
+        it('should not detect collision on regular tiles', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const regularTile: Tile = {
+                id: 'tile1',
+                type: 'platform',
+                position: { x: 90, y: 110 },
+                dimensions: { width: 64, height: 32 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true },
+            };
+
+            const result = checkLavaCollision(player, [regularTile]);
+
+            expect(result).toBe(false);
+        });
+
+        it('should not detect collision when player is not overlapping lava', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const lavaTile: Tile = {
+                id: 'tile1',
+                type: 'platform',
+                position: { x: 200, y: 200 },
+                dimensions: { width: 64, height: 32 },
+                rotation: 0,
+                layer: 0,
+                properties: { collidable: true, material: 'lava' },
+            };
+
+            const result = checkLavaCollision(player, [lavaTile]);
+
+            expect(result).toBe(false);
+        });
+
+        it('should check multiple tiles and detect lava', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const tiles: Tile[] = [
+                {
+                    id: 'tile1',
+                    type: 'platform',
+                    position: { x: 0, y: 0 },
+                    dimensions: { width: 32, height: 32 },
+                    rotation: 0,
+                    layer: 0,
+                    properties: { collidable: true },
+                },
+                {
+                    id: 'tile2',
+                    type: 'platform',
+                    position: { x: 90, y: 110 },
+                    dimensions: { width: 64, height: 32 },
+                    rotation: 0,
+                    layer: 0,
+                    properties: { collidable: true, material: 'lava' },
+                },
+            ];
+
+            const result = checkLavaCollision(player, tiles);
+
+            expect(result).toBe(true);
+        });
+
+        it('should return false when no tiles are provided', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+
+            const result = checkLavaCollision(player, []);
+
+            expect(result).toBe(false);
+        });
+
+        it('should only detect lava material, not other materials', () => {
+            const player: AABB = { x: 100, y: 100, width: 32, height: 32 };
+            const tiles: Tile[] = [
+                {
+                    id: 'tile1',
+                    type: 'platform',
+                    position: { x: 90, y: 110 },
+                    dimensions: { width: 64, height: 32 },
+                    rotation: 0,
+                    layer: 0,
+                    properties: { collidable: true, material: 'ice' },
+                },
+                {
+                    id: 'tile2',
+                    type: 'platform',
+                    position: { x: 90, y: 150 },
+                    dimensions: { width: 64, height: 32 },
+                    rotation: 0,
+                    layer: 0,
+                    properties: { collidable: true, material: 'stone' },
+                },
+            ];
+
+            const result = checkLavaCollision(player, tiles);
+
+            expect(result).toBe(false);
         });
     });
 });

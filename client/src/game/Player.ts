@@ -7,7 +7,7 @@ const JUMP_VELOCITY = -400;
 
 /**
  * Player entity for the game mode.
- * Handles player position, dimensions, and velocity.
+ * Handles player position, dimensions, velocity, and health.
  */
 export class Player {
     public x: number;
@@ -16,6 +16,9 @@ export class Player {
     public height: number;
     public vx: number;
     public vy: number;
+    public health: number;
+    public readonly maxHealth: number = 3;
+    public isDying: boolean;
     private grounded: boolean;
 
     constructor(x: number, y: number, width: number = 32, height: number = 32) {
@@ -25,6 +28,8 @@ export class Player {
         this.height = height;
         this.vx = 0;
         this.vy = 0;
+        this.health = 3;
+        this.isDying = false;
         this.grounded = false;
     }
 
@@ -43,6 +48,44 @@ export class Player {
             this.vy = JUMP_VELOCITY;
             this.grounded = false;
         }
+    }
+
+    /**
+     * Reduce player health by the specified amount.
+     * Health cannot go below 0.
+     * @param amount - Amount of damage to take
+     */
+    takeDamage(amount: number): void {
+        this.health = Math.max(0, this.health - amount);
+    }
+
+    /**
+     * Check if player is dead (health <= 0).
+     */
+    isDead(): boolean {
+        return this.health <= 0;
+    }
+
+    /**
+     * Trigger death state.
+     * Sets isDying flag to true (for animation or death handling).
+     */
+    die(): void {
+        this.isDying = true;
+    }
+
+    /**
+     * Respawn the player at a spawn point.
+     * Resets position, health, velocity, and death state.
+     * @param spawnPoint - Position to respawn at
+     */
+    respawn(spawnPoint: { x: number; y: number }): void {
+        this.x = spawnPoint.x;
+        this.y = spawnPoint.y;
+        this.health = 3;
+        this.isDying = false;
+        this.vx = 0;
+        this.vy = 0;
     }
 
     /**
