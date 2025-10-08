@@ -223,17 +223,20 @@ Work through chapters sequentially. After implementing each chapter:
 - **Implementation:** Jump applies negative velocity when on ground
 - **Note:** Added jump() method, isGrounded() method, grounded state tracking, and JUMP_VELOCITY constant (-400 px/s)
 
-#### 24.2.5 Write unit test for vertical collision (ceiling/floor) ⏸️ Not Started
+#### 24.2.5 Write unit test for vertical collision (ceiling/floor) ✅ COMPLETE
 - **Location:** `client/src/game/collision.test.ts`
 - **Test:** Detect collision from above/below
+- **Note:** Added 6 comprehensive tests covering ceiling hits, floor landings, no collision, corner collisions, zero velocity, and velocity-based side detection
 
-#### 24.2.6 Implement vertical collision detection ⏸️ Not Started
+#### 24.2.6 Implement vertical collision detection ✅ COMPLETE
 - **Location:** `client/src/game/collision.ts`
 - **Implementation:** Vertical collision resolution
+- **Note:** resolveVerticalCollision function determines collision side (top/bottom), calculates corrected Y position, handles zero velocity by comparing object centers
 
-#### 24.2.7 Write unit test for jump arc physics ⏸️ Not Started
+#### 24.2.7 Write unit test for jump arc physics ✅ COMPLETE
 - **Location:** `client/src/game/Player.test.ts`
 - **Test:** Jump creates realistic arc with gravity
+- **Note:** Test refactored based on code review - removed manual gravity simulation, focuses on Player behavior
 
 #### 24.2.8 Tune jump velocity and gravity constants ⏸️ Not Started
 - **Location:** `client/src/game/physics.ts`
