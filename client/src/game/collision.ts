@@ -23,6 +23,23 @@ export interface CollisionInfo {
 }
 
 /**
+ * Velocity vector for moving objects.
+ */
+export interface Velocity {
+    x: number;
+    y: number;
+}
+
+/**
+ * Result of resolving a vertical collision.
+ */
+export interface VerticalCollisionResult {
+    side: 'top' | 'bottom' | null;
+    correctedY: number;
+    shouldStopVerticalVelocity: boolean;
+}
+
+/**
  * Check if two axis-aligned bounding boxes are colliding.
  * Uses AABB collision detection algorithm.
  *
@@ -71,5 +88,64 @@ export function checkAABBCollision(a: AABB, b: AABB): CollisionInfo {
         isColliding: true,
         overlapX,
         overlapY,
+    };
+}
+
+/**
+ * Resolve vertical collision between a moving object and a static object.
+ * Determines which side of the collision occurred (top or bottom) and calculates
+ * the corrected Y position to prevent overlap.
+ *
+ * @param moving - The moving object's bounding box
+ * @param stationary - The static object's bounding box
+ * @param velocity - The moving object's velocity vector
+ * @returns Collision resolution information
+ */
+export function resolveVerticalCollision(moving: AABB, stationary: AABB, velocity: Velocity): VerticalCollisionResult {
+    const collision = checkAABBCollision(moving, stationary);
+
+    // No collision detected
+    if (!collision.isColliding) {
+        return {
+            side: null,
+            correctedY: moving.y,
+            shouldStopVerticalVelocity: false,
+        };
+    }
+
+    // Determine collision side based on velocity direction
+    // If velocity is zero, use overlap to determine direction
+    let side: 'top' | 'bottom';
+    let correctedY: number;
+
+    if (velocity.y === 0) {
+        // No vertical velocity - determine based on overlap
+        // If moving object's center is above stationary object's center, it's a bottom collision
+        const movingCenterY = moving.y + moving.height / 2;
+        const stationaryCenterY = stationary.y + stationary.height / 2;
+
+        if (movingCenterY < stationaryCenterY) {
+            // Moving object is above - bottom collision
+            side = 'bottom';
+            correctedY = stationary.y - moving.height;
+        } else {
+            // Moving object is below - top collision
+            side = 'top';
+            correctedY = stationary.y + stationary.height;
+        }
+    } else if (velocity.y > 0) {
+        // Moving downward - bottom of moving object hit top of stationary object
+        side = 'bottom';
+        correctedY = stationary.y - moving.height;
+    } else {
+        // Moving upward - top of moving object hit bottom of stationary object
+        side = 'top';
+        correctedY = stationary.y + stationary.height;
+    }
+
+    return {
+        side,
+        correctedY,
+        shouldStopVerticalVelocity: true,
     };
 }
