@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AABB } from '@/game/collision';
-import { checkLavaCollision } from '@/game/collision';
+import { checkEnemyCollision, checkLavaCollision } from '@/game/collision';
+import { Enemy } from '@/game/Enemy';
 import { InputHandler } from '@/game/InputHandler';
 import { Player } from '@/game/Player';
 import { applyGravity } from '@/game/physics';
@@ -49,6 +50,19 @@ export function PlayMode({ level }: PlayModeProps) {
             height: GRID_SIZE,
         }));
 
+        // Initialize enemies from spawn points
+        const enemies: Enemy[] = level.spawnPoints
+            .filter((sp) => sp.type === 'enemy')
+            .map(
+                (sp) =>
+                    new Enemy({
+                        x: sp.position.x * GRID_SIZE,
+                        y: sp.position.y * GRID_SIZE,
+                        width: 32,
+                        height: 32,
+                    })
+            );
+
         // Game loop with requestAnimationFrame
         let lastTime = performance.now();
         let animationFrameId: number;
@@ -78,13 +92,47 @@ export function PlayMode({ level }: PlayModeProps) {
             // Update player position and handle collisions
             player.update(deltaTime, platforms);
 
-            // Check for lava collision
+            // Update enemies
+            for (const enemy of enemies) {
+                enemy.update(deltaTime);
+            }
+
+            // Check enemy collision
             const playerAABB = {
                 x: player.x,
                 y: player.y,
                 width: player.width,
                 height: player.height,
             };
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                if (!enemy.isAlive) {
+                    continue;
+                }
+
+                const collision = checkEnemyCollision(playerAABB, enemy, player.vy);
+
+                if (collision.collided) {
+                    if (collision.fromTop) {
+                        // Player stomped on enemy - kill enemy and make player bounce
+                        enemy.kill();
+                        player.vy = -200; // Bounce upward
+                    } else {
+                        // Side collision - player takes damage
+                        player.takeDamage(1);
+                    }
+                }
+            }
+
+            // Remove dead enemies
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                if (!enemies[i].isAlive) {
+                    enemies.splice(i, 1);
+                }
+            }
+
+            // Check for lava collision
             if (checkLavaCollision(playerAABB, level.tiles)) {
                 player.takeDamage(3); // Instant death
             }
@@ -116,14 +164,29 @@ export function PlayMode({ level }: PlayModeProps) {
                 ctx.strokeRect(tile.position.x * GRID_SIZE, tile.position.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
             }
 
-            // Render player
-            ctx.fillStyle = '#3b82f6'; // Blue color for player
-            ctx.fillRect(player.x, player.y, player.width, player.height);
+            // Render enemies
+            ctx.fillStyle = '#ef4444'; // Red color for enemies
+            for (const enemy of enemies) {
+                if (enemy.isAlive) {
+                    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
 
-            // Draw player outline
-            ctx.strokeStyle = '#60a5fa';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(player.x, player.y, player.width, player.height);
+                    // Draw enemy outline
+                    ctx.strokeStyle = '#dc2626';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                }
+            }
+
+            // Render player (with flashing effect if invulnerable)
+            if (!player.isInvulnerable || Math.floor(performance.now() / 100) % 2 === 0) {
+                ctx.fillStyle = '#3b82f6'; // Blue color for player
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+
+                // Draw player outline
+                ctx.strokeStyle = '#60a5fa';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(player.x, player.y, player.width, player.height);
+            }
 
             animationFrameId = requestAnimationFrame(gameLoop);
         };

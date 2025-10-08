@@ -207,10 +207,15 @@ describe('Player', () => {
             expect(player.health).toBe(2);
         });
 
-        it('should allow multiple damage hits', () => {
+        it('should allow multiple damage hits when invulnerability expires', () => {
             const player = new Player(100, 100);
 
             player.takeDamage(1);
+            expect(player.health).toBe(2);
+
+            // Wait for invulnerability to expire
+            player.update(2);
+
             player.takeDamage(1);
 
             expect(player.health).toBe(1);
@@ -288,6 +293,93 @@ describe('Player', () => {
 
             expect(player.vx).toBe(0);
             expect(player.vy).toBe(0);
+        });
+    });
+
+    describe('invulnerability system', () => {
+        it('should not be invulnerable initially', () => {
+            const player = new Player(100, 100);
+
+            expect(player.isInvulnerable).toBe(false);
+        });
+
+        it('should become invulnerable after taking damage', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+
+            expect(player.isInvulnerable).toBe(true);
+        });
+
+        it('should not take damage while invulnerable', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+            expect(player.health).toBe(2);
+            expect(player.isInvulnerable).toBe(true);
+
+            player.takeDamage(1);
+
+            expect(player.health).toBe(2); // Health should not decrease
+        });
+
+        it('should set invulnerability timer when taking damage', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+
+            expect(player.invulnerabilityTimer).toBeGreaterThan(0);
+        });
+
+        it('should decrement invulnerability timer during update', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+            const initialTimer = player.invulnerabilityTimer;
+
+            player.update(0.5);
+
+            expect(player.invulnerabilityTimer).toBeLessThan(initialTimer);
+        });
+
+        it('should expire invulnerability after timer runs out', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+            expect(player.isInvulnerable).toBe(true);
+
+            // Update with time greater than invulnerability duration (1.5 seconds)
+            player.update(2);
+
+            expect(player.isInvulnerable).toBe(false);
+            expect(player.invulnerabilityTimer).toBe(0);
+        });
+
+        it('should allow damage again after invulnerability expires', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+            expect(player.health).toBe(2);
+
+            // Wait for invulnerability to expire
+            player.update(2);
+            expect(player.isInvulnerable).toBe(false);
+
+            player.takeDamage(1);
+
+            expect(player.health).toBe(1);
+        });
+
+        it('should reset invulnerability on respawn', () => {
+            const player = new Player(100, 100);
+
+            player.takeDamage(1);
+            expect(player.isInvulnerable).toBe(true);
+
+            player.respawn({ x: 50, y: 50 });
+
+            expect(player.isInvulnerable).toBe(false);
+            expect(player.invulnerabilityTimer).toBe(0);
         });
     });
 

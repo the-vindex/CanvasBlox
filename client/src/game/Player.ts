@@ -6,6 +6,11 @@ import { type AABB, checkAABBCollision } from './collision';
 const JUMP_VELOCITY = -400;
 
 /**
+ * Invulnerability duration in seconds after taking damage
+ */
+const INVULNERABILITY_DURATION = 1.5;
+
+/**
  * Player entity for the game mode.
  * Handles player position, dimensions, velocity, and health.
  */
@@ -19,6 +24,8 @@ export class Player {
     public health: number;
     public readonly maxHealth: number = 3;
     public isDying: boolean;
+    public isInvulnerable: boolean;
+    public invulnerabilityTimer: number;
     private grounded: boolean;
 
     constructor(x: number, y: number, width: number = 32, height: number = 32) {
@@ -30,6 +37,8 @@ export class Player {
         this.vy = 0;
         this.health = 3;
         this.isDying = false;
+        this.isInvulnerable = false;
+        this.invulnerabilityTimer = 0;
         this.grounded = false;
     }
 
@@ -53,10 +62,20 @@ export class Player {
     /**
      * Reduce player health by the specified amount.
      * Health cannot go below 0.
+     * If player is invulnerable, no damage is taken.
      * @param amount - Amount of damage to take
      */
     takeDamage(amount: number): void {
+        // If invulnerable, don't take damage
+        if (this.isInvulnerable) {
+            return;
+        }
+
         this.health = Math.max(0, this.health - amount);
+
+        // Activate invulnerability after taking damage
+        this.isInvulnerable = true;
+        this.invulnerabilityTimer = INVULNERABILITY_DURATION;
     }
 
     /**
@@ -76,7 +95,7 @@ export class Player {
 
     /**
      * Respawn the player at a spawn point.
-     * Resets position, health, velocity, and death state.
+     * Resets position, health, velocity, death state, and invulnerability.
      * @param spawnPoint - Position to respawn at
      */
     respawn(spawnPoint: { x: number; y: number }): void {
@@ -84,6 +103,8 @@ export class Player {
         this.y = spawnPoint.y;
         this.health = 3;
         this.isDying = false;
+        this.isInvulnerable = false;
+        this.invulnerabilityTimer = 0;
         this.vx = 0;
         this.vy = 0;
     }
@@ -91,10 +112,20 @@ export class Player {
     /**
      * Update player position based on velocity and delta time.
      * Applies collision detection and resolution with platforms.
+     * Updates invulnerability timer.
      * @param deltaTime - Time elapsed since last update in seconds
      * @param platforms - Optional array of platform AABBs to check collision against
      */
     update(deltaTime: number, platforms?: AABB[]): void {
+        // Update invulnerability timer
+        if (this.isInvulnerable) {
+            this.invulnerabilityTimer -= deltaTime;
+            if (this.invulnerabilityTimer <= 0) {
+                this.isInvulnerable = false;
+                this.invulnerabilityTimer = 0;
+            }
+        }
+
         // Apply velocity to position
         this.x += this.vx * deltaTime;
         this.y += this.vy * deltaTime;
