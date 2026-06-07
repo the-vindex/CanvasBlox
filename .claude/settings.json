@@ -24,7 +24,10 @@
             "Bash(npm run format:check:*)",
             "Bash(npm run format:*)",
             "Bash(ast-grep:*)",
-            "WebSearch"
+            "WebSearch",
+            "WebFetch(domain:medium.com)",
+            "mcp__playwright__browser_navigate",
+            "mcp__playwright__browser_evaluate"
         ],
         "deny": [],
         "ask": []
